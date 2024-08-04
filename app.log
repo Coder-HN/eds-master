@@ -1,0 +1,6 @@
+2024-08-04 12:04:20,324 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/searchAttend/getAllAttend
+2024-08-04 12:04:20,350 - INFO - app - Response Status: 200 OK
+2024-08-04 12:04:21,884 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/searchAccess/getAllAccess
+2024-08-04 12:04:21,974 - INFO - app - Response Status: 200 OK
+2024-08-04 12:04:27,522 - INFO - app - Request: POST http://127.0.0.1:5000/api/user/addAccess
+2024-08-04 12:04:27,606 - INFO - app - Response Status: 200 OK
