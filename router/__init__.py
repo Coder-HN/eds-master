@@ -5,4 +5,4 @@ main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
-    return redirect(url_for('admin.'))
+    return redirect(url_for('searchAccess.getAllAccess'))

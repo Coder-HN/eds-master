@@ -1,5 +1,10 @@
-from flask import Flask, Blueprint, redirect, url_for, request
-import json
+from flask import Blueprint, jsonify, make_response, request, current_app
+
+from config import Config
+from mapper import UserMapper, ServiceMapper, AccessMapper, AttendMapper
+from models import TableAccess, TableAttend
+
+from utils import timeHelper
 
 """
 创建一个名user的蓝图,并在其中定义路由
@@ -14,23 +19,131 @@ import json
 user = Blueprint('user', __name__, url_prefix='/api/user')
 
 
-@user.route('/login', methods=['POST'])
-def user_login():
-    # 获取前端json数据
+@user.route('/addAccess', methods=['POST'])
+def add_access():
     data = request.get_json()
-    username = data.get('username')
-    password = data.get('password')
-    if username == 'admin' and password == 'hhn':
-        print("login success")
-        global user_info
-        user_info = json.loads('{"username": "admin"}')
-        token = username + password
-        return json.dumps({'status': 'ok', 'type': username, 'currentAuthority': token})
+
+    user_num = data.get('num')
+    service_id = data.get('service_id')
+    value_hand_left = data.get('value_hand_left')
+    value_hand_right = data.get('value_hand_right')
+    value_foot_left = data.get('value_foot_left')
+    value_foot_right = data.get('value_foot_right')
+    access_flag = data.get('access_flag')
+    card_id = data.get('card_id')
+    _service = ServiceMapper.get_services_by_multiple_conditions(service_id=service_id)
+    service_num = _service[0].num
+
+    # TODO will_fail，unregist功能未完善
+    will_fail = "000"
+    unregist = 1  # 需要检查卡号是不是特殊卡号
+
+    access_time = timeHelper.get_now_time()
+    hand_left_min = Config.HAND_LEFT_MIN
+    hand_left_max = Config.HAND_LEFT_MAX
+    hand_right_min = Config.HAND_RIGHT_MIN
+    hand_right_max = Config.HAND_RIGHT_MAX
+    foot_left_min = Config.FOOT_LEFT_MIN
+    foot_left_max = Config.FOOT_LEFT_MAX
+    foot_right_min = Config.FOOT_RIGHT_MIN
+    foot_right_max = Config.FOOT_RIGHT_MAX
+    if hand_left_min <= value_hand_left <= hand_left_max:
+        result_hand_left = 1
     else:
-        print("login fail")
-        return json.dumps({'status': 'failed'})
+        result_hand_left = 2
+    if hand_right_min <= value_hand_right <= hand_right_max:
+        result_hand_right = 1
+    else:
+        result_hand_right = 2
+    if foot_left_min <= value_foot_left <= foot_left_max:
+        result_foot_left = 1
+    else:
+        result_foot_left = 2
+    if foot_right_min <= value_foot_right <= foot_right_max:
+        result_foot_right = 1
+    else:
+        result_foot_right = 2
+    if result_hand_left == 1 and result_hand_right == 1 and result_foot_left == 1 and result_foot_right == 1:
+        result = 1
+    else:
+        result = 2
+    new_access = TableAccess()
+    new_access.user_num = user_num
+    new_access.service_num = service_num
+    new_access.access_flag = access_flag
+    new_access.access_time = access_time
+    new_access.result = result
+    new_access.unregist = unregist
+    new_access.will_fail = will_fail
+    new_access.result_hand_left = result_hand_left
+    new_access.result_hand_right = result_hand_right
+    new_access.result_foot_left = result_foot_left
+    new_access.result_foot_right = result_foot_right
+    new_access.value_hand_left = value_hand_left
+    new_access.value_hand_right = value_hand_right
+    new_access.value_foot_left = value_foot_left
+    new_access.value_foot_right = value_foot_right
+    new_access.hand_left_min = hand_left_min
+    new_access.hand_left_max = hand_left_max
+    new_access.hand_right_min = hand_right_min
+    new_access.hand_right_max = hand_right_max
+    new_access.foot_left_min = foot_left_min
+    new_access.foot_left_max = foot_left_max
+    new_access.foot_right_min = foot_right_min
+    new_access.foot_right_max = foot_right_max
+    try:
+        AccessMapper.add_access(new_access)
+        if access_flag == 2:
+            update_attend_table(access_time, card_id)
+    except Exception as e:
+        return jsonify({'error': e}), 500
+    return make_response('', 200)
 
 
-@user.route('/register')
-def user_register():
-    return 'Hello, World! This is the register page.'
+def update_attend_table(access_time, card_id):
+    try:
+        # 求这次进出的在岗时间
+        _user = UserMapper.get_users_by_multiple_conditions(card_id=card_id)[0]
+        access_enter = AccessMapper.get_access_enter_by_leave(_user.num)
+        time_difference = access_time - timeHelper.get_utc_time(access_enter.access_time)
+        # 将时间差转换为以小时为单位的小数值
+        hours_difference = time_difference.total_seconds() / 3600
+        # 检查是否存在出勤记录
+        access_date = timeHelper.get_date_by_timestamp(access_time)
+        attend = AttendMapper.get_attend_by_user_num_attend_date(_user.num, access_date)
+        if attend is not None:
+            AttendMapper.update_attend(attend.num, hours_difference)
+        else:
+            new_attend = TableAttend()
+            new_attend.user_num = _user.num
+            new_attend.attend_date = access_date
+            new_attend.attend_time = hours_difference
+            new_attend.attend_time_require = Config.ATTEND_TIME_REQUIRE
+            new_attend.access_times = 1
+            new_attend.access_times_limit = Config.ACCESS_TIMES_LIMIT
+            AttendMapper.add_attend(new_attend)
+    except Exception as e:
+        return jsonify({'error': e}), 500
+    return True
+
+
+"""
+需要从门禁接收的信息：
+    service_id:设备编号
+    card_id:刷卡卡号
+    value_hand:手环测试实际阻值
+    value_leftfoot:左脚测试实际阻值
+    value_rightfoot右脚测试实际阻值
+    will_fail:失效情况
+    unregist:登记情况
+    access_flag:进出标志
+需要后端添加的信息：
+    access_time:进出时间，直接取接收到信息的当前时间就行
+后续插入记录到数据库中需要添加的信息：
+    result:静电测试总结果
+    result_hand:手环测试结果
+    result_leftfoot:左脚测试结果
+    result_rightfoot:右脚测试结果
+    
+还需要给出警告  
+"""
