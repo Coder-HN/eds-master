@@ -77,6 +77,19 @@ def enter_card_data(_port, _baudrates, socketio=None):
                             if result is None:
                                 # 处理 None 情况
                                 service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = None, None, None, None, None
+                                hand_left_min = Config.HAND_LEFT_MIN
+                                hand_left_max = Config.HAND_LEFT_MAX
+                                hand_right_min = Config.HAND_RIGHT_MIN
+                                hand_right_max = Config.HAND_RIGHT_MAX
+                                foot_left_min = Config.FOOT_LEFT_MIN
+                                foot_left_max = Config.FOOT_LEFT_MAX
+                                foot_right_min = Config.FOOT_RIGHT_MIN
+                                foot_right_max = Config.FOOT_RIGHT_MAX
+                                result_hand_left = 2
+                                result_hand_right = 2
+                                result_foot_left = 2
+                                result_foot_right = 2
+                                result = 2
                             else:
                                 service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = result
                                 print("service_id:", service_id)
