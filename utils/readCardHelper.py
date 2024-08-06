@@ -73,36 +73,41 @@ def enter_card_data(_port, _baudrates, socketio=None):
                             user_pic_path = user[_pic_path]
                             # 完成测试电阻，是否开门，插入进出记录表的工作
                             print("测试电阻中--------------------------------------------------")
-                            service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = get_r()
-                            print("service_id:", service_id)
-                            hand_left_min = Config.HAND_LEFT_MIN
-                            hand_left_max = Config.HAND_LEFT_MAX
-                            hand_right_min = Config.HAND_RIGHT_MIN
-                            hand_right_max = Config.HAND_RIGHT_MAX
-                            foot_left_min = Config.FOOT_LEFT_MIN
-                            foot_left_max = Config.FOOT_LEFT_MAX
-                            foot_right_min = Config.FOOT_RIGHT_MIN
-                            foot_right_max = Config.FOOT_RIGHT_MAX
-                            if hand_left_min <= value_hand_left <= hand_left_max:
-                                result_hand_left = 1
+                            result = get_r()
+                            if result is None:
+                                # 处理 None 情况
+                                service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = None, None, None, None, None
                             else:
-                                result_hand_left = 2
-                            if hand_right_min <= value_hand_right <= hand_right_max:
-                                result_hand_right = 1
-                            else:
-                                result_hand_right = 2
-                            if foot_left_min <= value_foot_left <= foot_left_max:
-                                result_foot_left = 1
-                            else:
-                                result_foot_left = 2
-                            if foot_right_min <= value_foot_right <= foot_right_max:
-                                result_foot_right = 1
-                            else:
-                                result_foot_right = 2
-                            if result_hand_left == 1 and result_hand_right == 1 and result_foot_left == 1 and result_foot_right == 1:
-                                result = 1
-                            else:
-                                result = 2
+                                service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = result
+                                print("service_id:", service_id)
+                                hand_left_min = Config.HAND_LEFT_MIN
+                                hand_left_max = Config.HAND_LEFT_MAX
+                                hand_right_min = Config.HAND_RIGHT_MIN
+                                hand_right_max = Config.HAND_RIGHT_MAX
+                                foot_left_min = Config.FOOT_LEFT_MIN
+                                foot_left_max = Config.FOOT_LEFT_MAX
+                                foot_right_min = Config.FOOT_RIGHT_MIN
+                                foot_right_max = Config.FOOT_RIGHT_MAX
+                                if hand_left_min <= value_hand_left <= hand_left_max:
+                                    result_hand_left = 1
+                                else:
+                                    result_hand_left = 2
+                                if hand_right_min <= value_hand_right <= hand_right_max:
+                                    result_hand_right = 1
+                                else:
+                                    result_hand_right = 2
+                                if foot_left_min <= value_foot_left <= foot_left_max:
+                                    result_foot_left = 1
+                                else:
+                                    result_foot_left = 2
+                                if foot_right_min <= value_foot_right <= foot_right_max:
+                                    result_foot_right = 1
+                                else:
+                                    result_foot_right = 2
+                                if result_hand_left == 1 and result_hand_right == 1 and result_foot_left == 1 and result_foot_right == 1:
+                                    result = 1
+                                else:
+                                    result = 2
                             if socketio is None:
                                 print("socketio not open")
                             else:
@@ -132,7 +137,6 @@ def enter_card_data(_port, _baudrates, socketio=None):
                                     'foot_right_max': foot_right_max,
                                 }
                                 print(set_data)
-                                socketio.emit('test_data', {'data': "set_data"})
                                 socketio.emit('serial_data', {'data': set_data})
                             if result == 1:
                                 print("开门中--------------------------------------------------")
