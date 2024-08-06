@@ -18,10 +18,11 @@ from utils.readCardHelper import enter_card_data
 def connect_socket(socketio):
     # 开门
     baudrates = Config.default_baudrates
-    name = Config.test_enter_card_name
-    port = find_serial_port(name)
+    # name = Config.test_enter_card_name
+    # port = find_serial_port(name)
+    port = Config.test_enter_card_port
     if port is None:
-        print(f"测试器{name}进门串口未找到，请检查设备连接。")
+        print(f"进门读卡串口{port}未找到，请检查设备连接。")
     else:
         enter_card_data(port, baudrates, socketio)
     # TODO 关门

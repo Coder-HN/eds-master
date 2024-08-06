@@ -27,8 +27,11 @@ class Config:
     ACCESS_TIMES_LIMIT = 6
     # 默认波特率
     default_baudrates = 9600
-    test_r_name = 'USB-SERIAL CH340'
-    test_enter_card_name = 'USB Serial Port'
+    # 串口名或者实际port
+    test_r_name = 'USB-SERIAL CH340'  # 测试电阻的串口名
+    test_enter_card_name = 'USB Serial Port'  # 读卡的串口名
+    test_r_port = ""  # 测试电阻的串口port
+    test_enter_card_port = "COM3"  # 读卡的串口port
     # 串口命令
     hex_test_online = "01 01 01 00 00 00 00 01 CA"  # 测试是否在线
     hex_test_online_succcess = "01 01 01 00 00 00 00 05 AB"  # 测试是否在线成功
