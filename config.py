@@ -13,7 +13,7 @@ class Config:
     UPLOAD_FOLDER = 'E:/workplaces/FrontProjects/edsFront/public/profile_photo/'
     # 静电测试电阻上下限配置，以K为单位
     HAND_LEFT_MIN = 100
-    HAND_LEFT_MAX = 1500  # 1.5M
+    HAND_LEFT_MAX = 15000  # 15M
     HAND_RIGHT_MIN = 100
     HAND_RIGHT_MAX = 15000
 
