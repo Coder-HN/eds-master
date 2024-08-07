@@ -13,9 +13,10 @@ class Config:
     UPLOAD_FOLDER = 'E:/workplaces/FrontProjects/edsFront/public/profile_photo/'
     # 静电测试电阻上下限配置，以K为单位
     HAND_LEFT_MIN = 100
-    HAND_LEFT_MAX = 15000  # 15M
+    HAND_LEFT_MAX = 1500  # 1.5M
     HAND_RIGHT_MIN = 100
     HAND_RIGHT_MAX = 15000
+
     FOOT_LEFT_MIN = 100
     FOOT_LEFT_MAX = 60000  # 60M
     FOOT_RIGHT_MIN = 100
@@ -28,9 +29,9 @@ class Config:
     # 默认波特率
     default_baudrates = 9600
     # 串口名或者实际port
-    test_r_name = 'USB-SERIAL CH340'  # 测试电阻的串口名
-    test_enter_card_name = 'USB Serial Port'  # 读卡的串口名
-    test_r_port = ""  # 测试电阻的串口port
+    # test_r_name = 'USB-SERIAL CH340'  # 测试电阻的串口名
+    # test_enter_card_name = 'USB Serial Port'  # 读卡的串口名
+    test_r_port = "COM7"  # 测试电阻的串口port
     test_enter_card_port = "COM3"  # 读卡的串口port
     # 串口命令
     hex_test_online = "01 01 01 00 00 00 00 01 CA"  # 测试是否在线

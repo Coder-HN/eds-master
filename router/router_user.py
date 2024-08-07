@@ -4,7 +4,7 @@ from config import Config
 from mapper import UserMapper, ServiceMapper, AccessMapper, AttendMapper
 from models import TableAccess, TableAttend
 
-from utils import timeHelper
+from utils import timeHelper, testResistanceHelper
 
 """
 创建一个名user的蓝图,并在其中定义路由
@@ -17,6 +17,76 @@ from utils import timeHelper
 /user/detect/fail：检测失败不予通行
 """
 user = Blueprint('user', __name__, url_prefix='/api/user')
+
+
+# 测试失败后在规定时间内再次测试接口
+@user.route('/test_user_r', methods=['GET'])
+def test_user_r():
+    result = testResistanceHelper.get_r()
+    hand_left_min = Config.HAND_LEFT_MIN
+    hand_left_max = Config.HAND_LEFT_MAX
+    hand_right_min = Config.HAND_RIGHT_MIN
+    hand_right_max = Config.HAND_RIGHT_MAX
+    foot_left_min = Config.FOOT_LEFT_MIN
+    foot_left_max = Config.FOOT_LEFT_MAX
+    foot_right_min = Config.FOOT_RIGHT_MIN
+    foot_right_max = Config.FOOT_RIGHT_MAX
+    if result is None:
+        # 处理 None 情况
+        service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = None, None, None, None, None
+        result_hand_left = 2
+        result_hand_right = 2
+        result_foot_left = 2
+        result_foot_right = 2
+        result = 2
+    else:
+        service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = result
+        print("service_id:", service_id)
+        if hand_left_min <= value_hand_left <= hand_left_max:
+            result_hand_left = 1
+        else:
+            result_hand_left = 2
+        if hand_right_min <= value_hand_right <= hand_right_max:
+            result_hand_right = 1
+        else:
+            result_hand_right = 2
+        if foot_left_min <= value_foot_left <= foot_left_max:
+            result_foot_left = 1
+        else:
+            result_foot_left = 2
+        if foot_right_min <= value_foot_right <= foot_right_max:
+            result_foot_right = 1
+        else:
+            result_foot_right = 2
+        if result_hand_left == 1 and result_hand_right == 1 and result_foot_left == 1 and result_foot_right == 1:
+            result = 1
+        else:
+            result = 2
+    set_data = {
+        'access_flag': 1,
+        'service_id': service_id,
+        'value_hand_left': value_hand_left,
+        'value_hand_right': value_hand_right,
+        'value_foot_left': value_foot_left,
+        'value_foot_right': value_foot_right,
+        'result_hand_left': result_hand_left,
+        'result_hand_right': result_hand_right,
+        'result_foot_left': result_foot_left,
+        'result_foot_right': result_foot_right,
+        'hand_left_min': hand_left_min,
+        'hand_left_max': hand_left_max,
+        'hand_right_min': hand_right_min,
+        'hand_right_max': hand_right_max,
+        'foot_left_min': foot_left_min,
+        'foot_left_max': foot_left_max,
+        'foot_right_min': foot_right_min,
+        'foot_right_max': foot_right_max,
+    }
+    print(set_data)
+    if result == 1:
+        print("开门中--------------------------------------------------")
+        testResistanceHelper.open_door()
+    return jsonify({'data': set_data}), 200
 
 
 @user.route('/addAccess', methods=['POST'])
