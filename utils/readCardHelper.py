@@ -58,6 +58,10 @@ def enter_card_data(_port, _baudrates, socketio=None):
                         card_id = turn_16_to_10(frame_data)
                         print("card_id:", card_id)
                         # 先查询card_id是否在数据库中
+                        if socketio is None:
+                            print("socketio not open")
+                        else:
+                            socketio.emit('read_card_status', {'data': "reading"})
                         users, column_names = dbHelper.get_user_by_card_id(card_id)
                         if len(users) == 1:  # 成功提示请测试电阻
                             user = users[0]

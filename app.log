@@ -4,3 +4,9 @@
 2024-08-04 12:04:21,974 - INFO - app - Response Status: 200 OK
 2024-08-04 12:04:27,522 - INFO - app - Request: POST http://127.0.0.1:5000/api/user/addAccess
 2024-08-04 12:04:27,606 - INFO - app - Response Status: 200 OK
+2024-08-07 13:39:05,430 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/searchAccess/getAllAccess
+2024-08-07 13:39:05,545 - INFO - app - Response Status: 200 OK
+2024-08-07 13:39:06,819 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/searchAttend/getAllAttend
+2024-08-07 13:39:06,823 - INFO - app - Response Status: 200 OK
+2024-08-07 13:39:07,702 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageUser/getAllUsers
+2024-08-07 13:39:07,705 - INFO - app - Response Status: 200 OK
