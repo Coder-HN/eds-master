@@ -61,6 +61,7 @@ def enter_card_data(_port, _baudrates, socketio=None):
                         if socketio is None:
                             print("socketio not open")
                         else:
+                            print("socketio open, send read_card_status")
                             socketio.emit('read_card_status', {'data': "reading"})
                         users, column_names = dbHelper.get_user_by_card_id(card_id)
                         if len(users) == 1:  # 成功提示请测试电阻
