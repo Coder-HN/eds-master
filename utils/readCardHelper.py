@@ -36,8 +36,8 @@ def calculate_checksum(frame):
         return False
 
 
-# 整个读卡进门，测试电阻过程
-def enter_card_data(_port, _baudrates, socketio=None):
+# 整个读卡进门access_flag=1，测试电阻过程
+def enter_card_process(_port, _baudrates, socketio=None):
     try:
         # 打开串行端口
         with serial.Serial(_port, _baudrates, timeout=1) as ser:
@@ -50,19 +50,20 @@ def enter_card_data(_port, _baudrates, socketio=None):
                     buffer.extend(data)
                     # 检查是否有完整数据帧、检查校验和是否正确
                     if len(buffer) >= 2 and buffer[0] == 2 and len(buffer) == buffer[1]:
-                        print("读卡中--------------------------------------------------")
+                        print("进门读卡中...")
                         # 数据帧校验
                         calculate_checksum(buffer)
                         # 处理数据帧
                         frame_data = buffer[3:-2]
                         card_id = turn_16_to_10(frame_data)
                         print("card_id:", card_id)
-                        # 先查询card_id是否在数据库中
+                        # 检查socketio连接
                         if socketio is None:
                             print("socketio not open")
                         else:
                             print("socketio open, send read_card_status")
-                            socketio.emit('read_card_status', {'data': "reading"})
+                            socketio.emit('read_card_status', {'data': "enter"})
+                        # 先查询card_id是否在数据库中
                         users, column_names = dbHelper.get_user_by_card_id(card_id)
                         if len(users) == 1:  # 成功提示请测试电阻
                             user = users[0]
@@ -77,7 +78,7 @@ def enter_card_data(_port, _baudrates, socketio=None):
                             user_employee_id = user[_employee_id]
                             user_pic_path = user[_pic_path]
                             # 完成测试电阻，是否开门，插入进出记录表的工作
-                            print("测试电阻中--------------------------------------------------")
+                            print("测试电阻中...")
                             result = get_r()
                             if result is None:
                                 # 处理 None 情况
@@ -130,6 +131,7 @@ def enter_card_data(_port, _baudrates, socketio=None):
                                 print("socketio not open")
                             else:
                                 set_data = {
+                                    'card_id': card_id,
                                     'access_flag': 1,
                                     'service_id': service_id,
                                     'num': user_num,
@@ -155,32 +157,98 @@ def enter_card_data(_port, _baudrates, socketio=None):
                                     'foot_right_max': foot_right_max,
                                 }
                                 print(set_data)
-                                socketio.emit('serial_data', {'data': set_data})
+                                socketio.emit('success_data', {'data': set_data})
                             if result == 1:
-                                print("开门中--------------------------------------------------")
+                                print("开门中...")
                                 open_door()
                         else:  # 失败表示无权限通过
                             print("无权限通过")
+                            error_data = {
+                                'card_id': card_id
+                            }
+                            socketio.emit('fail_data', {'data': error_data})
                         # 清除已处理的数据帧
                         del buffer[:]
                         print("del_buffer", buffer)
     except serial.SerialException as e:
-        print(f"串口错误: {e}")
+        print(f"串口连接错误: {e}")
     except Exception as e:
-        print(f"其他错误: {e}")
+        print(f"其他系统错误: {e}")
 
 
-# 整个读卡进门，测试电阻过程
-def outdoor_card_data(_port, _baudrates, socketio=None):
-    pass;
+# 整个读卡出门过程access_flag=2
+def leave_card_process(_port, _baudrates, socketio=None):
+    try:
+        # 打开串行端口
+        with serial.Serial(_port, _baudrates, timeout=1) as ser:
+            buffer = bytearray()  # 一个字节可以存02
+            while True:
+                # 读取所有可用的数据
+                data = ser.read(ser.in_waiting)
+                if data:
+                    # 将数据添加到缓冲区
+                    buffer.extend(data)
+                    # 检查是否有完整数据帧、检查校验和是否正确
+                    if len(buffer) >= 2 and buffer[0] == 2 and len(buffer) == buffer[1]:
+                        print("出门读卡中...")
+                        # 数据帧校验
+                        calculate_checksum(buffer)
+                        # 处理数据帧
+                        frame_data = buffer[3:-2]
+                        card_id = turn_16_to_10(frame_data)
+                        print("card_id:", card_id)
+                        # 检查socketio连接
+                        if socketio is None:
+                            print("socketio not open")
+                        else:
+                            print("socketio open, send read_card_status")
+                            socketio.emit('read_card_status', {'data': "leave"})
+                        # 先查询card_id是否在数据库中
+                        users, column_names = dbHelper.get_user_by_card_id(card_id)
+                        if len(users) == 1:  # 查询成功
+                            user = users[0]
+                            _num = column_names.index('num')
+                            _name = column_names.index('name')
+                            _department = column_names.index('department')
+                            _employee_id = column_names.index('employee_id')
+                            _pic_path = column_names.index('pic_path')
+                            user_num = user[_num]
+                            user_name = user[_name]
+                            user_department = user[_department]
+                            user_employee_id = user[_employee_id]
+                            user_pic_path = user[_pic_path]
+                            set_data = {
+                                'card_id': card_id,
+                                'access_flag': 2,
+                                'num': user_num,
+                                'name': user_name,
+                                'employee_id': user_employee_id,
+                                'department': user_department,
+                                'pic_path': user_pic_path,
+                            }
+                            print(set_data)
+                            socketio.emit('success_data', {'data': set_data})
+                            print("开门中...")
+                            open_door()
+                        else:  # 失败表示无权限通过
+                            print("无权限通过")
+                            error_data = {
+                                'card_id': card_id
+                            }
+                            socketio.emit('fail_data', {'data': error_data})
+                        # 清除已处理的数据帧
+                        del buffer[:]
+                        print("del_buffer", buffer)
+    except serial.SerialException as e:
+        print(f"串口连接错误: {e}")
+    except Exception as e:
+        print(f"其他系统错误: {e}")
 
 
 if __name__ == "__main__":
     baudrates = Config.default_baudrates
-    # name = Config.test_enter_card_name
-    # port = find_serial_port(name)
     port = Config.test_enter_card_port
     if port is None:
         print(f"读卡进门串口{port}未找到，请检查设备连接。")
     else:
-        enter_card_data(port, baudrates)
+        enter_card_process(port, baudrates)

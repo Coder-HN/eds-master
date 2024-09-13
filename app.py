@@ -11,21 +11,23 @@ from router.router_admin_attend import searchAttend
 from router.router_admin_manager_service import manageService
 from router.router_admin_manager_user import manageUser
 from router.router_user import user
-from utils.portHelper import find_serial_port
-from utils.readCardHelper import enter_card_data
+from utils.readCardHelper import enter_card_process, leave_card_process
 
 
 def connect_socket(socketio):
-    # 开门
     baudrates = Config.default_baudrates
-    # name = Config.test_enter_card_name
-    # port = find_serial_port(name)
-    port = Config.test_enter_card_port
-    if port is None:
-        print(f"进门读卡串口{port}未找到，请检查设备连接。")
+    # 开门
+    port_enter = Config.test_enter_card_port
+    if port_enter is None:
+        print(f"进门读卡串口{port_enter}未找到，请检查设备连接。")
     else:
-        enter_card_data(port, baudrates, socketio)
-    # TODO 关门
+        enter_card_process(port_enter, baudrates, socketio)
+    # 关门
+    port_leave = Config.test_leave_card_port
+    if port_leave is None:
+        print(f"出门读卡串口{port_leave}未找到，请检查设备连接。")
+    else:
+        leave_card_process(port_leave, baudrates, socketio)
 
 
 # 使用配置文件配置数据库配置

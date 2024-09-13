@@ -21,18 +21,16 @@ class Config:
     FOOT_LEFT_MAX = 60000  # 60M
     FOOT_RIGHT_MIN = 100
     FOOT_RIGHT_MAX = 60000
-    # 串口名称
-    SERIAL_PORT_NAME = ''
+
     # 在岗时间要求、进出次数要求
     ATTEND_TIME_REQUIRE = 8
     ACCESS_TIMES_LIMIT = 6
     # 默认波特率
     default_baudrates = 9600
-    # 串口名或者实际port
-    # test_r_name = 'USB-SERIAL CH340'  # 测试电阻的串口名
-    # test_enter_card_name = 'USB Serial Port'  # 读卡的串口名
+    # 串口名
     test_r_port = "COM7"  # 测试电阻的串口port
-    test_enter_card_port = "COM3"  # 读卡的串口port
+    test_enter_card_port = "COM3"  # 读卡进门的串口port
+    test_leave_card_port = "COM"  # 读卡出门的串口port
     # 串口命令
     hex_test_online = "01 01 01 00 00 00 00 01 CA"  # 测试是否在线
     hex_test_online_succcess = "01 01 01 00 00 00 00 05 AB"  # 测试是否在线成功
@@ -41,7 +39,7 @@ class Config:
     hex_get_cow = "01 01 03 00 00 00 00 01 A4"  # 测试电阻
 
 
-# 测试配置，暂无用
+# 测试配置，暂时无用
 class TestConfig(Config):
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root:root@localhost/edsystem'
     TESTING = True
