@@ -186,15 +186,17 @@ def leave_card_process(_port, _baudrates, socketio=None):
                 if data:
                     # 将数据添加到缓冲区
                     buffer.extend(data)
-                    # 检查是否有完整数据帧、检查校验和是否正确
-                    if len(buffer) >= 2 and buffer[0] == 2 and len(buffer) == buffer[1]:
-                        print("出门读卡中...")
-                        # 数据帧校验
-                        calculate_checksum(buffer)
-                        # 处理数据帧
-                        frame_data = buffer[3:-2]
-                        card_id = turn_16_to_10(frame_data)
-                        print("card_id:", card_id)
+                    print("出门读卡中...")
+                    # 检查是否有完整数据帧、检查起始桢和结束桢
+                    # 读取数据帧
+                    frame_data = buffer[1:11]
+                    card_id = turn_16_to_10(frame_data)
+                    print("card_id:", card_id)
+                    # 读取校验桢
+                    frame_check = buffer[11:13]
+                    check_num = turn_16_to_10(frame_check)
+                    if len(buffer) >= 2 and buffer[0] == 2 and buffer[len(buffer) - 1] == 3 and checksum(card_id,
+                                                                                                         check_num):
                         # 检查socketio连接
                         if socketio is None:
                             print("socketio not open")
