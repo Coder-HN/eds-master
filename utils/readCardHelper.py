@@ -16,19 +16,15 @@ from utils.testResistanceHelper import get_r, open_door
 """
 
 
-# 读卡器校验位校验方法 #TODO 有问题
-def calculate_checksum(frame):
-    print(f"frame: {' '.join(f'{byte:02X}' for byte in frame)}")
+# 读卡器校验位校验方法
+def checksum(card_id, check_num):
     # 计算校验和
-    checksum = 0
-    for byte in frame[:-1]:  # 除了最后一个字节（校验和本身），总和为710
-        checksum += byte
-    calculated_checksum = checksum % 256
-    # 验证校验和
-    received_checksum = frame[-1]
-    print("数据帧校验和:", received_checksum)
-    print("计算的校验和:", calculated_checksum)
-    if calculated_checksum == received_checksum:
+    xor_result = 0
+    for byte in card_id:
+        xor_result ^= byte
+    print("数据帧校验和:", check_num)
+    print("计算的校验和:", xor_result)
+    if xor_result == check_num:
         print("校验通过")
         return True
     else:
@@ -48,15 +44,17 @@ def enter_card_process(_port, _baudrates, socketio=None):
                 if data:
                     # 将数据添加到缓冲区
                     buffer.extend(data)
-                    # 检查是否有完整数据帧、检查校验和是否正确
-                    if len(buffer) >= 2 and buffer[0] == 2 and len(buffer) == buffer[1]:
-                        print("进门读卡中...")
-                        # 数据帧校验
-                        calculate_checksum(buffer)
-                        # 处理数据帧
-                        frame_data = buffer[3:-2]
-                        card_id = turn_16_to_10(frame_data)
-                        print("card_id:", card_id)
+                    print("进门读卡中...")
+                    # 检查是否有完整数据帧、检查起始桢和结束桢
+                    # 读取数据帧
+                    frame_data = buffer[1:11]
+                    card_id = turn_16_to_10(frame_data)
+                    print("card_id:", card_id)
+                    # 读取校验桢
+                    frame_check = buffer[11:13]
+                    check_num = turn_16_to_10(frame_check)
+                    if len(buffer) >= 2 and buffer[0] == 2 and buffer[len(buffer) - 1] == 3 and checksum(card_id,
+                                                                                                         check_num):
                         # 检查socketio连接
                         if socketio is None:
                             print("socketio not open")
