@@ -1,5 +1,6 @@
 # 静电检测系统的后端：edsMaster
-
+## 克隆代码
+git clone https://gitee.com/Henning_HHN/eds-master.git
 ## 拉取最新代码
 git pull https://gitee.com/Henning_HHN/eds-master.git
 
