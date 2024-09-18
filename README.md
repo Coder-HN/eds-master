@@ -1,7 +1,9 @@
 # 静电检测系统的后端：edsMaster
 
-## 环境准备
+## 拉取最新代码
+git pull https://gitee.com/Henning_HHN/eds-master.git
 
+## 环境准备
 事先安装好pip和python
 
 ```bash
