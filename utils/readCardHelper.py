@@ -9,29 +9,10 @@ from utils.testResistanceHelper import get_r, open_door
 
 """
 读卡器
-假设接收的数据帧为 02 09 01 E0 0F E2 77 72 03：
-1. 帧起始（02）：标识帧的起始。
-2. 长度字段（09）：表示数据帧的总长度，包括起始和校验和在内。
-3. 命令代码（01）：表示具体的命令类型，如REQA、SELECT等。
-4. 数据字段（E0 0F E2 77 72）：具体的命令数据或响应数据。
-5. 校验和（03）：用于验证数据的完整性。
+02 + 卡号 +0D 0A 03
 """
-
-
-# 读卡器校验位校验方法,输入的是对应的帧
-def checksum(card_id, check_num):
-    # 计算校验和
-    xor_result = 0
-    for byte in card_id:
-        xor_result ^= byte
-    print("数据帧校验和:", check_num)
-    print("计算的校验和:", xor_result)
-    if xor_result == check_num:
-        print("校验通过")
-        return True
-    else:
-        print("校验失败")
-        return False
+# 目标二进制数组
+target_end_data = bytes([0x0D, 0x0A, 0x03])
 
 
 # 整个读卡进门access_flag=1，测试电阻过程
@@ -71,18 +52,12 @@ def enter_card_process(_port, _baudrates, socketio=None):
             # 将字符数组连接成字符串
             card_id = ''.join(ascii_chars_card)
             print("card_id:", card_id)
-            # 读取校验桢
-            frame_check = buffer[-3:-1]
-            hex_check_num = ' '.join(f'{byte:02X}' for byte in frame_check)
-            print(f"Hex check_num: {hex_check_num}")
-            # 将每个十六进制数转换为对应的 ASCII 字符
-            ascii_chars_check = [chr(byte) for byte in frame_check]
-            # 将字符数组连接成字符串
-            check_num = ''.join(ascii_chars_check)
-            print("check_num:", check_num)
+            # 读取末尾桢
+            frame_end = buffer[-3:]
+            hex_end = ' '.join(f'{byte:02X}' for byte in frame_end)
+            print(f"Hex end: {hex_end}")
             # 检查是否有完整数据帧、检查起始桢和结束桢
-            if len(buffer) >= 2 and buffer[0] == 2 and buffer[len(buffer) - 1] == 3 and checksum(frame_data,
-                                                                                                 frame_check):
+            if len(buffer) > 4 and buffer[0] == 2 and frame_end == target_end_data:
                 # 检查socketio连接
                 if socketio is None:
                     print("socketio not open")
