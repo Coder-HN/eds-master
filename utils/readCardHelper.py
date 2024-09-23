@@ -162,7 +162,8 @@ def enter_card_process(_port, _baudrates, socketio=None):
                         print(set_data)
                         if socketio is None:
                             print("socketio not open")
-                        socketio.emit('success_data', {'data': set_data})
+                        else:
+                            socketio.emit('success_data', {'data': set_data})
                     if result == 1:
                         print("开门中...")
                         open_door()
@@ -173,7 +174,8 @@ def enter_card_process(_port, _baudrates, socketio=None):
                     }
                     if socketio is None:
                         print("socketio not open")
-                    socketio.emit('fail_data', {'data': error_data})
+                    else:
+                        socketio.emit('fail_data', {'data': error_data})
                 # 清除已处理的数据帧
                 del buffer[:]
                 print("del_buffer", buffer)
