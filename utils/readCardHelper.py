@@ -46,7 +46,6 @@ def enter_card_process(_port, _baudrates, socketio=None):
             while True:
                 if ser.in_waiting > 0:
                     # 读取所有可用的数据
-
                     data = ser.read(ser.in_waiting)
                     # 遍历每个字节
                     for byte in data:
