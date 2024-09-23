@@ -2,9 +2,10 @@ import time
 
 import serial
 import serial.tools.list_ports
+
 from config import Config
 from utils import dbHelper
-from utils.portHelper import find_serial_port, turn_16_to_10
+from utils.portHelper import turn_16_to_10
 from utils.testResistanceHelper import get_r, open_door
 
 """
@@ -197,9 +198,7 @@ def leave_card_process(_port, _baudrates, socketio=None):
                     print("card_id:", card_id)
                     # 读取校验桢
                     frame_check = buffer[11:13]
-                    check_num = turn_16_to_10(frame_check)
-                    if len(buffer) >= 2 and buffer[0] == 2 and buffer[len(buffer) - 1] == 3 and checksum(card_id,
-                                                                                                         check_num):
+                    if len(buffer) >= 2 and buffer[0] == 2 and buffer[len(buffer) - 1] == 3:
                         # 检查socketio连接
                         if socketio is None:
                             print("socketio not open")
