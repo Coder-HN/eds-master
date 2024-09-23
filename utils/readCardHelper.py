@@ -45,10 +45,19 @@ def enter_card_process(_port, _baudrates, socketio=None):
                     # 将数据添加到缓冲区
                     buffer.extend(data)
                     print("进门读卡中...")
+                    # 以十六进制格式打印
+                    hex_data_string = ' '.join(f'{byte:02X}' for byte in data)
+                    print(f"Hex Data: {hex_data_string}")
                     # 检查是否有完整数据帧、检查起始桢和结束桢
-                    # 读取数据帧
+                    # 读取数据帧，原始二进制数据，十六进制格式
                     frame_data = buffer[1:11]
-                    card_id = turn_16_to_10(frame_data)
+                    # 以十六进制格式打印
+                    hex_card_string = ' '.join(f'{byte:02X}' for byte in frame_data)
+                    print(f"Hex Data: {hex_card_string}")
+                    # 将每个十六进制数转换为对应的 ASCII 字符
+                    ascii_chars = [chr(byte) for byte in frame_data]
+                    # 将字符数组连接成字符串
+                    card_id = ''.join(ascii_chars)
                     print("card_id:", card_id)
                     # 读取校验桢
                     frame_check = buffer[11:13]
