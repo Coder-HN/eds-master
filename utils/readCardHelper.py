@@ -18,7 +18,7 @@ from utils.testResistanceHelper import get_r, open_door
 """
 
 
-# 读卡器校验位校验方法
+# 读卡器校验位校验方法,输入的是对应的帧
 def checksum(card_id, check_num):
     # 计算校验和
     xor_result = 0
@@ -43,6 +43,7 @@ def enter_card_process(_port, _baudrates, socketio=None):
             buffer = bytearray()  # 临时存储数据
             frame_started = False  # 标记数据帧是否已经开始
             start_time = time.time()  # 记录帧开始的时间
+            print("进门读卡中...")
             while True:
                 if ser.in_waiting > 0:
                     # 读取所有可用的数据
@@ -53,35 +54,35 @@ def enter_card_process(_port, _baudrates, socketio=None):
                             frame_started = True  # 标记帧开始
                             start_time = time.time()  # 记录开始时间
                         buffer.append(byte)  # 将接收到的字节加入缓冲区
-
                 # 检查是否已经超过帧超时时间（frame_timeout_ms 毫秒）
                 if frame_started and (time.time() - start_time) * 1000 >= frame_timeout_ms:
                     if buffer:
-                        print("完整数据帧:", buffer.hex(' '))
+                        hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
+                        print("完整数据帧:", hex_data_string)
                         break
                     buffer.clear()  # 清空缓冲区
                     frame_started = False  # 重置帧标记
-            print("进门读卡中...")
-            # 以十六进制格式打印
-            hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
-            print(f"Hex Data: {hex_data_string}")
-            # 检查是否有完整数据帧、检查起始桢和结束桢
             # 读取数据帧，原始二进制数据，十六进制格式
-            frame_data = buffer[1:11]
-            # 以十六进制格式打印
+            frame_data = buffer[1:-3]
             hex_card_string = ' '.join(f'{byte:02X}' for byte in frame_data)
-            print(f"Hex card: {hex_card_string}")
+            print(f"Hex card_id: {hex_card_string}")
             # 将每个十六进制数转换为对应的 ASCII 字符
-            ascii_chars = [chr(byte) for byte in frame_data]
+            ascii_chars_card = [chr(byte) for byte in frame_data]
             # 将字符数组连接成字符串
-            card_id = ''.join(ascii_chars)
+            card_id = ''.join(ascii_chars_card)
             print("card_id:", card_id)
             # 读取校验桢
-            frame_check = buffer[11:13]
-            check_num = turn_16_to_10(frame_check)
+            frame_check = buffer[-3:-1]
+            hex_check_num = ' '.join(f'{byte:02X}' for byte in frame_check)
+            print(f"Hex check_num: {hex_check_num}")
+            # 将每个十六进制数转换为对应的 ASCII 字符
+            ascii_chars_check = [chr(byte) for byte in frame_check]
+            # 将字符数组连接成字符串
+            check_num = ''.join(ascii_chars_check)
             print("check_num:", check_num)
-            if len(buffer) >= 2 and buffer[0] == 2 and buffer[len(buffer) - 1] == 3 and checksum(card_id,
-                                                                                                 check_num):
+            # 检查是否有完整数据帧、检查起始桢和结束桢
+            if len(buffer) >= 2 and buffer[0] == 2 and buffer[len(buffer) - 1] == 3 and checksum(frame_data,
+                                                                                                 frame_check):
                 # 检查socketio连接
                 if socketio is None:
                     print("socketio not open")
