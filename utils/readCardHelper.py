@@ -160,6 +160,8 @@ def enter_card_process(_port, _baudrates, socketio=None):
                             'foot_right_max': foot_right_max,
                         }
                         print(set_data)
+                        if socketio is None:
+                            print("socketio not open")
                         socketio.emit('success_data', {'data': set_data})
                     if result == 1:
                         print("开门中...")
@@ -169,6 +171,8 @@ def enter_card_process(_port, _baudrates, socketio=None):
                     error_data = {
                         'card_id': card_id
                     }
+                    if socketio is None:
+                        print("socketio not open")
                     socketio.emit('fail_data', {'data': error_data})
                 # 清除已处理的数据帧
                 del buffer[:]
