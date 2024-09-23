@@ -72,8 +72,6 @@ def _get_r(_port, _baudrates):
 
 def get_r():
     baudrates = Config.default_baudrates
-    # name = Config.test_r_name
-    # port = find_serial_port(name)
     port = Config.test_r_port
     if port is None:
         print(f"测试电阻串口{port}未找到，请检查设备连接。")
