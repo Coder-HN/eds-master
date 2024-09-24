@@ -32,7 +32,7 @@ class Config:
     test_r_port = "COM7"  # 测试电阻的串口port
     # test_enter_card_port = "COM3"
     test_enter_card_port = "COM10"  # 读卡进门的串口port
-    test_leave_card_port = "COM"  # 读卡出门的串口port
+    test_leave_card_port = None  # 读卡出门的串口port
     # 串口命令
     hex_test_online = "01 01 01 00 00 00 00 01 CA"  # 测试是否在线
     hex_test_online_succcess = "01 01 01 00 00 00 00 05 AB"  # 测试是否在线成功
