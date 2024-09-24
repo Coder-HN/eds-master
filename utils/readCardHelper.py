@@ -79,8 +79,9 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                 user_pic_path = user[_pic_path]
                                 # 完成测试电阻，是否开门，插入进出记录表的工作
                                 print("测试电阻中...")
-                                result = get_r()
-                                if result is None:
+                                r = get_r()
+                                result = False
+                                if r is None:
                                     # 处理 None 情况
                                     service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = None, None, None, None, None
                                     hand_left_min = Config.HAND_LEFT_MIN
@@ -95,9 +96,8 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                     result_hand_right = 2
                                     result_foot_left = 2
                                     result_foot_right = 2
-                                    result = 2
                                 else:
-                                    service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = result
+                                    service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = r
                                     print("service_id:", service_id)
                                     hand_left_min = Config.HAND_LEFT_MIN
                                     hand_left_max = Config.HAND_LEFT_MAX
@@ -124,9 +124,7 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                     else:
                                         result_foot_right = 2
                                     if result_hand_left == 1 and result_hand_right == 1 and result_foot_left == 1 and result_foot_right == 1:
-                                        result = 1
-                                    else:
-                                        result = 2
+                                        result = True
                                 set_data = {
                                     'card_id': card_id,
                                     'access_flag': 1,
@@ -155,7 +153,7 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                 }
                                 print(set_data)
                                 socketio.emit('success_data', {'data': set_data})
-                                if result == 1:
+                                if result:
                                     print("请通行")
                                     open_door()
                                 else:  # 失败表示无权限通过
