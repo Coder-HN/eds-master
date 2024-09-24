@@ -153,6 +153,7 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                 }
                                 print(set_data)
                                 socketio.emit('success_data', {'data': set_data})
+                                print("发送数据到前端")
                                 if result:
                                     print("人员及电阻均符合要求,通行")
                                     open_door()
