@@ -59,10 +59,10 @@ def enter_card_process(_port, _baudrates, socketio=None):
                             print("数据帧校验通过")
                             # 检查socketio连接
                             if socketio is None:
-                                print("socketio not open")
+                                print("socketio未开启")
                             else:
-                                print("socketio open, send read_card_status")
-                                socketio.emit('read_card_status', {'data': "enter"})
+                                print("socketio已打开，跳转指令已发送")
+                                socketio.emit('read_card_status', {'status': 1})
                             # 先查询card_id是否在数据库中
                             users, column_names = dbHelper.get_user_by_card_id(card_id)
                             if len(users) == 1:  # 成功提示请测试电阻
@@ -214,9 +214,9 @@ def leave_card_process(_port, _baudrates, socketio=None):
                             print("数据帧校验通过")
                             # 检查socketio连接
                             if socketio is None:
-                                print("socketio not open")
+                                print("socketio未开启")
                             else:
-                                print("socketio open, send read_card_status")
+                                print("socketio已打开，跳转指令已发送")
                                 socketio.emit('read_card_status', {'data': "enter"})
                             # 先查询card_id是否在数据库中
                             users, column_names = dbHelper.get_user_by_card_id(card_id)
