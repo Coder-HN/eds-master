@@ -25,7 +25,7 @@ def enter_card_process(_port, _baudrates, socketio=None):
             buffer = bytearray()  # 临时存储数据
             frame_started = False  # 标记数据帧是否已经开始
             start_time = time.time()  # 记录帧开始的时间
-            print("进门读卡监听中...")
+            print("==================进门读卡监听中==================")
             while True:
                 if ser.in_waiting > 0:
                     # 读取所有可用的数据
@@ -40,7 +40,7 @@ def enter_card_process(_port, _baudrates, socketio=None):
                 if frame_started and (time.time() - start_time) * 1000 >= frame_timeout_ms:
                     if buffer:
                         hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
-                        print(f"{frame_timeout_ms}ms接收到的完整数据帧:", hex_data_string)
+                        print(f"=================={frame_timeout_ms}ms接收到的完整数据帧:", hex_data_string)
                         # 读取数据帧，原始二进制数据，十六进制格式
                         frame_data = buffer[1:-3]
                         hex_card_string = ' '.join(f'{byte:02X}' for byte in frame_data)
@@ -154,14 +154,14 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                 print(set_data)
                                 socketio.emit('success_data', {'data': set_data})
                                 if result:
-                                    print("请通行")
+                                    print("人员及电阻均符合要求,通行")
                                     open_door()
-                                else:  # 失败表示无权限通过
-                                    print("无权限通过")
-                                    error_data = {
-                                        'card_id': card_id
-                                    }
-                                    socketio.emit('fail_data', {'data': error_data})
+                            else:  # 失败表示无权限通过
+                                print("无权限通过")
+                                error_data = {
+                                    'card_id': card_id
+                                }
+                                socketio.emit('fail_data', {'data': error_data})
                     buffer.clear()  # 清空缓冲区
                     frame_started = False  # 重置帧标记
     except serial.SerialException as e:
@@ -179,7 +179,7 @@ def leave_card_process(_port, _baudrates, socketio=None):
             buffer = bytearray()  # 临时存储数据
             frame_started = False  # 标记数据帧是否已经开始
             start_time = time.time()  # 记录帧开始的时间
-            print("出门读卡中...")
+            print("==================出门读卡监听中==================")
             while True:
                 if ser.in_waiting > 0:
                     # 读取所有可用的数据
@@ -194,68 +194,64 @@ def leave_card_process(_port, _baudrates, socketio=None):
                 if frame_started and (time.time() - start_time) * 1000 >= frame_timeout_ms:
                     if buffer:
                         hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
-                        print("完整数据帧:", hex_data_string)
-                        break
+                        print(f"=================={frame_timeout_ms}ms接收到的完整数据帧:", hex_data_string)
+                        # 读取数据帧，原始二进制数据，十六进制格式
+                        frame_data = buffer[1:-3]
+                        hex_card_string = ' '.join(f'{byte:02X}' for byte in frame_data)
+                        print(f"Hex card_id: {hex_card_string}")
+                        # 将每个十六进制数转换为对应的 ASCII 字符
+                        ascii_chars_card = [chr(byte) for byte in frame_data]
+                        # 将字符数组连接成字符串
+                        card_id = ''.join(ascii_chars_card)
+                        print("card_id:", card_id)
+                        # 读取末尾桢
+                        frame_end = buffer[-3:]
+                        hex_end = ' '.join(f'{byte:02X}' for byte in frame_end)
+                        print(f"Hex end: {hex_end}")
+                        # 检查是否有完整数据帧、检查起始桢和结束桢
+                        if len(buffer) > 4 and buffer[0] == 2 and frame_end == target_end_data:
+                            print("数据帧校验通过")
+                            # 检查socketio连接
+                            if socketio is None:
+                                print("socketio not open")
+                            else:
+                                print("socketio open, send read_card_status")
+                                socketio.emit('read_card_status', {'data': "enter"})
+                            # 先查询card_id是否在数据库中
+                            users, column_names = dbHelper.get_user_by_card_id(card_id)
+                            if len(users) == 1:  # 成功提示请测试电阻
+                                user = users[0]
+                                _num = column_names.index('num')
+                                _name = column_names.index('name')
+                                _department = column_names.index('department')
+                                _employee_id = column_names.index('employee_id')
+                                _pic_path = column_names.index('pic_path')
+                                user_num = user[_num]
+                                user_name = user[_name]
+                                user_department = user[_department]
+                                user_employee_id = user[_employee_id]
+                                user_pic_path = user[_pic_path]
+                                set_data = {
+                                    'card_id': card_id,
+                                    'access_flag': 2,
+                                    'num': user_num,
+                                    'name': user_name,
+                                    'employee_id': user_employee_id,
+                                    'department': user_department,
+                                    'pic_path': user_pic_path,
+                                }
+                                print(set_data)
+                                socketio.emit('success_data', {'data': set_data})
+                                print("开门中...")
+                                open_door()
+                            else:  # 失败表示无权限通过
+                                print("无权限通过")
+                                error_data = {
+                                    'card_id': card_id
+                                }
+                                socketio.emit('fail_data', {'data': error_data})
                     buffer.clear()  # 清空缓冲区
                     frame_started = False  # 重置帧标记
-            # 读取数据帧，原始二进制数据，十六进制格式
-            frame_data = buffer[1:-3]
-            hex_card_string = ' '.join(f'{byte:02X}' for byte in frame_data)
-            print(f"Hex card_id: {hex_card_string}")
-            # 将每个十六进制数转换为对应的 ASCII 字符
-            ascii_chars_card = [chr(byte) for byte in frame_data]
-            # 将字符数组连接成字符串
-            card_id = ''.join(ascii_chars_card)
-            print("card_id:", card_id)
-            # 读取末尾桢
-            frame_end = buffer[-3:]
-            hex_end = ' '.join(f'{byte:02X}' for byte in frame_end)
-            print(f"Hex end: {hex_end}")
-            # 检查是否有完整数据帧、检查起始桢和结束桢
-            if len(buffer) > 4 and buffer[0] == 2 and frame_end == target_end_data:
-                print("数据帧校验通过")
-                # 检查socketio连接
-                if socketio is None:
-                    print("socketio not open")
-                else:
-                    print("socketio open, send read_card_status")
-                    socketio.emit('read_card_status', {'data': "leave"})
-                # 先查询card_id是否在数据库中
-                users, column_names = dbHelper.get_user_by_card_id(card_id)
-                if len(users) == 1:  # 查询成功
-                    user = users[0]
-                    _num = column_names.index('num')
-                    _name = column_names.index('name')
-                    _department = column_names.index('department')
-                    _employee_id = column_names.index('employee_id')
-                    _pic_path = column_names.index('pic_path')
-                    user_num = user[_num]
-                    user_name = user[_name]
-                    user_department = user[_department]
-                    user_employee_id = user[_employee_id]
-                    user_pic_path = user[_pic_path]
-                    set_data = {
-                        'card_id': card_id,
-                        'access_flag': 2,
-                        'num': user_num,
-                        'name': user_name,
-                        'employee_id': user_employee_id,
-                        'department': user_department,
-                        'pic_path': user_pic_path,
-                    }
-                    print(set_data)
-                    socketio.emit('success_data', {'data': set_data})
-                    print("开门中...")
-                    open_door()
-                else:  # 失败表示无权限通过
-                    print("无权限通过")
-                    error_data = {
-                        'card_id': card_id
-                    }
-                    socketio.emit('fail_data', {'data': error_data})
-                # 清除已处理的数据帧
-                del buffer[:]
-                print("del_buffer", buffer)
     except serial.SerialException as e:
         print(f"串口连接错误: {e}")
     except Exception as e:

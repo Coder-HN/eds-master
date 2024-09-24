@@ -14,7 +14,7 @@ from router.router_user import user
 from utils.readCardHelper import enter_card_process, leave_card_process
 
 
-def connect_socket(socketio):
+def enter_connect_socket(socketio):
     baudrates = Config.default_baudrates
     # 开门
     port_enter = Config.test_enter_card_port
@@ -22,6 +22,10 @@ def connect_socket(socketio):
         print(f"进门读卡串口{port_enter}未找到，请检查设备连接。")
     else:
         enter_card_process(port_enter, baudrates, socketio)
+
+
+def leave_connect_socket(socketio):
+    baudrates = Config.default_baudrates
     # 关门
     port_leave = Config.test_leave_card_port
     if port_leave is None:
@@ -61,9 +65,12 @@ def create_app(config_class=Config):
 
     # 串口IO
     socketio = SocketIO(_app, cors_allowed_origins="*")
-    thread = threading.Thread(target=connect_socket, args=(socketio,))
-    thread.daemon = True
-    thread.start()
+    thread_enter = threading.Thread(target=enter_connect_socket, args=(socketio,))
+    thread_enter.daemon = True
+    thread_enter.start()
+    thread_leave = threading.Thread(target=leave_connect_socket, args=(socketio,))
+    thread_leave.daemon = True
+    thread_leave.start()
 
     # 初始化数据库
     db.init_app(_app)
