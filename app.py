@@ -37,7 +37,7 @@ def leave_connect_socket(socketio):
 # 日志过滤器
 class NoSocketIOLoggingFilter(logging.Filter):
     def filter(self, record):
-        return '/socket.io/' not in record.getMessage()
+        return 'GET /socket.io/' not in record.getMessage() and 'POST /socket.io/' not in record.getMessage()
 
 
 # 使用配置文件配置数据库配置
