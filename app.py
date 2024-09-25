@@ -34,6 +34,12 @@ def leave_connect_socket(socketio):
         leave_card_process(port_leave, baudrates, socketio)
 
 
+# 日志过滤器
+class NoSocketIOLoggingFilter(logging.Filter):
+    def filter(self, record):
+        return '/socket.io/' not in record.getMessage()
+
+
 # 使用配置文件配置数据库配置
 def create_app(config_class=Config):
     _app = Flask(__name__)
@@ -61,10 +67,15 @@ def create_app(config_class=Config):
     file_handler = logging.FileHandler('app.log')
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
+    # 添加过滤器到日志处理器
+    file_handler.addFilter(NoSocketIOLoggingFilter())
+    # 将处理器添加到应用日志
     _app.logger.addHandler(file_handler)
-
+    # 过滤掉werkzeug的`socket.io`日志
+    werkzeug_logger = logging.getLogger('werkzeug')
+    werkzeug_logger.addFilter(NoSocketIOLoggingFilter())
     # 串口IO
-    socketio = SocketIO(_app, cors_allowed_origins="*", logger=False, engineio_logger=False)
+    socketio = SocketIO(_app, cors_allowed_origins="*")
     thread_enter = threading.Thread(target=enter_connect_socket, args=(socketio,))
     thread_enter.daemon = True
     thread_enter.start()
