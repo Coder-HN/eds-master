@@ -64,7 +64,7 @@ def create_app(config_class=Config):
     _app.logger.addHandler(file_handler)
 
     # 串口IO
-    socketio = SocketIO(_app, cors_allowed_origins="*")
+    socketio = SocketIO(_app, cors_allowed_origins="*", logger=False, engineio_logger=False)
     thread_enter = threading.Thread(target=enter_connect_socket, args=(socketio,))
     thread_enter.daemon = True
     thread_enter.start()
