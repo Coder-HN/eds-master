@@ -12,7 +12,6 @@ from router.router_admin_manager_service import manageService
 from router.router_admin_manager_user import manageUser
 from router.router_user import user
 from utils.readCardHelper import enter_card_process, leave_card_process
-from flask_cors import CORS
 
 
 def enter_connect_socket(socketio):
@@ -39,7 +38,6 @@ def leave_connect_socket(socketio):
 def create_app(config_class=Config):
     _app = Flask(__name__)
     _app.config.from_object(config_class)
-    CORS(_app)  # 允许所有跨域请求
 
     # 在请求处理之前记录请求信息
     @_app.before_request

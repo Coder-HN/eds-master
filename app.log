@@ -10,3 +10,7 @@
 2024-08-07 13:39:06,823 - INFO - app - Response Status: 200 OK
 2024-08-07 13:39:07,702 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageUser/getAllUsers
 2024-08-07 13:39:07,705 - INFO - app - Response Status: 200 OK
+2024-09-24 22:35:15,157 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/searchAccess/getAllAccess
+2024-09-24 22:35:15,351 - INFO - app - Response Status: 200 OK
+2024-09-25 17:51:30,742 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/searchAccess/getAllAccess
+2024-09-25 17:51:30,948 - INFO - app - Response Status: 200 OK
