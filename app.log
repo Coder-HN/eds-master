@@ -14,3 +14,7 @@
 2024-09-24 22:35:15,351 - INFO - app - Response Status: 200 OK
 2024-09-25 17:51:30,742 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/searchAccess/getAllAccess
 2024-09-25 17:51:30,948 - INFO - app - Response Status: 200 OK
+2024-09-25 20:37:04,836 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/searchAccess/getAllAccess
+2024-09-25 20:37:04,968 - INFO - app - Response Status: 200 OK
+2024-09-25 20:40:30,973 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/searchAccess/getAllAccess
+2024-09-25 20:40:31,062 - INFO - app - Response Status: 200 OK
