@@ -34,12 +34,6 @@ def leave_connect_socket(socketio):
         leave_card_process(port_leave, baudrates, socketio)
 
 
-# 日志过滤器
-class NoSocketIOLoggingFilter(logging.Filter):
-    def filter(self, record):
-        return 'GET /socket.io/' not in record.getMessage() and 'POST /socket.io/' not in record.getMessage()
-
-
 # 使用配置文件配置数据库配置
 def create_app(config_class=Config):
     _app = Flask(__name__)
@@ -56,6 +50,15 @@ def create_app(config_class=Config):
         _app.logger.info(f"Response Status: {response.status}")
         return response
 
+    # 串口IO
+    socketio = SocketIO(_app, cors_allowed_origins="*", logger=False, engineio_logger=False)
+    thread_enter = threading.Thread(target=enter_connect_socket, args=(socketio,))
+    thread_enter.daemon = True
+    thread_enter.start()
+    thread_leave = threading.Thread(target=leave_connect_socket, args=(socketio,))
+    thread_leave.daemon = True
+    thread_leave.start()
+
     # 清除所有已有的处理器
     for handler in _app.logger.handlers[:]:
         _app.logger.removeHandler(handler)
@@ -67,21 +70,8 @@ def create_app(config_class=Config):
     file_handler = logging.FileHandler('app.log')
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
-    # 添加过滤器到日志处理器
-    file_handler.addFilter(NoSocketIOLoggingFilter())
     # 将处理器添加到应用日志
     _app.logger.addHandler(file_handler)
-    # 过滤掉werkzeug的`socket.io`日志
-    werkzeug_logger = logging.getLogger('werkzeug')
-    werkzeug_logger.addFilter(NoSocketIOLoggingFilter())
-    # 串口IO
-    socketio = SocketIO(_app, cors_allowed_origins="*", logger=False, engineio_logger=False)
-    thread_enter = threading.Thread(target=enter_connect_socket, args=(socketio,))
-    thread_enter.daemon = True
-    thread_enter.start()
-    thread_leave = threading.Thread(target=leave_connect_socket, args=(socketio,))
-    thread_leave.daemon = True
-    thread_leave.start()
 
     # 初始化数据库
     db.init_app(_app)
