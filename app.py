@@ -59,16 +59,6 @@ def create_app(config_class=Config):
     thread_leave.daemon = True
     thread_leave.start()
 
-    class NoSocketIOLoggingFilter(logging.Filter):
-        def filter(self, record):
-            return '/socket.io/' not in record.getMessage()
-    # 禁用 socketio 日志
-    socketio_logger = logging.getLogger('socketio')
-    socketio_logger.setLevel(logging.ERROR)
-    # 获取 werkzeug logger
-    werkzeug_logger = logging.getLogger('werkzeug')
-    werkzeug_logger.setLevel(logging.WARNING)  # 设置较高的日志级别，忽略普通请求日志
-    werkzeug_logger.addFilter(NoSocketIOLoggingFilter())  # 添加过滤器，去除 /socket.io/ 请求日志
     # 清除所有已有的处理器
     for handler in _app.logger.handlers[:]:
         _app.logger.removeHandler(handler)
@@ -80,8 +70,6 @@ def create_app(config_class=Config):
     file_handler = logging.FileHandler('app.log')
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
-    # 添加过滤器
-    file_handler.addFilter(NoSocketIOLoggingFilter())
     # 将处理器添加到应用日志
     _app.logger.addHandler(file_handler)
 
