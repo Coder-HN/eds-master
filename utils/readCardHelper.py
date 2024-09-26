@@ -27,6 +27,7 @@ def enter_card_process(_port, _baudrates, socketio=None):
             start_time = time.time()  # 记录帧开始的时间
             print("==================进门读卡监听中==================")
             while True:
+                time.sleep(0.001)
                 if ser.in_waiting > 0:
                     # 读取所有可用的数据
                     data = ser.read(ser.in_waiting)
@@ -182,6 +183,7 @@ def leave_card_process(_port, _baudrates, socketio=None):
             start_time = time.time()  # 记录帧开始的时间
             print("==================出门读卡监听中==================")
             while True:
+                time.sleep(0.001)
                 if ser.in_waiting > 0:
                     # 读取所有可用的数据
                     data = ser.read(ser.in_waiting)
