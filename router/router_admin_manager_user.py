@@ -1,4 +1,6 @@
 import os
+import sys
+
 import pandas as pd
 from io import BytesIO
 from flask import send_file
@@ -238,5 +240,7 @@ def add_user_excel():
         response = send_file(output, download_name='处理结果.xlsx', as_attachment=True, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         return response, 200
     except Exception as e:
-        current_app.logger.info(f"error: {str(e)}")
+        exc_info = sys.exc_info()
+        current_app.log_exception(exc_info)
+        current_app.logger.error(f"error: {str(e)}")
         return jsonify({'error': str(e)}), 500
