@@ -1,4 +1,6 @@
+import codecs
 import logging
+import sys
 import threading
 
 from flask import Flask, request
@@ -8,6 +10,7 @@ from config import Config
 from database import db
 from router.router_admin_access import searchAccess
 from router.router_admin_attend import searchAttend
+from router.router_admin_manager_department import manageDepartment
 from router.router_admin_manager_service import manageService
 from router.router_admin_manager_user import manageUser
 from router.router_user import user
@@ -79,11 +82,20 @@ def create_app(config_class=Config):
     # 注册蓝图
     _app.register_blueprint(user)
     _app.register_blueprint(manageUser)
+    _app.register_blueprint(manageDepartment)
     _app.register_blueprint(manageService)
     _app.register_blueprint(searchAccess)
     _app.register_blueprint(searchAttend)
     return _app
 
+
+# 调试乱码用以下代码
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+else:
+    # 对于不支持 reconfigure 的情况，手动设置编码
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer)
 
 if __name__ == "__main__":
     app = create_app()

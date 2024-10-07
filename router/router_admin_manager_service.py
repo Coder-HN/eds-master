@@ -61,7 +61,13 @@ def add_service():
         return jsonify({'error': '添加数据失败'}), 500
 
 
-# TODO 导出设备信息
-@manageService.route('/downloadService', methods=['POST'])  # 导出设备
-def download_service():
-    return make_response('', 200)
+@manageService.route('/getRStandard', methods=['POST'])  # 添加设备
+def get_r_standard():
+    new_service = TableService()
+    # 处理其他数据
+    new_service.service_id = request.form.get('service_id')
+    new_service.service_name = request.form.get('service_name')
+    if ServiceMapper.add_service(new_service):
+        return make_response('', 200)
+    else:
+        return jsonify({'error': '添加数据失败'}), 500

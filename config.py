@@ -11,12 +11,11 @@ class Config:
     STATIC_PUBLIC = 'E:/workplaces/FrontProjects/edsFront/public'
     # 头像位置
     UPLOAD_FOLDER = 'E:/workplaces/FrontProjects/edsFront/public/profile_photo/'
-    # 静电测试电阻上下限配置，以K为单位
+
     HAND_LEFT_MIN = 100
     HAND_LEFT_MAX = 15000  # 15M
     HAND_RIGHT_MIN = 100
     HAND_RIGHT_MAX = 15000
-
     FOOT_LEFT_MIN = 100
     FOOT_LEFT_MAX = 60000  # 60M
     FOOT_RIGHT_MIN = 100
@@ -31,8 +30,8 @@ class Config:
     # 串口名
     test_r_port = "COM7"  # 测试电阻的串口port
     # test_enter_card_port = "COM3"
-    test_enter_card_port = "COM10" # 读卡进门的串口port
-    test_leave_card_port =  None # 读卡出门的串口port
+    test_enter_card_port = "COM10"  # 读卡进门的串口port
+    test_leave_card_port = None  # 读卡出门的串口port
     # 串口命令
     hex_test_online = "01 01 01 00 00 00 00 01 CA"  # 测试是否在线
     hex_test_online_succcess = "01 01 01 00 00 00 00 05 AB"  # 测试是否在线成功

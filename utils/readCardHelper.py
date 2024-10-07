@@ -78,71 +78,26 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                 user_department = user[_department]
                                 user_employee_id = user[_employee_id]
                                 user_pic_path = user[_pic_path]
-                                # 完成测试电阻，是否开门，插入进出记录表的工作
-                                print("测试电阻中...")
-                                r = get_r()
-                                result = False
-                                if r is None:
-                                    # 处理 None 情况
-                                    service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = None, None, None, None, None
-                                    hand_left_min = Config.HAND_LEFT_MIN
-                                    hand_left_max = Config.HAND_LEFT_MAX
-                                    hand_right_min = Config.HAND_RIGHT_MIN
-                                    hand_right_max = Config.HAND_RIGHT_MAX
-                                    foot_left_min = Config.FOOT_LEFT_MIN
-                                    foot_left_max = Config.FOOT_LEFT_MAX
-                                    foot_right_min = Config.FOOT_RIGHT_MIN
-                                    foot_right_max = Config.FOOT_RIGHT_MAX
-                                    result_hand_left = 2
-                                    result_hand_right = 2
-                                    result_foot_left = 2
-                                    result_foot_right = 2
-                                else:
-                                    service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = r
-                                    print("service_id:", service_id)
-                                    hand_left_min = Config.HAND_LEFT_MIN
-                                    hand_left_max = Config.HAND_LEFT_MAX
-                                    hand_right_min = Config.HAND_RIGHT_MIN
-                                    hand_right_max = Config.HAND_RIGHT_MAX
-                                    foot_left_min = Config.FOOT_LEFT_MIN
-                                    foot_left_max = Config.FOOT_LEFT_MAX
-                                    foot_right_min = Config.FOOT_RIGHT_MIN
-                                    foot_right_max = Config.FOOT_RIGHT_MAX
-                                    if hand_left_min <= value_hand_left <= hand_left_max:
-                                        result_hand_left = 1
-                                    else:
-                                        result_hand_left = 2
-                                    if hand_right_min <= value_hand_right <= hand_right_max:
-                                        result_hand_right = 1
-                                    else:
-                                        result_hand_right = 2
-                                    if foot_left_min <= value_foot_left <= foot_left_max:
-                                        result_foot_left = 1
-                                    else:
-                                        result_foot_left = 2
-                                    if foot_right_min <= value_foot_right <= foot_right_max:
-                                        result_foot_right = 1
-                                    else:
-                                        result_foot_right = 2
-                                    if result_hand_left == 1 and result_hand_right == 1 and result_foot_left == 1 and result_foot_right == 1:
-                                        result = True
-                                set_data = {
+
+                                # 先发送员工、及部分电阻信息到前端
+                                hand_left_min = Config.HAND_LEFT_MIN
+                                hand_left_max = Config.HAND_LEFT_MAX
+                                hand_right_min = Config.HAND_RIGHT_MIN
+                                hand_right_max = Config.HAND_RIGHT_MAX
+                                foot_left_min = Config.FOOT_LEFT_MIN
+                                foot_left_max = Config.FOOT_LEFT_MAX
+                                foot_right_min = Config.FOOT_RIGHT_MIN
+                                foot_right_max = Config.FOOT_RIGHT_MAX
+                                cache_data = {
                                     'card_id': card_id,
                                     'access_flag': 1,
                                     'service_id': service_id,
-                                    'num': user_num,
+                                    'user_num': user_num,
+
                                     'name': user_name,
                                     'employee_id': user_employee_id,
                                     'department': user_department,
                                     'pic_path': user_pic_path,
-                                    'value_hand_left': value_hand_left,
-                                    'value_hand_right': value_hand_right,
-                                    'value_foot_left': value_foot_left,
-                                    'value_foot_right': value_foot_right,
-                                    'result_hand_left': result_hand_left,
-                                    'result_hand_right': result_hand_right,
-                                    'result_foot_left': result_foot_left,
-                                    'result_foot_right': result_foot_right,
                                     'hand_left_min': hand_left_min,
                                     'hand_left_max': hand_left_max,
                                     'hand_right_min': hand_right_min,
@@ -151,6 +106,50 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                     'foot_left_max': foot_left_max,
                                     'foot_right_min': foot_right_min,
                                     'foot_right_max': foot_right_max,
+                                }
+                                print(cache_data)
+                                socketio.emit('cache_data', {'data': cache_data})
+
+                                # 完成测试电阻，是否开门，插入进出记录表的工作
+                                print("测试电阻中...")
+                                r = get_r()
+                                result = False
+                                service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = None, None, None, None, None
+                                result_hand_left = 2
+                                result_hand_right = 2
+                                result_foot_left = 2
+                                result_foot_right = 2
+                                if r is not None:
+                                    service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = r
+                                    print("service_id:", service_id)
+                                    if hand_left_min <= value_hand_left <= hand_left_max:
+                                        result_hand_left = 1
+                                    if hand_right_min <= value_hand_right <= hand_right_max:
+                                        result_hand_right = 1
+                                    if foot_left_min <= value_foot_left <= foot_left_max:
+                                        result_foot_left = 1
+                                    if foot_right_min <= value_foot_right <= foot_right_max:
+                                        result_foot_right = 1
+                                    if result_hand_left * result_hand_right * result_foot_left * result_foot_right == 1:
+                                        result = True
+                                result_num = 2
+                                if result:
+                                    result_num = 1
+                                set_data = {
+                                    'card_id': card_id,
+                                    'access_flag': 1,
+                                    'service_id': service_id,
+                                    'user_num': user_num,
+                                    'result_num': result_num,
+
+                                    'value_hand_left': value_hand_left,
+                                    'value_hand_right': value_hand_right,
+                                    'value_foot_left': value_foot_left,
+                                    'value_foot_right': value_foot_right,
+                                    'result_hand_left': result_hand_left,
+                                    'result_hand_right': result_hand_right,
+                                    'result_foot_left': result_foot_left,
+                                    'result_foot_right': result_foot_right,
                                 }
                                 print(set_data)
                                 socketio.emit('success_data', {'data': set_data})

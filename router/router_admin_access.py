@@ -4,7 +4,7 @@ import os
 from flask import Blueprint, request, jsonify, send_file
 
 from config import Config
-from mapper import UserMapper, ServiceMapper, AccessMapper
+from mapper import UserMapper, ServiceMapper, AccessMapper, DepartmentMapper
 from utils import timeHelper
 from utils.dbHelper import export_mysql_to_sql
 
@@ -27,7 +27,8 @@ def get_all_access():
             user = UserMapper.get_user_by_num(user_num)
             access["name"] = user.name
             access["employee_id"] = user.employee_id
-            access["department"] = user.department
+            department = DepartmentMapper.get_department_by_num(user.department_num)
+            access["department"] = department.department_name
             service_num = access.get("service_num")
             service = ServiceMapper.get_service_by_num(service_num)
             access["service_id"] = service.service_id
@@ -59,7 +60,6 @@ def search():
     end_time = None
     employee_id = request.form.get('employee_id')
     name = request.form.get('name')
-    department = request.form.get('department')
     service_name = request.form.get('service_name')
     start_time_str = request.form.get('start_time')
     end_time_str = request.form.get('end_time')
@@ -70,7 +70,7 @@ def search():
         end_time = timeHelper.parse_datetime(end_time_str)
         end_time = timeHelper.get_end_of_day(end_time)
     try:
-        all_access = AccessMapper.get_access_by_multiple_conditions(employee_id, name, department, service_name,
+        all_access = AccessMapper.get_access_by_multiple_conditions(employee_id, name, service_name,
                                                                     start_time, end_time)
         access_list = [access.to_dict() for access in all_access]
         for access in access_list:
@@ -80,7 +80,8 @@ def search():
             user = UserMapper.get_user_by_num(user_num)
             access["name"] = user.name
             access["employee_id"] = user.employee_id
-            access["department"] = user.department
+            department = DepartmentMapper.get_department_by_num(user.department_num)
+            access["department"] = department.department_name
             service_num = access.get("service_num")
             service = ServiceMapper.get_service_by_num(service_num)
             access["service_id"] = service.service_id

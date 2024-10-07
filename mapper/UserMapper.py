@@ -5,8 +5,8 @@ from database import db
 def add_user(user: TableUser):
     new_user = TableUser(employee_id=user.employee_id,
                          name=user.name,
-                         department=user.department,
-                         position=user.position,
+                         position_num=user.position_num,
+                         department_num=user.department_num,
                          card_id=user.card_id,
                          pic_path=user.pic_path,
                          is_delete=0)
@@ -24,7 +24,8 @@ def get_all_users():
 
 
 # 多条件查询
-def get_users_by_multiple_conditions(employee_id=None, card_id=None, name=None, department=None, position=None):
+def get_users_by_multiple_conditions(employee_id=None, card_id=None, name=None, department_num=None,
+                                     position_num=None):
     query = TableUser.query
     if employee_id:
         query = query.filter(TableUser.employee_id == employee_id)
@@ -32,11 +33,16 @@ def get_users_by_multiple_conditions(employee_id=None, card_id=None, name=None, 
         query = query.filter(TableUser.card_id == card_id)
     if name:
         query = query.filter(TableUser.name == name)
-    if department:
-        query = query.filter(TableUser.department == department)
-    if position:
-        query = query.filter(TableUser.position == position)
+    if department_num:
+        query = query.filter(TableUser.department_num == department_num)
+    if position_num:
+        query = query.filter(TableUser.position_num == position_num)
     return query.all()
+
+
+def get_user_by_employee_id(employee_id):
+    user = TableUser.query.filter_by(employee_id=employee_id).first()
+    return user
 
 
 # 修改员工信息or删除员工（将is_delete置为1）
@@ -49,11 +55,11 @@ def update_user(user_num, updated_user: TableUser):
     if updated_user.name:
         user.name = updated_user.name
         is_change = True
-    if updated_user.department:
-        user.department = updated_user.department
+    if updated_user.department_num:
+        user.department_num = updated_user.department_num
         is_change = True
-    if updated_user.position:
-        user.position = updated_user.position
+    if updated_user.position_num:
+        user.position_num = updated_user.position_num
         is_change = True
     if updated_user.card_id:
         user.card_id = updated_user.card_id

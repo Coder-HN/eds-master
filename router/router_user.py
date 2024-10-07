@@ -22,7 +22,8 @@ user = Blueprint('user', __name__, url_prefix='/api/user')
 # 测试失败后在规定时间内再次测试接口
 @user.route('/test_user_r', methods=['GET'])
 def test_user_r():
-    result = testResistanceHelper.get_r()
+    print("重新测试阻值中--------------------------------------------------")
+    r = testResistanceHelper.get_r()
     hand_left_min = Config.HAND_LEFT_MIN
     hand_left_max = Config.HAND_LEFT_MAX
     hand_right_min = Config.HAND_RIGHT_MIN
@@ -31,40 +32,30 @@ def test_user_r():
     foot_left_max = Config.FOOT_LEFT_MAX
     foot_right_min = Config.FOOT_RIGHT_MIN
     foot_right_max = Config.FOOT_RIGHT_MAX
-    if result is None:
-        # 处理 None 情况
-        service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = None, None, None, None, None
-        result_hand_left = 2
-        result_hand_right = 2
-        result_foot_left = 2
-        result_foot_right = 2
-        result = 2
-    else:
-        service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = result
+    result = False
+    service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = None, None, None, None, None
+    result_hand_left = 2
+    result_hand_right = 2
+    result_foot_left = 2
+    result_foot_right = 2
+    if r is not None:
+        service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = r
         print("service_id:", service_id)
         if hand_left_min <= value_hand_left <= hand_left_max:
             result_hand_left = 1
-        else:
-            result_hand_left = 2
         if hand_right_min <= value_hand_right <= hand_right_max:
             result_hand_right = 1
-        else:
-            result_hand_right = 2
         if foot_left_min <= value_foot_left <= foot_left_max:
             result_foot_left = 1
-        else:
-            result_foot_left = 2
         if foot_right_min <= value_foot_right <= foot_right_max:
             result_foot_right = 1
-        else:
-            result_foot_right = 2
         if result_hand_left == 1 and result_hand_right == 1 and result_foot_left == 1 and result_foot_right == 1:
-            result = 1
-        else:
-            result = 2
+            result = True
+    result_num = 2
+    if result:
+        result_num = 1
     set_data = {
-        'access_flag': 1,
-        'service_id': service_id,
+        'result_num': result_num,
         'value_hand_left': value_hand_left,
         'value_hand_right': value_hand_right,
         'value_foot_left': value_foot_left,
@@ -73,17 +64,9 @@ def test_user_r():
         'result_hand_right': result_hand_right,
         'result_foot_left': result_foot_left,
         'result_foot_right': result_foot_right,
-        'hand_left_min': hand_left_min,
-        'hand_left_max': hand_left_max,
-        'hand_right_min': hand_right_min,
-        'hand_right_max': hand_right_max,
-        'foot_left_min': foot_left_min,
-        'foot_left_max': foot_left_max,
-        'foot_right_min': foot_right_min,
-        'foot_right_max': foot_right_max,
     }
     print(set_data)
-    if result == 1:
+    if result:
         print("开门中--------------------------------------------------")
         testResistanceHelper.open_door()
     return jsonify({'data': set_data}), 200
@@ -93,7 +76,7 @@ def test_user_r():
 def add_access():
     data = request.get_json()
     access_flag = data.get('access_flag')
-    user_num = data.get('num')
+    user_num = data.get('user_num')
     service_id = data.get('service_id')
     card_id = data.get('card_id')
     _service = ServiceMapper.get_services_by_multiple_conditions(service_id=service_id)
@@ -193,24 +176,3 @@ def update_attend_table(access_time, card_id):
     except Exception as e:
         return jsonify({'error': e}), 500
     return True
-
-
-"""
-需要从门禁接收的信息：
-    service_id:设备编号
-    card_id:刷卡卡号
-    value_hand:手环测试实际阻值
-    value_leftfoot:左脚测试实际阻值
-    value_rightfoot右脚测试实际阻值
-    will_fail:失效情况
-    unregist:登记情况
-    access_flag:进出标志
-需要后端添加的信息：
-    access_time:进出时间，直接取接收到信息的当前时间就行
-后续插入记录到数据库中需要添加的信息：
-    result:静电测试总结果
-    result_hand:手环测试结果
-    result_leftfoot:左脚测试结果
-    result_rightfoot:右脚测试结果
-还需要给出警告  
-"""
