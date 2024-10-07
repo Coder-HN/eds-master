@@ -6414,3 +6414,21 @@ TypeError: Object of type TypeError is not JSON serializable
 2024-10-07 21:39:35,874 - INFO - app - Response Status: 200 OK
 2024-10-07 21:39:35,879 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageService/getAllServices
 2024-10-07 21:39:35,881 - INFO - app - Response Status: 200 OK
+2024-10-07 22:24:54,433 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/searchAccess/getAllAccess
+2024-10-07 22:24:54,504 - INFO - app - Response Status: 200 OK
+2024-10-07 22:24:56,237 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageUser/getAllUsers
+2024-10-07 22:24:56,244 - INFO - app - Response Status: 200 OK
+2024-10-07 22:24:56,245 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageDepartment/getDepartments
+2024-10-07 22:24:56,251 - INFO - app - Response Status: 200 OK
+2024-10-07 22:24:58,214 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageDepartment/getAllDepartments
+2024-10-07 22:24:58,230 - INFO - app - Response Status: 200 OK
+2024-10-07 22:24:59,174 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageUser/getAllUsers
+2024-10-07 22:24:59,176 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageDepartment/getDepartments
+2024-10-07 22:24:59,178 - INFO - app - Response Status: 200 OK
+2024-10-07 22:24:59,179 - INFO - app - Response Status: 200 OK
+2024-10-07 22:25:12,492 - INFO - app - Request: POST http://127.0.0.1:5000/api/admin/manageUser/addUserExcel
+2024-10-07 22:25:13,242 - INFO - app - Response Status: 200 OK
+2024-10-07 22:25:13,824 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageUser/getAllUsers
+2024-10-07 22:25:13,826 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageDepartment/getDepartments
+2024-10-07 22:25:13,832 - INFO - app - Response Status: 200 OK
+2024-10-07 22:25:13,852 - INFO - app - Response Status: 200 OK
