@@ -62,9 +62,6 @@ def create_app(config_class=Config):
     thread_leave.daemon = True
     thread_leave.start()
 
-    # 清除所有已有的处理器
-    for handler in _app.logger.handlers[:]:
-        _app.logger.removeHandler(handler)
     # 配置日志记录
     _app.logger.setLevel(logging.INFO)
     # 创建一个格式化器
