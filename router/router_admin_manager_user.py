@@ -172,6 +172,7 @@ def add_user_excel():
     if mime_type not in ['application/vnd.ms-excel',
                          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']:
         return jsonify({'error': '文件类型不支持，请上传Excel文件'}), 200
+    users_employee_id_excel = []
     try:
         # 使用 pandas 读取 Excel 文件
         df = pd.read_excel(file)
@@ -219,16 +220,23 @@ def add_user_excel():
                 user_db.position_num = position_num
                 user_get = UserMapper.get_user_by_employee_id(user_db.employee_id)
                 if user_get:
-                    if user_get.is_delete == 0:
-                        UserMapper.update_user(user_get.num, TableUser(num=user_get.num, is_delete=1))
-                        results.append({**row.to_dict(), '处理情况': '成功删除'})
+                    users_employee_id_excel.append(user_get.employee_id)
+                    if user_get.is_delete == 1:
+                        UserMapper.update_user(user_get.num, TableUser(num=user_get.num, is_delete=0))
+                        results.append({**row.to_dict(), '处理情况': '数据库中已删除、复原'})
                     else:
-                        results.append({**row.to_dict(), '处理情况': '跳过、已删除'})
+                        results.append({**row.to_dict(), '处理情况': '数据库中已存在、跳过'})
                 else:
                     UserMapper.add_user(user_db)
                     results.append({**row.to_dict(), '处理情况': '成功添加'})
             except Exception as process_error:
                 results.append({**row.to_dict(), '处理情况': f'失败: {str(process_error)}'})
+        # 在Excel中不存在，而数据库中有的，将该员工从当前表中移至离职人员表中，但进出记录需要保存，可查询
+        users_db = UserMapper.get_all_users()
+        for user_db in users_db:
+            if user_db.employee_id not in users_employee_id_excel:  # 存在excel表中
+                UserMapper.update_user(user_db.num, TableUser(num=user_db.num, is_delete=1))
+
         # 创建新的 DataFrame 并保存为 Excel 文件
         results_df = pd.DataFrame(results)
         output = BytesIO()
@@ -237,7 +245,8 @@ def add_user_excel():
         output.seek(0)
 
         # 这里设置 mimetype 为 Excel
-        response = send_file(output, download_name='处理结果.xlsx', as_attachment=True, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response = send_file(output, download_name='处理结果.xlsx', as_attachment=True,
+                             mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         return response, 200
     except Exception as e:
         exc_info = sys.exc_info()

@@ -51,7 +51,7 @@ def import_sql_to_mysql(input_file):
 def get_user_by_card_id(card_id):
     conn = mysql.connector.connect(**mysql_config)
     cursor = conn.cursor()
-    query = "SELECT * FROM table_user WHERE card_id = %s"
+    query = "SELECT * FROM table_user WHERE card_id = %s AND is_delete = 0"
     cursor.execute(query, (card_id,))
     result = cursor.fetchall()
     column_names = cursor.column_names
