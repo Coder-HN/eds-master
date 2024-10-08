@@ -110,7 +110,7 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                     'foot_right_min': foot_right_min,
                                     'foot_right_max': foot_right_max,
                                 }
-                                time.sleep(1)
+                                time.sleep(1)  # 等待跳转后页面开启监听
                                 print(cache_data)
                                 socketio.emit('cache_data', {'data': cache_data})
                                 print("发送cache_data数据到前端")
