@@ -110,6 +110,7 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                     'foot_right_min': foot_right_min,
                                     'foot_right_max': foot_right_max,
                                 }
+                                time.sleep(1)
                                 print(cache_data)
                                 socketio.emit('cache_data', {'data': cache_data})
                                 print("发送cache_data数据到前端")
