@@ -79,8 +79,10 @@ def add_access():
     user_num = data.get('user_num')
     service_id = data.get('service_id')
     card_id = data.get('card_id')
-    _service = ServiceMapper.get_services_by_multiple_conditions(service_id=service_id)
-    service_num = _service[0].num
+
+    service = ServiceMapper.get_service_by_id(service_id)
+    service_num = service.num
+
     # TODO will_fail，unregist功能未完善
     will_fail = "000"
     unregist = 1  # 需要检查卡号是不是特殊卡号

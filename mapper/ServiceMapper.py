@@ -28,6 +28,11 @@ def get_services_by_multiple_conditions(service_id=None, service_name=None):
     return query.all()
 
 
+def get_service_by_id(service_id):
+    service = TableService.query.filter_by(service_id=service_id).first()
+    return service
+
+
 # 修改设备信息
 def update_service(service_num, updated_service: TableService):
     service = TableService.query.filter_by(num=service_num).first()
