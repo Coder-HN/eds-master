@@ -49,25 +49,25 @@ def get_user_by_employee_id(employee_id):
 def update_user(user_num, updated_user: TableUser):
     user = TableUser.query.filter_by(num=user_num).first()
     is_change = False
-    if updated_user.employee_id:
+    if updated_user.employee_id is not None:
         user.employee_id = updated_user.employee_id
         is_change = True
-    if updated_user.name:
+    if updated_user.name is not None:
         user.name = updated_user.name
         is_change = True
-    if updated_user.department_num:
+    if updated_user.department_num is not None:
         user.department_num = updated_user.department_num
         is_change = True
-    if updated_user.position_num:
+    if updated_user.position_num is not None:
         user.position_num = updated_user.position_num
         is_change = True
-    if updated_user.card_id:
+    if updated_user.card_id is not None:
         user.card_id = updated_user.card_id
         is_change = True
-    if updated_user.pic_path:
+    if updated_user.pic_path is not None:
         user.pic_path = updated_user.pic_path
         is_change = True
-    if updated_user.is_delete:
+    if updated_user.is_delete is not None:
         user.is_delete = updated_user.is_delete
         is_change = True
     db.session.commit()
