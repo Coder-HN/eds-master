@@ -65,32 +65,25 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                 print("socketio已打开，跳转指令已发送")
                                 socketio.emit('read_card_status', {'status': 1})
                             # 先查询card_id是否在数据库中
-
-                            # users, column_names = dbHelper.get_user_by_card_id(card_id)
-                            user_db = UserMapper.get_user_by_card_id(card_id)
-                            if user_db is not None:
+                            users, column_names = dbHelper.get_user_by_card_id(card_id)
+                            if len(users) == 1:  # 成功提示请测试电阻
+                                user = users[0]
+                                _num = column_names.index('num')
+                                _name = column_names.index('name')
+                                _department_num = column_names.index('department_num')
+                                _employee_id = column_names.index('employee_id')
+                                _pic_path = column_names.index('pic_path')
+                                user_num = user[_num]
+                                user_name = user[_name]
+                                user_department_num = user[_department_num]
                                 user_department = None
-                                if user_db.department_num is not None:
-                                    department = DepartmentMapper.get_department_by_num(user_db.department_num)
-                                    user_department = department.department_name
-                                user_num = user_db.num
-                                user_name = user_db.name
-                                user_employee_id = user_db.employee_id
-                                user_pic_path = user_db.pic_path
-                            # if len(users) == 1:  # 成功提示请测试电阻
-                            #     user = users[0]
-                            #     _num = column_names.index('num')
-                            #     _name = column_names.index('name')
-                            #     _department = column_names.index('department')
-                            #     _employee_id = column_names.index('employee_id')
-                            #     _pic_path = column_names.index('pic_path')
-                            #
-                            #     user_num = user[_num]
-                            #     user_name = user[_name]
-                            #     user_department = user[_department]
-                            #     user_employee_id = user[_employee_id]
-                            #     user_pic_path = user[_pic_path]
-
+                                if user_department_num is not None:
+                                    departments, column_names = dbHelper.get_department_by_num(user_department_num)
+                                    department = departments[0]
+                                    _department_name = column_names.index('department_name')
+                                    user_department = department[_department_name]
+                                user_employee_id = user[_employee_id]
+                                user_pic_path = user[_pic_path]
                                 # 先发送员工、及部分电阻信息到前端
                                 hand_left_min = Config.HAND_LEFT_MIN
                                 hand_left_max = Config.HAND_LEFT_MAX
@@ -232,36 +225,33 @@ def leave_card_process(_port, _baudrates, socketio=None):
                                 print("socketio已打开，跳转指令已发送")
                                 socketio.emit('read_card_status', {'data': "enter"})
                             # 先查询card_id是否在数据库中
-                            # users, column_names = dbHelper.get_user_by_card_id(card_id)
-                            user_db = UserMapper.get_user_by_card_id(card_id)
-                            if user_db is not None:
-                                department = DepartmentMapper.get_department_by_num(user_db.department_num)
-                                # if len(users) == 1:  # 成功提示请测试电阻
-                                #     user = users[0]
-                                #     _num = column_names.index('num')
-                                #     _name = column_names.index('name')
-                                #     _department_num = column_names.index('department_num')
-                                #     _employee_id = column_names.index('employee_id')
-                                #     _pic_path = column_names.index('pic_path')
-                                #     user_num = user[_num]
-                                #     user_name = user[_name]
-                                #     user_department_num = user[_department_num]
-                                #     user_department = None
-                                #     if user_department_num is not None:
-                                #         departments, column_names = dbHelper.get_department_by_num(user_department_num)
-                                #         department = departments[0]
-                                #         _department_name = column_names.index('department_name')
-                                #         user_department = department[_department_name]
-                                #     user_employee_id = user[_employee_id]
-                                #     user_pic_path = user[_pic_path]
+                            users, column_names = dbHelper.get_user_by_card_id(card_id)
+                            if len(users) == 1:  # 成功提示请测试电阻
+                                user = users[0]
+                                _num = column_names.index('num')
+                                _name = column_names.index('name')
+                                _department_num = column_names.index('department_num')
+                                _employee_id = column_names.index('employee_id')
+                                _pic_path = column_names.index('pic_path')
+                                user_num = user[_num]
+                                user_name = user[_name]
+                                user_department_num = user[_department_num]
+                                user_department = None
+                                if user_department_num is not None:
+                                    departments, column_names = dbHelper.get_department_by_num(user_department_num)
+                                    department = departments[0]
+                                    _department_name = column_names.index('department_name')
+                                    user_department = department[_department_name]
+                                user_employee_id = user[_employee_id]
+                                user_pic_path = user[_pic_path]
                                 set_data = {
                                     'card_id': card_id,
                                     'access_flag': 1,
-                                    'num': user_db.num,
-                                    'name': user_db.name,
-                                    'employee_id': user_db.employee_id,
-                                    'department': department.department_name,
-                                    'pic_path': user_db.pic_path,
+                                    'num': user_num,
+                                    'name': user_name,
+                                    'employee_id': user_employee_id,
+                                    'department': user_department,
+                                    'pic_path': user_pic_path,
                                 }
                                 print(set_data)
                                 socketio.emit('success_data', {'data': set_data})
