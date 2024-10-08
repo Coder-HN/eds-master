@@ -117,17 +117,14 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                 print("测试电阻中...")
                                 r = get_r()
                                 result = False
-
-                                # TODO 设备id没法获取
-                                service_id = 1
-
-                                value_hand_left, value_hand_right, value_foot_left, value_foot_right = None, None, None, None
+                                service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = None, None, None, None, None
                                 result_hand_left = 2
                                 result_hand_right = 2
                                 result_foot_left = 2
                                 result_foot_right = 2
                                 if r is not None:
-                                    value_hand_left, value_hand_right, value_foot_left, value_foot_right = r
+                                    service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = r
+                                    print("service_id:", service_id)
                                     if hand_left_min <= value_hand_left <= hand_left_max:
                                         result_hand_left = 1
                                     if hand_right_min <= value_hand_right <= hand_right_max:
