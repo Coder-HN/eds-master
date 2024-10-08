@@ -112,7 +112,7 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                 }
                                 print(cache_data)
                                 socketio.emit('cache_data', {'data': cache_data})
-
+                                print("发送cache_data数据到前端")
                                 # 完成测试电阻，是否开门，插入进出记录表的工作
                                 print("测试电阻中...")
                                 r = get_r()
@@ -156,7 +156,7 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                 }
                                 print(set_data)
                                 socketio.emit('success_data', {'data': set_data})
-                                print("发送数据到前端")
+                                print("发送success_data数据到前端")
                                 if result:
                                     print("人员及电阻均符合要求,通行")
                                     open_door()
