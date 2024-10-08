@@ -4,7 +4,6 @@ import serial
 import serial.tools.list_ports
 
 from config import Config
-from mapper import DepartmentMapper, UserMapper
 from utils import dbHelper
 from utils.testResistanceHelper import get_r, open_door
 
@@ -96,7 +95,6 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                 cache_data = {
                                     'card_id': card_id,
                                     'access_flag': 1,
-                                    'service_id': service_id,
                                     'user_num': user_num,
 
                                     'name': user_name,
