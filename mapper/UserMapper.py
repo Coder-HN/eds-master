@@ -19,6 +19,10 @@ def get_user_by_num(user_num):
     return TableUser.query.filter_by(num=user_num).first()
 
 
+def get_user_by_card_id(card_id):
+    return TableUser.query.filter_by(card_id=card_id).first()
+
+
 def get_all_users():
     return TableUser.query.filter(TableUser.is_delete == 0).all()
 
