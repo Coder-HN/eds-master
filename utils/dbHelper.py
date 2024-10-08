@@ -58,3 +58,15 @@ def get_user_by_card_id(card_id):
     cursor.close()
     conn.close()
     return result, column_names
+
+
+def get_department_by_num(department_num):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor()
+    query = "SELECT * FROM table_department WHERE num = %s"
+    cursor.execute(query, (department_num,))
+    result = cursor.fetchall()
+    column_names = cursor.column_names
+    cursor.close()
+    conn.close()
+    return result, column_names

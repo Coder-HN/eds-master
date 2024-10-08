@@ -4,6 +4,7 @@ import serial
 import serial.tools.list_ports
 
 from config import Config
+from mapper import DepartmentMapper
 from utils import dbHelper
 from utils.portHelper import turn_16_to_10
 from utils.testResistanceHelper import get_r, open_door
@@ -225,12 +226,18 @@ def leave_card_process(_port, _baudrates, socketio=None):
                                 user = users[0]
                                 _num = column_names.index('num')
                                 _name = column_names.index('name')
-                                _department = column_names.index('department')
+                                _department_num = column_names.index('department_num')
                                 _employee_id = column_names.index('employee_id')
                                 _pic_path = column_names.index('pic_path')
                                 user_num = user[_num]
                                 user_name = user[_name]
-                                user_department = user[_department]
+                                user_department_num = user[_department_num]
+                                user_department = None
+                                if user_department_num is not None:
+                                    departments, column_names = dbHelper.get_department_by_num(user_department_num)
+                                    department = departments[0]
+                                    _department_name = column_names.index('department_name')
+                                    user_department = department[_department_name]
                                 user_employee_id = user[_employee_id]
                                 user_pic_path = user[_pic_path]
                                 set_data = {
