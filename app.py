@@ -42,16 +42,16 @@ def create_app(config_class=Config):
     _app = Flask(__name__)
     _app.config.from_object(config_class)
 
-    # 在请求处理之前记录请求信息
-    @_app.before_request
-    def log_request_info():
-        _app.logger.info(f"Request: {request.method} {request.url}")
-
-    # 在请求处理之后记录响应信息
-    @_app.after_request
-    def log_response_info(response):
-        _app.logger.info(f"Response Status: {response.status}")
-        return response
+    # # 在请求处理之前记录请求信息
+    # @_app.before_request
+    # def log_request_info():
+    #     _app.logger.info(f"Request: {request.method} {request.url}")
+    #
+    # # 在请求处理之后记录响应信息
+    # @_app.after_request
+    # def log_response_info(response):
+    #     _app.logger.info(f"Response Status: {response.status}")
+    #     return response
 
     # 串口IO
     socketio = SocketIO(_app, cors_allowed_origins="*", logger=False, engineio_logger=False)
@@ -64,12 +64,9 @@ def create_app(config_class=Config):
 
     # 配置日志记录
     _app.logger.setLevel(logging.INFO)
-    # 创建一个格式化器
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(name)s - %(message)s')
     # 创建一个文件处理器并设置格式
     file_handler = logging.FileHandler('app.log')
     file_handler.setLevel(logging.INFO)
-    file_handler.setFormatter(formatter)
     # 将处理器添加到应用日志
     _app.logger.addHandler(file_handler)
 

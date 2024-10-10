@@ -6432,3 +6432,351 @@ TypeError: Object of type TypeError is not JSON serializable
 2024-10-07 22:25:13,826 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageDepartment/getDepartments
 2024-10-07 22:25:13,832 - INFO - app - Response Status: 200 OK
 2024-10-07 22:25:13,852 - INFO - app - Response Status: 200 OK
+2024-10-09 21:56:16,004 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/searchAccess/getAllAccess
+2024-10-09 21:56:16,186 - INFO - app - Response Status: 200 OK
+2024-10-09 21:56:18,635 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/searchAttend/getAllAttend
+2024-10-09 21:56:18,643 - INFO - app - Response Status: 200 OK
+2024-10-09 21:56:19,408 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageDepartment/getAllDepartments
+2024-10-09 21:56:19,442 - INFO - app - Response Status: 200 OK
+2024-10-09 21:56:20,442 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageUser/getAllUsers
+2024-10-09 21:56:20,445 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageDepartment/getDepartments
+2024-10-09 21:56:20,445 - INFO - app - Response Status: 200 OK
+2024-10-09 21:56:20,467 - INFO - app - Response Status: 200 OK
+2024-10-09 21:56:22,044 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageService/getAllServices
+2024-10-09 21:56:22,044 - INFO - app - Response Status: 200 OK
+2024-10-09 21:56:22,060 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageService/getAllServices
+2024-10-09 21:56:22,060 - INFO - app - Response Status: 200 OK
+2024-10-10 15:25:59,083 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageService/getAllServices
+2024-10-10 15:25:59,163 - INFO - app - Response Status: 200 OK
+2024-10-10 15:25:59,169 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageService/getAllServices
+2024-10-10 15:25:59,176 - INFO - app - Response Status: 200 OK
+2024-10-10 15:26:45,528 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageService/getAllServices
+2024-10-10 15:26:45,535 - INFO - app - Response Status: 200 OK
+2024-10-10 15:26:45,541 - INFO - app - Request: GET http://127.0.0.1:5000/api/admin/manageService/getAllServices
+2024-10-10 15:26:45,547 - INFO - app - Response Status: 200 OK
+Request: GET http://127.0.0.1:5000/api/admin/manageService/getAllServices
+Response Status: 200 OK
+Request: GET http://127.0.0.1:5000/api/admin/manageService/getAllServices
+Response Status: 200 OK
+Exception on /api/admin/manageService/updateService [POST]
+Traceback (most recent call last):
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\workplaces\PythonProjects\edsMaster\router\router_admin_manager_service.py", line 75, in update_user
+    num = int(request.form.get('num'))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+Exception on /api/admin/manageService/updateService [POST]
+Traceback (most recent call last):
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\workplaces\PythonProjects\edsMaster\router\router_admin_manager_service.py", line 80, in update_user
+    new_service.r_standard_num = r_standard.num
+                                 ^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'num'
+Exception on /api/admin/manageService/updateService [POST]
+Traceback (most recent call last):
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\workplaces\PythonProjects\edsMaster\router\router_admin_manager_service.py", line 81, in update_user
+    new_service.r_standard_num = r_standard.num
+                                 ^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'num'
+Exception on /api/admin/manageService/updateService [POST]
+Traceback (most recent call last):
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\workplaces\PythonProjects\edsMaster\router\router_admin_manager_service.py", line 82, in update_user
+    new_service.r_standard_num = r_standard.num
+                                 ^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'num'
+Exception on /api/admin/manageService/updateService [POST]
+Traceback (most recent call last):
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\workplaces\PythonProjects\edsMaster\router\router_admin_manager_service.py", line 75, in update_user
+    num = request.date.get('num')
+          ^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'get'
+Exception on /api/admin/manageService/addRStandard [POST]
+Traceback (most recent call last):
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\engine\default.py", line 924, in do_execute
+    cursor.execute(statement, parameters)
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\connections.py", line 563, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\connections.py", line 825, in _read_query_result
+    result.read()
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\connections.py", line 1199, in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\connections.py", line 775, in _read_packet
+    packet.raise_for_error()
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+pymysql.err.IntegrityError: (1048, "Column 'r_name' cannot be null")
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\workplaces\PythonProjects\edsMaster\router\router_admin_manager_service.py", line 114, in add_r_standard
+    if RStandardMapper.add_r_standard(new_r_standard):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\workplaces\PythonProjects\edsMaster\mapper\RStandardMapper.py", line 7, in add_r_standard
+    db.session.commit()
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\orm\scoping.py", line 597, in commit
+    return self._proxied.commit()
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\orm\session.py", line 2017, in commit
+    trans.commit(_to_root=True)
+  File "<string>", line 2, in commit
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\orm\session.py", line 1302, in commit
+    self._prepare_impl()
+  File "<string>", line 2, in _prepare_impl
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\orm\state_changes.py", line 139, in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\orm\session.py", line 1277, in _prepare_impl
+    self.session.flush()
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\orm\session.py", line 4341, in flush
+    self._flush(objects)
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\orm\session.py", line 4476, in _flush
+    with util.safe_reraise():
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\util\langhelpers.py", line 146, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\orm\session.py", line 4437, in _flush
+    flush_context.execute()
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 466, in execute
+    rec.execute(self)
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\orm\unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\orm\persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\orm\persistence.py", line 1233, in _emit_insert_statements
+    result = connection.execute(
+             ^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\engine\base.py", line 1418, in execute
+    return meth(
+           ^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\sql\elements.py", line 515, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\engine\base.py", line 1640, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\engine\base.py", line 2353, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\sqlalchemy\engine\default.py", line 924, in do_execute
+    cursor.execute(statement, parameters)
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\cursors.py", line 153, in execute
+    result = self._query(query)
+             ^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\cursors.py", line 322, in _query
+    conn.query(q)
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\connections.py", line 563, in query
+    self._affected_rows = self._read_query_result(unbuffered=unbuffered)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\connections.py", line 825, in _read_query_result
+    result.read()
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\connections.py", line 1199, in read
+    first_packet = self.connection._read_packet()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\connections.py", line 775, in _read_packet
+    packet.raise_for_error()
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\protocol.py", line 219, in raise_for_error
+    err.raise_mysql_exception(self._data)
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\pymysql\err.py", line 150, in raise_mysql_exception
+    raise errorclass(errno, errval)
+sqlalchemy.exc.IntegrityError: (pymysql.err.IntegrityError) (1048, "Column 'r_name' cannot be null")
+[SQL: INSERT INTO table_r_standard (r_name, hand_left_min, hand_left_max, hand_right_min, hand_right_max, foot_left_min, foot_left_max, foot_right_min, foot_right_max) VALUES (%(r_name)s, %(hand_left_min)s, %(hand_left_max)s, %(hand_right_min)s, %(hand_right_max)s, %(foot_left_min)s, %(foot_left_max)s, %(foot_right_min)s, %(foot_right_max)s)]
+[parameters: {'r_name': None, 'hand_left_min': '100', 'hand_left_max': '1000', 'hand_right_min': '100', 'hand_right_max': '1000', 'foot_left_min': '100', 'foot_left_max': '1000', 'foot_right_min': '100', 'foot_right_max': '1000'}]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+Exception on /api/admin/manageService/updateRStandard [POST]
+Traceback (most recent call last):
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\workplaces\PythonProjects\edsMaster\router\router_admin_manager_service.py", line 124, in update_r_standard
+    num = int(request.form.get('num'))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+Exception on /api/admin/manageService/updateRStandard [POST]
+Traceback (most recent call last):
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\workplaces\PythonProjects\edsMaster\router\router_admin_manager_service.py", line 125, in update_r_standard
+    num = int(request.form.get('num'))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+Exception on /api/admin/manageService/updateRStandard [POST]
+Traceback (most recent call last):
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\workplaces\PythonProjects\edsMaster\router\router_admin_manager_service.py", line 125, in update_r_standard
+    num = int(request.form.get('num'))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+Exception on /api/admin/manageService/updateRStandard [POST]
+Traceback (most recent call last):
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\workplaces\PythonProjects\edsMaster\router\router_admin_manager_service.py", line 125, in update_r_standard
+    num = int(request.form.get('num'))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+Exception on /api/admin/manageService/updateRStandard [POST]
+Traceback (most recent call last):
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\workplaces\PythonProjects\edsMaster\router\router_admin_manager_service.py", line 125, in update_r_standard
+    num = int(request.form.get('num'))
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'NoneType'
+Exception on /api/admin/manageService/addRStandard [POST]
+Traceback (most recent call last):
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 1473, in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 882, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 880, in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\CodeSupport\Anaconda\envs\env_311\Lib\site-packages\flask\app.py", line 865, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\workplaces\PythonProjects\edsMaster\router\router_admin_manager_service.py", line 106, in add_r_standard
+    new_r_standard.hand_left_min = float(request.form.get('hand_left_min'))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: could not convert string to float: 'undefined'

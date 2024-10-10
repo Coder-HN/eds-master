@@ -11,6 +11,42 @@ metadata = MetaData()
 
 
 # 生成models方法 sqlacodegen mysql+pymysql://root:root@localhost/edsystem > models.py
+class TableUser(db.Model):
+    __tablename__ = 'table_user'
+
+    num = Column(BigInteger, primary_key=True, info='人员序号、主键')
+    employee_id = Column(String(50, 'utf8mb4_0900_ai_ci'), info='工号', unique=True)
+    card_id = Column(String(50, 'utf8mb4_0900_ai_ci'), info='卡号', unique=True)
+    name = Column(String(50, 'utf8mb4_0900_ai_ci'), nullable=False, info='姓名')
+    position_num = Column(ForeignKey('table_position.num', ondelete='SET NULL', onupdate='SET NULL'), index=True,
+                          info='职位序号、外键')
+    department_num = Column(ForeignKey('table_department.num', ondelete='SET NULL', onupdate='SET NULL'), index=True,
+                            info='部门序号、外键')
+
+    pic_path = Column(String(100, 'utf8mb4_0900_ai_ci'), info='照片,设置成路径，以 工号_卡号 命名')
+    is_delete = Column(Integer, nullable=False, server_default=FetchedValue(), info='0表示未离职，1表示已离职')
+
+    table_position = relationship('TablePosition', primaryjoin='TableUser.position_num == TablePosition.num',
+                                  backref='table_user')
+    table_department = relationship('TableDepartment', primaryjoin='TableUser.department_num == TableDepartment.num',
+                                    backref='table_user')
+
+    def __repr__(self):
+        return f'<table_user {self.name}>'
+
+    def to_dict(self):
+        return {
+            'num': self.num,
+            'employee_id': self.employee_id,
+            'name': self.name,
+            'position_num': self.position_num,
+            'department_num': self.department_num,
+            'card_id': self.card_id,
+            'pic_path': self.pic_path,
+            'is_delete': self.is_delete
+        }
+
+
 class TableAccess(db.Model):
     __tablename__ = 'table_access'
 
@@ -33,15 +69,6 @@ class TableAccess(db.Model):
     value_foot_left = Column(Numeric(10, 2), info='左脚测试实际阻值,单位:兆欧姆')
     result_foot_right = Column(Integer, info='右脚测试结果，"合格""不合格""免测""未测""禁测"')
     value_foot_right = Column(Numeric(10, 2), info='右脚测试实际阻值,单位:兆欧姆')
-    hand_left_min = Column(Numeric(10, 2), info='检测时左手下限阻值')
-    hand_left_max = Column(Numeric(10, 2), info='检测时左手上限阻值')
-    hand_right_min = Column(Numeric(10, 2), info='检测时右手下限阻值')
-    hand_right_max = Column(Numeric(10, 2), info='检测时右手上限阻值')
-    foot_left_min = Column(Numeric(10, 2), info='检测时左脚下限阻值')
-    foot_left_max = Column(Numeric(10, 2), info='检测时左脚上限阻值')
-    foot_right_min = Column(Numeric(10, 2), info='检测时右脚下限阻值')
-    foot_right_max = Column(Numeric(10, 2), info='检测时右脚上限阻值')
-
     table_service = relationship('TableService', primaryjoin='TableAccess.service_num == TableService.num',
                                  backref='table_access')
     table_user = relationship('TableUser', primaryjoin='TableAccess.user_num == TableUser.num', backref='table_access')
@@ -67,14 +94,6 @@ class TableAccess(db.Model):
             'value_foot_left': self.value_foot_left,
             'result_foot_right': self.result_foot_right,
             'value_foot_right': self.value_foot_right,
-            'hand_left_min': self.hand_left_min,
-            'hand_left_max': self.hand_left_max,
-            'hand_right_min': self.hand_right_min,
-            'hand_right_max': self.hand_right_max,
-            'foot_left_min': self.foot_left_min,
-            'foot_left_max': self.foot_left_max,
-            'foot_right_min': self.foot_right_min,
-            'foot_right_max': self.foot_right_max,
         }
 
 
@@ -111,7 +130,7 @@ class TableDepartment(db.Model):
     __tablename__ = 'table_department'
 
     num = Column(Integer, primary_key=True, info='部门序号、主键')
-    department_name = Column(String(50), nullable=False, info='部门名')
+    department_name = Column(String(50), nullable=False, info='部门名', unique=True)
 
     t_table_department_position = Table(
         'table_department_position', metadata,
@@ -137,7 +156,7 @@ class TablePosition(db.Model):
     __tablename__ = 'table_position'
 
     num = Column(Integer, primary_key=True, info='职位序号、主键')
-    position_name = Column(String(50), nullable=False, info='职位名字')
+    position_name = Column(String(50), nullable=False, info='职位名字', unique=True)
 
     def __repr__(self):
         return f'<table_position {self.num},{self.position_name}>'
@@ -181,7 +200,12 @@ class TableService(db.Model):
 
     num = Column(Integer, primary_key=True, info='设备序号,主键')
     service_id = Column(String(50, 'utf8mb4_0900_ai_ci'), nullable=False, info='设备编号')
-    service_name = Column(String(50, 'utf8mb4_0900_ai_ci'), nullable=False, info='设备名称')
+    service_name = Column(String(50, 'utf8mb4_0900_ai_ci'), nullable=False, info='设备名称', unique=True)
+    r_standard_num = Column(ForeignKey('table_r_standard.num', ondelete='CASCADE', onupdate='CASCADE'), nullable=False,
+                            index=True, info='电阻标准序号、外键')
+    table_r_standard = relationship('TableRStandard',
+                                    primaryjoin='TableService.r_standard_num == TableRStandard.num',
+                                    backref='table_service')
 
     def __repr__(self):
         return f'<table_service {self.service_name}>'
@@ -191,66 +215,41 @@ class TableService(db.Model):
             'num': self.num,
             'service_id': self.service_id,
             'service_name': self.service_name,
+            'r_standard_num': self.r_standard_num
         }
 
 
-class TableUser(db.Model):
-    __tablename__ = 'table_user'
+class TableRStandard(db.Model):
+    __tablename__ = 'table_r_standard'
 
-    num = Column(BigInteger, primary_key=True, info='人员序号、主键')
-    employee_id = Column(String(50, 'utf8mb4_0900_ai_ci'), info='工号', unique=True)
-    card_id = Column(String(50, 'utf8mb4_0900_ai_ci'), info='卡号', unique=True)
-    name = Column(String(50, 'utf8mb4_0900_ai_ci'), nullable=False, info='姓名')
-    position_num = Column(ForeignKey('table_position.num', ondelete='SET NULL', onupdate='SET NULL'), index=True,
-                          info='职位序号、外键')
-    department_num = Column(ForeignKey('table_department.num', ondelete='SET NULL', onupdate='SET NULL'), index=True,
-                            info='部门序号、外键')
-    pic_path = Column(String(100, 'utf8mb4_0900_ai_ci'), info='照片,设置成路径，以 工号_卡号 命名')
-    is_delete = Column(Integer, nullable=False, server_default=FetchedValue(), info='0表示未离职，1表示已离职')
+    num = Column(Integer, primary_key=True, info='序号,自增主键')
+    r_name = Column(String(50, 'utf8mb4_0900_ai_ci'), nullable=False, info='标准名称')
+    hand_left_min = Column(Numeric(10, 2), info='检测时左手下限阻值')
+    hand_left_max = Column(Numeric(10, 2), info='检测时左手上限阻值')
+    hand_right_min = Column(Numeric(10, 2), info='检测时右手下限阻值')
+    hand_right_max = Column(Numeric(10, 2), info='检测时右手上限阻值')
 
-    table_position = relationship('TablePosition', primaryjoin='TableUser.position_num == TablePosition.num',
-                                  backref='table_users')
-    table_department = relationship('TableDepartment', primaryjoin='TableUser.department_num == TableDepartment.num',
-                                    backref='table_users')
+    foot_left_min = Column(Numeric(10, 2), info='检测时左脚下限阻值')
+    foot_left_max = Column(Numeric(10, 2), info='检测时左脚上限阻值')
+    foot_right_min = Column(Numeric(10, 2), info='检测时右脚下限阻值')
+    foot_right_max = Column(Numeric(10, 2), info='检测时右脚上限阻值')
 
     def __repr__(self):
-        return f'<table_user {self.name}>'
+        return f'<table_r_standard {self.r_name}>'
 
     def to_dict(self):
         return {
             'num': self.num,
-            'employee_id': self.employee_id,
-            'name': self.name,
-            'position_num': self.position_num,
-            'department_num': self.department_num,
-            'card_id': self.card_id,
-            'pic_path': self.pic_path,
-            'is_delete': self.is_delete
-        }
+            'r_name': self.r_name,
+            'hand_left_min': self.hand_left_min,
+            'hand_left_max': self.hand_left_max,
+            'hand_right_min': self.hand_right_min,
+            'hand_right_max': self.hand_right_max,
 
-
-class TableUserPosition(db.Model):
-    __tablename__ = 'table_user_position'
-
-    num = Column(Integer, primary_key=True, info='人员职位关系序号、主键')
-    user_num = Column(ForeignKey('table_user.num', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True,
-                      info='人员序号、外键')
-    position_num = Column(ForeignKey('table_position.num', ondelete='CASCADE', onupdate='CASCADE'), nullable=False,
-                          index=True, info='职位序号、外键')
-
-    table_position = relationship('TablePosition', primaryjoin='TableUserPosition.position_num == TablePosition.num',
-                                  backref='table_user_positions')
-    table_user = relationship('TableUser', primaryjoin='TableUserPosition.user_num == TableUser.num',
-                              backref='table_user_positions')
-
-    def __repr__(self):
-        return f'<table_user_position {self.user_num},{self.position_num}>'
-
-    def to_dict(self):
-        return {
-            'num': self.num,
-            'user_num': self.user_num,
-            'service_num': self.position_num,
+            'foot_left_min': self.foot_left_min,
+            'foot_left_max': self.foot_left_max,
+            'foot_right_min': self.foot_right_min,
+            'foot_right_max': self.foot_right_max,
         }
 
 

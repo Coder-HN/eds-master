@@ -23,8 +23,14 @@ def get_user_by_card_id(card_id):
     return TableUser.query.filter_by(card_id=card_id).first()
 
 
+# 获取未离职人员列表
 def get_all_users():
     return TableUser.query.filter(TableUser.is_delete == 0).all()
+
+
+# 获取离职人员列表
+def get_all_users_deleted():
+    return TableUser.query.filter(TableUser.is_delete == 1).all()
 
 
 # 多条件查询

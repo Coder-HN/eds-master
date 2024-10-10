@@ -4,7 +4,7 @@ import os
 from flask import Blueprint, request, jsonify, send_file
 
 from config import Config
-from mapper import UserMapper, ServiceMapper, AccessMapper, DepartmentMapper
+from mapper import UserMapper, ServiceMapper, AccessMapper, DepartmentMapper, RStandardMapper
 from utils import timeHelper
 from utils.dbHelper import export_mysql_to_sql
 
@@ -46,10 +46,21 @@ def get_detail_access():
     num = request.form.get('num')
     try:
         access = AccessMapper.get_access_by_num(num)
+        service = ServiceMapper.get_service_by_num(access.service_num)
+        r_standard = RStandardMapper.get_r_standard_by_num(service.r_standard_num)
+        data = access.to_dict()
+        data['hand_left_min'] = r_standard.hand_left_min
+        data['hand_left_max'] = r_standard.hand_left_max
+        data['hand_right_min'] = r_standard.hand_right_min
+        data['hand_right_max'] = r_standard.hand_right_max
+        data['foot_left_min'] = r_standard.foot_left_min
+        data['foot_left_max'] = r_standard.foot_left_max
+        data['foot_right_min'] = r_standard.foot_right_min
+        data['foot_right_max'] = r_standard.foot_right_max
     except Exception as e:
         return jsonify({'error': e}), 500
     response = {
-        "data": access.to_dict()
+        "data": data
     }
     return jsonify(response), 200
 
@@ -86,6 +97,16 @@ def search():
             service = ServiceMapper.get_service_by_num(service_num)
             access["service_id"] = service.service_id
             access["service_name"] = service.service_name
+
+            r_standard = RStandardMapper.get_r_standard_by_num(service.r_standard_num)
+            access['hand_left_min'] = r_standard.hand_left_min
+            access['hand_left_max'] = r_standard.hand_left_max
+            access['hand_right_min'] = r_standard.hand_right_min
+            access['hand_right_max'] = r_standard.hand_right_max
+            access['foot_left_min'] = r_standard.foot_left_min
+            access['foot_left_max'] = r_standard.foot_left_max
+            access['foot_right_min'] = r_standard.foot_right_min
+            access['foot_right_max'] = r_standard.foot_right_max
     except Exception as e:
         return jsonify({'error': e}), 500
     response = {
@@ -105,13 +126,3 @@ def upload_db():
         return response, 200
     else:
         return jsonify({"error": "导出数据库失败"}), 500
-
-# # 定义导入路由
-# @searchAccess.route('/upload_db', methods=['POST'])
-# def upload_db():
-#     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-#     output_file = f"backup_{timestamp}.sql"
-#     if export_mysql_to_sql(mysql_config, output_file):
-#         return send_file(output_file, as_attachment=True, download_name=output_file)
-#     else:
-#         return jsonify({"error": "Failed to export database"}), 500

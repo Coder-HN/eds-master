@@ -117,11 +117,10 @@ def search_departments():
         message_list_dict = []
         all_department_nums = []
         if position_name is not None:
-            position_list = PositionMapper.get_position_by_name(position_name)
-            if position_list is not None:
-                for position in position_list:
-                    department_num = DepartmentMapper.get_department_by_position_num(position.num)
-                    all_department_nums.append(department_num)
+            position = PositionMapper.get_position_by_name(position_name)
+            if position is not None:
+                department_num_list = DepartmentMapper.get_department_by_position_num(position.num)
+                all_department_nums.append(department_num_list)
         if department_name is not None:
             department = DepartmentMapper.get_department_by_name(department_name)
             if department is not None:
@@ -169,7 +168,8 @@ def delete_position():
     try:
         data = request.get_json()
         position_num = data.get('num')
-        is_change = PositionMapper.delete_position_complex(position_num)
+        department_num = data.get('department_num')
+        is_change = PositionMapper.delete_position_complex(position_num=position_num, department_num=department_num)
         if is_change:
             return make_response('', 200)
         else:

@@ -1,7 +1,7 @@
 from decimal import Decimal
 from sqlalchemy import desc
 
-from mapper import UserMapper
+from mapper import UserMapper, DepartmentMapper
 from models import TableAttend
 from database import db
 
@@ -44,13 +44,13 @@ def add_attend(attend: TableAttend):
     return new_attend
 
 
-def get_attend_by_multiple_conditions(employee_id=None, card_id=None, name=None, department=None,
+def get_attend_by_multiple_conditions(employee_id=None, card_id=None, name=None, department_num=None,
                                       start_time=None, end_time=None):
     users = []
     user_num = None
-    if employee_id or name or department:
+    if employee_id is not None or card_id is not None or name is not None or department_num is not None:
         users = UserMapper.get_users_by_multiple_conditions(employee_id=employee_id, card_id=card_id, name=name,
-                                                            department=department)
+                                                            department_num=department_num)
     if len(users) == 1:
         user_num = users[0].num
     query = TableAttend.query

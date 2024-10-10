@@ -45,7 +45,7 @@ def delete_department(department_num):
 
 
 def delete_department_complex(department_num):
-    # 先删除关系、职位
+    # 先删除部门下的所有职位关系
     if not delete_department_position(TableDepartmentPosition(department_num=department_num)):
         return False
     # 再删除部门
@@ -64,24 +64,22 @@ def delete_department_position(department_position: TableDepartmentPosition):
             department_num=department_num
         ).first()
         department_position_list.append(department_position_new)  # 只有一个
+
     # 删除部门时
     if position_num is None and department_num is not None:
         department_position_list = TableDepartmentPosition.query.filter_by(
             department_num=department_num
         ).all()  # 可能有多个
-    # 如果找到服务，执行删除关系操作
+
+    # 执行删除关系操作
     if len(department_position_list) != 0:
         for dp in department_position_list:
             db.session.delete(dp)
         db.session.commit()
-    # 删除部门时
-    if position_num is None and department_num is not None:
-        for department_position in department_position_list:
-            if not PositionMapper.delete_position(department_position.position_num):
-                return False
     return True
 
 
+# 一个部门下可能有多个职位
 def get_position_by_department_num(department_num):
     list_department_position_nums = TableDepartmentPosition.query.filter_by(department_num=department_num).all()
     position_list = []
@@ -92,6 +90,10 @@ def get_position_by_department_num(department_num):
     return position_list
 
 
+# 一个职位可能有多个部门设有
 def get_department_by_position_num(position_num):
-    position_department_num = TableDepartmentPosition.query.filter_by(position_num=position_num).first()
-    return position_department_num.department_num
+    position_department_list = TableDepartmentPosition.query.filter_by(position_num=position_num).all()
+    department_num_list = []
+    for department_position in position_department_list:
+        department_num_list.append(department_position.department_num)
+    return department_num_list

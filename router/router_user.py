@@ -79,10 +79,8 @@ def add_access():
     user_num = data.get('user_num')
     service_id = data.get('service_id')
     card_id = data.get('card_id')
-
     service = ServiceMapper.get_service_by_id(service_id)
     service_num = service.num
-
     # TODO will_fail，unregist功能未完善
     will_fail = "000"
     unregist = 1  # 需要检查卡号是不是特殊卡号
@@ -130,14 +128,6 @@ def add_access():
         new_access.value_hand_right = value_hand_right
         new_access.value_foot_left = value_foot_left
         new_access.value_foot_right = value_foot_right
-        new_access.hand_left_min = hand_left_min
-        new_access.hand_left_max = hand_left_max
-        new_access.hand_right_min = hand_right_min
-        new_access.hand_right_max = hand_right_max
-        new_access.foot_left_min = foot_left_min
-        new_access.foot_left_max = foot_left_max
-        new_access.foot_right_min = foot_right_min
-        new_access.foot_right_max = foot_right_max
     new_access.user_num = user_num
     new_access.service_num = service_num
     new_access.access_flag = access_flag

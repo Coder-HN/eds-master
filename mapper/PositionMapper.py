@@ -22,7 +22,7 @@ def get_position_by_num(position_num):
 
 
 def get_position_by_name(position_name):
-    return TablePosition.query.filter_by(position_name=position_name).all()
+    return TablePosition.query.filter_by(position_name=position_name).first()
 
 
 def get_all_positions():
@@ -51,10 +51,13 @@ def delete_position(position_num):
         return False
 
 
-def delete_position_complex(position_num):
+def delete_position_complex(position_num, department_num):
     # 先删除关系
-    department_position = TableDepartmentPosition.query.filter_by(position_num=position_num).first()
-    if not DepartmentMapper.delete_department_position(department_position):
+    if not DepartmentMapper.delete_department_position(
+            TableDepartmentPosition(department_num=department_num, position_num=position_num)):
         return False
-    # 再删除职位
-    return delete_position(position_num)
+    # 如果关系中全部都不存在改职位再删除职位
+    department_num_list = DepartmentMapper.get_department_by_position_num(position_num)
+    if len(department_num_list) == 0:
+        return delete_position(position_num)
+    return True

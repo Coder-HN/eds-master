@@ -4,7 +4,8 @@ from database import db
 
 def add_service(service: TableService):
     new_service = TableService(service_id=service.service_id,
-                               service_name=service.service_name, )
+                               service_name=service.service_name,
+                               r_standard_num=service.r_standard_num)
     db.session.add(new_service)
     db.session.commit()
     return new_service
@@ -19,6 +20,7 @@ def get_all_services():
 
 
 # 多条件查询
+# TODO是否唯一
 def get_services_by_multiple_conditions(service_id=None, service_name=None):
     query = TableService.query
     if service_id:
@@ -39,6 +41,7 @@ def update_service(service_num, updated_service: TableService):
     if service:
         service.service_id = updated_service.service_id
         service.service_name = updated_service.service_name
+        service.r_standard_num = updated_service.r_standard_num
         db.session.commit()
         return service
     else:

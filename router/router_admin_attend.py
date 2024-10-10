@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, current_app
 
-from mapper import AttendMapper, UserMapper
+from mapper import AttendMapper, UserMapper, DepartmentMapper, PositionMapper
 from utils import timeHelper
 
 """
@@ -23,10 +23,11 @@ def get_all_attend():
             attend["employee_id"] = user.employee_id
             attend["card_id"] = user.card_id
             attend["name"] = user.name
-            attend["department"] = user.department
-            attend["position"] = user.position
+            department = DepartmentMapper.get_department_by_num(user.department_num)
+            attend["department"] = department.department_name
+            position = PositionMapper.get_position_by_num(user.position_num)
+            attend["position"] = position.position_name
     except Exception as e:
-        print(e)
         return jsonify({'error': e}), 500
     response = {
         "data": attend_list
@@ -41,7 +42,7 @@ def search():
     employee_id = request.form.get('employee_id')
     card_id = request.form.get('card_id')
     name = request.form.get('name')
-    department = request.form.get('department')
+    department_name = request.form.get('department')
     start_time_str = request.form.get('start_time')
     end_time_str = request.form.get('end_time')
     if start_time_str:
@@ -51,7 +52,11 @@ def search():
         end_time = timeHelper.parse_datetime(end_time_str)
         end_time = timeHelper.get_end_of_day(end_time)
     try:
-        all_attend = AttendMapper.get_attend_by_multiple_conditions(employee_id, card_id, name, department,
+        department_num = None
+        if department_name is not None:
+            department = DepartmentMapper.get_department_by_name(department_name)
+            department_num = department.num
+        all_attend = AttendMapper.get_attend_by_multiple_conditions(employee_id, card_id, name, department_num,
                                                                     start_time, end_time)
         attend_list = [attend.to_dict() for attend in all_attend]
         for attend in attend_list:
@@ -62,8 +67,16 @@ def search():
             attend["employee_id"] = user.employee_id
             attend["card_id"] = user.card_id
             attend["name"] = user.name
-            attend["department"] = user.department
-            attend["position"] = user.position
+            department_name = None
+            if user.department_num is not None:
+                department = DepartmentMapper.get_department_by_num(user.department_num)
+                department_name = department.department_name
+            attend["department"] = department_name
+            position_name = None
+            if user.position_num is not None:
+                position = PositionMapper.get_position_by_num(user.position_num)
+                position_name = position.position_name
+            attend["position"] = position_name
     except Exception as e:
         return jsonify({'error': e}), 500
     response = {
