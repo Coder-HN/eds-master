@@ -33,17 +33,17 @@ def get_all_access():
 def get_access_by_multiple_conditions(employee_id=None, name=None, service_name=None,
                                       start_time=None, end_time=None):
     users = []
-    service = []
+    service = None
     user_num = None
     service_num = None
     if employee_id or name:
         users = UserMapper.get_users_by_multiple_conditions(employee_id=employee_id, name=name)
     if service_name:
-        service = ServiceMapper.get_services_by_multiple_conditions(service_name=service_name)
+        service = ServiceMapper.get_service_by_name(service_name)
     if len(users) == 1:
         user_num = users[0].num
-    if len(service) == 1:
-        service_num = service[0].num
+    if service:
+        service_num = service.num
     query = TableAccess.query
     if user_num:
         query = query.filter(TableAccess.user_num == user_num)

@@ -199,7 +199,7 @@ class TableService(db.Model):
     __tablename__ = 'table_service'
 
     num = Column(Integer, primary_key=True, info='设备序号,主键')
-    service_id = Column(String(50, 'utf8mb4_0900_ai_ci'), nullable=False, info='设备编号')
+    service_id = Column(String(50, 'utf8mb4_0900_ai_ci'), nullable=False, info='设备编号', unique=True)
     service_name = Column(String(50, 'utf8mb4_0900_ai_ci'), nullable=False, info='设备名称', unique=True)
     r_standard_num = Column(ForeignKey('table_r_standard.num', ondelete='CASCADE', onupdate='CASCADE'), nullable=False,
                             index=True, info='电阻标准序号、外键')

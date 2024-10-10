@@ -19,15 +19,9 @@ def get_all_services():
     return TableService.query.all()
 
 
-# 多条件查询
-# TODO是否唯一
-def get_services_by_multiple_conditions(service_id=None, service_name=None):
-    query = TableService.query
-    if service_id:
-        query = query.filter(TableService.service_id == service_id)
-    if service_name:
-        query = query.filter(TableService.service_name == service_name)
-    return query.all()
+def get_service_by_name(service_name):
+    service = TableService.query.filter_by(service_name=service_name).first()
+    return service
 
 
 def get_service_by_id(service_id):

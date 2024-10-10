@@ -31,7 +31,7 @@ def search_services():
     service_id = request.form.get('service_id')
     service_name = request.form.get('service_name')
     try:
-        all_services = ServiceMapper.get_services_by_multiple_conditions(service_id, service_name)
+        all_services = [ServiceMapper.get_service_by_id(service_id), ServiceMapper.get_service_by_name(service_name)]
         services_list = [service.to_dict() for service in all_services]
         for service in services_list:
             r_standard = RStandardMapper.get_r_standard_by_num(int(service['r_standard_num']))

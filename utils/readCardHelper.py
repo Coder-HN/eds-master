@@ -11,6 +11,7 @@ from utils.testResistanceHelper import get_r, open_door
 读卡器
 02 + 卡号 +0D 0A 03
 """
+
 # 目标二进制数组
 target_end_data = bytes([0x0D, 0x0A, 0x03])
 
@@ -101,6 +102,7 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                     'employee_id': user_employee_id,
                                     'department': user_department,
                                     'pic_path': user_pic_path,
+
                                     'hand_left_min': hand_left_min,
                                     'hand_left_max': hand_left_max,
                                     'hand_right_min': hand_right_min,
@@ -119,6 +121,8 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                 r = get_r()
                                 result = False
                                 service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = None, None, None, None, None
+                                # 根据service_id算得电阻上下限
+
                                 result_hand_left = 2
                                 result_hand_right = 2
                                 result_foot_left = 2
@@ -154,6 +158,7 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                     'result_hand_right': result_hand_right,
                                     'result_foot_left': result_foot_left,
                                     'result_foot_right': result_foot_right,
+
                                 }
                                 print(set_data)
                                 socketio.emit('success_data', {'data': set_data})
