@@ -50,23 +50,40 @@ def import_sql_to_mysql(input_file):
 
 def get_user_by_card_id(card_id):
     conn = mysql.connector.connect(**mysql_config)
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     query = "SELECT * FROM table_user WHERE card_id = %s AND is_delete = 0"
     cursor.execute(query, (card_id,))
-    result = cursor.fetchall()
-    column_names = cursor.column_names
+    result = cursor.fetchone()
     cursor.close()
     conn.close()
-    return result, column_names
+    return result
 
 
 def get_department_by_num(department_num):
     conn = mysql.connector.connect(**mysql_config)
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     query = "SELECT * FROM table_department WHERE num = %s"
     cursor.execute(query, (department_num,))
-    result = cursor.fetchall()
-    column_names = cursor.column_names
+    result = cursor.fetchone()
     cursor.close()
     conn.close()
-    return result, column_names
+    return result
+
+
+def get_r_standard_by_service_id(service_id):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    query = "SELECT * FROM table_service_id WHERE service_id = %s"
+    cursor.execute(query, (service_id,))
+    service = cursor.fetchone()
+
+    r_num = service['r_standard_num']
+    query = "SELECT * FROM table_r_standard WHERE num = %s"
+    cursor.execute(query, (r_num,))
+    r_standard = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return (r_standard['hand_left_min'], r_standard['hand_left_max'],
+            r_standard['hand_right_min'], r_standard['hand_right_max'],
+            r_standard['foot_left_min'], r_standard['foot_left_max'],
+            r_standard['foot_right_min'], r_standard['foot_right_max'],)

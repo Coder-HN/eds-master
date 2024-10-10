@@ -12,18 +12,10 @@ class Config:
     # 头像位置
     UPLOAD_FOLDER = 'E:/workplaces/FrontProjects/edsFront/public/profile_photo/'
 
-    HAND_LEFT_MIN = 100
-    HAND_LEFT_MAX = 15000  # 15M
-    HAND_RIGHT_MIN = 100
-    HAND_RIGHT_MAX = 15000
-    FOOT_LEFT_MIN = 100
-    FOOT_LEFT_MAX = 60000  # 60M
-    FOOT_RIGHT_MIN = 100
-    FOOT_RIGHT_MAX = 60000
-
     # 在岗时间要求、进出次数要求
     ATTEND_TIME_REQUIRE = 8
     ACCESS_TIMES_LIMIT = 6
+
     # 默认波特率、端口超时时间ms
     default_baudrates = 9600
     default_com_timeout = 10

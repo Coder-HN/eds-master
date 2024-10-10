@@ -5,6 +5,7 @@ import serial.tools.list_ports
 
 from config import Config
 from utils import dbHelper
+from utils.dbHelper import get_r_standard_by_service_id
 from utils.testResistanceHelper import get_r, open_door
 
 """
@@ -65,52 +66,29 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                 print("socketio已打开，跳转指令已发送")
                                 socketio.emit('read_card_status', {'status': 1})
                             # 先查询card_id是否在数据库中
-                            users, column_names = dbHelper.get_user_by_card_id(card_id)
-                            if len(users) == 1:  # 成功提示请测试电阻
-                                user = users[0]
-                                _num = column_names.index('num')
-                                _name = column_names.index('name')
-                                _department_num = column_names.index('department_num')
-                                _employee_id = column_names.index('employee_id')
-                                _pic_path = column_names.index('pic_path')
-                                user_num = user[_num]
-                                user_name = user[_name]
-                                user_department_num = user[_department_num]
-                                user_department = None
+                            user = dbHelper.get_user_by_card_id(card_id)
+                            if user:  # 成功提示请测试电阻
+                                user_num = user['num']
+                                user_name = user['name']
+                                user_department_num = user['department_num']
                                 if user_department_num is not None:
-                                    departments, column_names = dbHelper.get_department_by_num(user_department_num)
-                                    department = departments[0]
-                                    _department_name = column_names.index('department_name')
-                                    user_department = department[_department_name]
-                                user_employee_id = user[_employee_id]
-                                user_pic_path = user[_pic_path]
-                                # 先发送员工、及部分电阻信息到前端
-                                hand_left_min = Config.HAND_LEFT_MIN
-                                hand_left_max = Config.HAND_LEFT_MAX
-                                hand_right_min = Config.HAND_RIGHT_MIN
-                                hand_right_max = Config.HAND_RIGHT_MAX
-                                foot_left_min = Config.FOOT_LEFT_MIN
-                                foot_left_max = Config.FOOT_LEFT_MAX
-                                foot_right_min = Config.FOOT_RIGHT_MIN
-                                foot_right_max = Config.FOOT_RIGHT_MAX
+                                    department = dbHelper.get_department_by_num(user_department_num)
+                                    if department:  # 确保有数据
+                                        user_department = department['department_name']
+                                    else:
+                                        user_department = None
+                                user_employee_id = user['employee_id']
+                                user_pic_path = user['pic_path']
+                                # 先发送员工信息到前端
                                 cache_data = {
-                                    'card_id': card_id,
                                     'access_flag': 1,
-                                    'user_num': user_num,
 
-                                    'name': user_name,
+                                    'user_num': user_num,
+                                    'card_id': card_id,
                                     'employee_id': user_employee_id,
+                                    'name': user_name,
                                     'department': user_department,
                                     'pic_path': user_pic_path,
-
-                                    'hand_left_min': hand_left_min,
-                                    'hand_left_max': hand_left_max,
-                                    'hand_right_min': hand_right_min,
-                                    'hand_right_max': hand_right_max,
-                                    'foot_left_min': foot_left_min,
-                                    'foot_left_max': foot_left_max,
-                                    'foot_right_min': foot_right_min,
-                                    'foot_right_max': foot_right_max,
                                 }
                                 time.sleep(1)  # 等待跳转后页面开启监听
                                 print(cache_data)
@@ -118,17 +96,16 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                 print("发送cache_data数据到前端")
                                 # 完成测试电阻，是否开门，插入进出记录表的工作
                                 print("测试电阻中...")
-                                r = get_r()
                                 result = False
-                                service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = None, None, None, None, None
-                                # 根据service_id算得电阻上下限
-
-                                result_hand_left = 2
-                                result_hand_right = 2
-                                result_foot_left = 2
-                                result_foot_right = 2
-                                if r is not None:
-                                    service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = r
+                                service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = get_r()
+                                if service_id:
+                                    # 根据service_id算得电阻上下限
+                                    hand_left_min, hand_left_max, hand_right_min, hand_right_max, foot_left_min, foot_left_max, foot_right_min, foot_right_max = \
+                                        get_r_standard_by_service_id(service_id)
+                                    result_hand_left = 2
+                                    result_hand_right = 2
+                                    result_foot_left = 2
+                                    result_foot_right = 2
                                     print("service_id:", service_id)
                                     if hand_left_min <= value_hand_left <= hand_left_max:
                                         result_hand_left = 1
@@ -140,36 +117,48 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                         result_foot_right = 1
                                     if result_hand_left * result_hand_right * result_foot_left * result_foot_right == 1:
                                         result = True
-                                result_num = 2
-                                if result:
-                                    result_num = 1
-                                set_data = {
-                                    'card_id': card_id,
-                                    'access_flag': 1,
-                                    'service_id': service_id,
-                                    'user_num': user_num,
-                                    'result_num': result_num,
+                                    result_num = 2
+                                    if result:
+                                        result_num = 1
+                                    set_data = {
+                                        'service_id': service_id,
 
-                                    'value_hand_left': value_hand_left,
-                                    'value_hand_right': value_hand_right,
-                                    'value_foot_left': value_foot_left,
-                                    'value_foot_right': value_foot_right,
-                                    'result_hand_left': result_hand_left,
-                                    'result_hand_right': result_hand_right,
-                                    'result_foot_left': result_foot_left,
-                                    'result_foot_right': result_foot_right,
+                                        'hand_left_min': hand_left_min,
+                                        'hand_left_max': hand_left_max,
+                                        'hand_right_min': hand_right_min,
+                                        'hand_right_max': hand_right_max,
+                                        'foot_left_min': foot_left_min,
+                                        'foot_left_max': foot_left_max,
+                                        'foot_right_min': foot_right_min,
+                                        'foot_right_max': foot_right_max,
 
-                                }
-                                print(set_data)
-                                socketio.emit('success_data', {'data': set_data})
-                                print("发送success_data数据到前端")
-                                if result:
-                                    print("人员及电阻均符合要求,通行")
-                                    open_door()
+                                        'value_hand_left': value_hand_left,
+                                        'value_hand_right': value_hand_right,
+                                        'value_foot_left': value_foot_left,
+                                        'value_foot_right': value_foot_right,
+                                        'result_hand_left': result_hand_left,
+                                        'result_hand_right': result_hand_right,
+                                        'result_foot_left': result_foot_left,
+                                        'result_foot_right': result_foot_right,
+
+                                        'result_num': result_num,
+                                    }
+                                    print(set_data)
+                                    socketio.emit('success_data', {'data': set_data})
+                                    print("发送success_data数据到前端")
+                                    if result:
+                                        print("人员及电阻均符合要求,通行")
+                                        open_door()
+                                else:
+                                    print("该门禁此人员无权限通过")
+                                    error_data = {
+                                        'error_message': f"该门禁未录入数据库,card_id={card_id},service_id={service_id}",
+                                    }
+                                    socketio.emit('fail_data', {'data': error_data})
                             else:  # 失败表示无权限通过
-                                print("无权限通过")
+                                print("该卡人员不在数据库中")
                                 error_data = {
-                                    'card_id': card_id
+                                    'error_message': f"该卡人员不在数据库中,card_id={card_id}",
                                 }
                                 socketio.emit('fail_data', {'data': error_data})
                     buffer.clear()  # 清空缓冲区
@@ -229,25 +218,19 @@ def leave_card_process(_port, _baudrates, socketio=None):
                                 print("socketio已打开，跳转指令已发送")
                                 socketio.emit('read_card_status', {'data': "enter"})
                             # 先查询card_id是否在数据库中
-                            users, column_names = dbHelper.get_user_by_card_id(card_id)
-                            if len(users) == 1:  # 成功提示请测试电阻
-                                user = users[0]
-                                _num = column_names.index('num')
-                                _name = column_names.index('name')
-                                _department_num = column_names.index('department_num')
-                                _employee_id = column_names.index('employee_id')
-                                _pic_path = column_names.index('pic_path')
-                                user_num = user[_num]
-                                user_name = user[_name]
-                                user_department_num = user[_department_num]
-                                user_department = None
+                            user = dbHelper.get_user_by_card_id(card_id)
+                            if user:  # 成功提示请测试电阻
+                                user_num = user['num']
+                                user_name = user['name']
+                                user_department_num = user['department_num']
                                 if user_department_num is not None:
-                                    departments, column_names = dbHelper.get_department_by_num(user_department_num)
-                                    department = departments[0]
-                                    _department_name = column_names.index('department_name')
-                                    user_department = department[_department_name]
-                                user_employee_id = user[_employee_id]
-                                user_pic_path = user[_pic_path]
+                                    department = dbHelper.get_department_by_num(user_department_num)
+                                    if department:  # 确保有数据
+                                        user_department = department['department_name']
+                                    else:
+                                        user_department = None
+                                user_employee_id = user['employee_id']
+                                user_pic_path = user['pic_path']
                                 set_data = {
                                     'card_id': card_id,
                                     'access_flag': 1,
@@ -264,7 +247,7 @@ def leave_card_process(_port, _baudrates, socketio=None):
                             else:  # 失败表示无权限通过
                                 print("无权限通过")
                                 error_data = {
-                                    'card_id': card_id
+                                    'error_message': f"该卡人员不在数据库中,card_id={card_id}",
                                 }
                                 socketio.emit('fail_data', {'data': error_data})
                     buffer.clear()  # 清空缓冲区
