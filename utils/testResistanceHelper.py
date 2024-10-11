@@ -62,7 +62,7 @@ def _get_r(_port, _baudrates):
                     left_foot = turn_16_to_10(cow_data[8:12]) / 1000
                     right_foot = turn_16_to_10(cow_data[12:16]) / 1000
                     print(
-                        f"left_hand:{left_hand}, right_hand:{right_hand}, left_foot:{left_foot}, right_foot:{right_foot}")
+                        f"service_id:{service_id}, left_hand:{left_hand}, right_hand:{right_hand}, left_foot:{left_foot}, right_foot:{right_foot}")
                     return service_id, left_hand, right_hand, left_foot, right_foot
     except serial.SerialException as e:
         print(f"串口错误: {e}")

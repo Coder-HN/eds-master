@@ -106,7 +106,6 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                     result_hand_right = 2
                                     result_foot_left = 2
                                     result_foot_right = 2
-                                    print("service_id:", service_id)
                                     if hand_left_min <= value_hand_left <= hand_left_max:
                                         result_hand_left = 1
                                     if hand_right_min <= value_hand_right <= hand_right_max:

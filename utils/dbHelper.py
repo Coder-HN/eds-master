@@ -73,7 +73,7 @@ def get_department_by_num(department_num):
 def get_r_standard_by_service_id(service_id):
     conn = mysql.connector.connect(**mysql_config)
     cursor = conn.cursor(dictionary=True)
-    query = "SELECT * FROM table_service_id WHERE service_id = %s"
+    query = "SELECT * FROM table_service WHERE service_id = %s"
     cursor.execute(query, (service_id,))
     service = cursor.fetchone()
 
