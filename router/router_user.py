@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, make_response, request, current_app
 
 from config import Config
-from mapper import UserMapper, ServiceMapper, AccessMapper, AttendMapper
+from mapper import UserMapper, ServiceMapper, AccessMapper, AttendMapper, RStandardMapper
 from models import TableAccess, TableAttend
 
 from utils import timeHelper, testResistanceHelper
@@ -23,39 +23,40 @@ user = Blueprint('user', __name__, url_prefix='/api/user')
 @user.route('/test_user_r', methods=['GET'])
 def test_user_r():
     print("重新测试阻值中--------------------------------------------------")
-    r = testResistanceHelper.get_r()
-    hand_left_min = Config.HAND_LEFT_MIN
-    hand_left_max = Config.HAND_LEFT_MAX
-    hand_right_min = Config.HAND_RIGHT_MIN
-    hand_right_max = Config.HAND_RIGHT_MAX
-    foot_left_min = Config.FOOT_LEFT_MIN
-    foot_left_max = Config.FOOT_LEFT_MAX
-    foot_right_min = Config.FOOT_RIGHT_MIN
-    foot_right_max = Config.FOOT_RIGHT_MAX
+    service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = testResistanceHelper.get_r()
+    service = ServiceMapper.get_service_by_id(service_id)
+    r_standard = RStandardMapper.get_r_standard_by_num(service.r_standard_num)
+    hand_left_min = float(r_standard.hand_left_min)
+    hand_left_max = float(r_standard.hand_left_max)
+    hand_right_min = float(r_standard.hand_right_min)
+    hand_right_max = float(r_standard.hand_right_max)
+    foot_left_min = float(r_standard.foot_left_min)
+    foot_left_max = float(r_standard.foot_left_max)
+    foot_right_min = float(r_standard.foot_right_min)
+    foot_right_max = float(r_standard.foot_right_max)
     result = False
-    service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = None, None, None, None, None
     result_hand_left = 2
     result_hand_right = 2
     result_foot_left = 2
     result_foot_right = 2
-    if r is not None:
-        service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = r
-        print("service_id:", service_id)
-        if hand_left_min <= value_hand_left <= hand_left_max:
-            result_hand_left = 1
-        if hand_right_min <= value_hand_right <= hand_right_max:
-            result_hand_right = 1
-        if foot_left_min <= value_foot_left <= foot_left_max:
-            result_foot_left = 1
-        if foot_right_min <= value_foot_right <= foot_right_max:
-            result_foot_right = 1
-        if result_hand_left == 1 and result_hand_right == 1 and result_foot_left == 1 and result_foot_right == 1:
-            result = True
+    if hand_left_min <= value_hand_left <= hand_left_max:
+        result_hand_left = 1
+    if hand_right_min <= value_hand_right <= hand_right_max:
+        result_hand_right = 1
+    if foot_left_min <= value_foot_left <= foot_left_max:
+        result_foot_left = 1
+    if foot_right_min <= value_foot_right <= foot_right_max:
+        result_foot_right = 1
+    if result_hand_left == 1 and result_hand_right == 1 and result_foot_left == 1 and result_foot_right == 1:
+        result = True
     result_num = 2
     if result:
         result_num = 1
     set_data = {
         'result_num': result_num,
+
+
+
         'value_hand_left': value_hand_left,
         'value_hand_right': value_hand_right,
         'value_foot_left': value_foot_left,
@@ -91,14 +92,15 @@ def add_access():
         value_hand_right = data.get('value_hand_right')
         value_foot_left = data.get('value_foot_left')
         value_foot_right = data.get('value_foot_right')
-        hand_left_min = Config.HAND_LEFT_MIN
-        hand_left_max = Config.HAND_LEFT_MAX
-        hand_right_min = Config.HAND_RIGHT_MIN
-        hand_right_max = Config.HAND_RIGHT_MAX
-        foot_left_min = Config.FOOT_LEFT_MIN
-        foot_left_max = Config.FOOT_LEFT_MAX
-        foot_right_min = Config.FOOT_RIGHT_MIN
-        foot_right_max = Config.FOOT_RIGHT_MAX
+        r_standard = RStandardMapper.get_r_standard_by_num(service.r_standard_num)
+        hand_left_min = float(r_standard.hand_left_min)
+        hand_left_max = float(r_standard.hand_left_max)
+        hand_right_min = float(r_standard.hand_right_min)
+        hand_right_max = float(r_standard.hand_right_max)
+        foot_left_min = float(r_standard.foot_left_min)
+        foot_left_max = float(r_standard.foot_left_max)
+        foot_right_min = float(r_standard.foot_right_min)
+        foot_right_max = float(r_standard.foot_right_max)
         if hand_left_min <= value_hand_left <= hand_left_max:
             result_hand_left = 1
         else:
