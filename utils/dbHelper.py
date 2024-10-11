@@ -83,7 +83,7 @@ def get_r_standard_by_service_id(service_id):
     r_standard = cursor.fetchone()
     cursor.close()
     conn.close()
-    return (r_standard['hand_left_min'], r_standard['hand_left_max'],
-            r_standard['hand_right_min'], r_standard['hand_right_max'],
-            r_standard['foot_left_min'], r_standard['foot_left_max'],
-            r_standard['foot_right_min'], r_standard['foot_right_max'],)
+    return (float(r_standard['hand_left_min']), float(r_standard['hand_left_max']),
+            float(r_standard['hand_right_min']), float(r_standard['hand_right_max']),
+            float(r_standard['foot_left_min']), float(r_standard['foot_left_max']),
+            float(r_standard['foot_right_min']), float(r_standard['foot_right_max']),)
