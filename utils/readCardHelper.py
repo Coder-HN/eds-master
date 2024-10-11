@@ -79,9 +79,10 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                         user_department = None
                                 user_employee_id = user['employee_id']
                                 user_pic_path = user['pic_path']
+                                access_flag = 1
                                 # 先发送员工信息到前端
                                 cache_data = {
-                                    'access_flag': 1,
+                                    'access_flag': access_flag,
 
                                     'user_num': user_num,
                                     'card_id': card_id,
@@ -120,6 +121,9 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                     if result:
                                         result_num = 1
                                     set_data = {
+                                        'user_num': user_num,
+                                        'access_flag': access_flag,
+                                        'card_id': card_id,
                                         'service_id': service_id,
 
                                         'hand_left_min': hand_left_min,
