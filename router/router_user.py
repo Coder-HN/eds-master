@@ -5,6 +5,7 @@ from mapper import UserMapper, ServiceMapper, AccessMapper, AttendMapper, RStand
 from models import TableAccess, TableAttend
 
 from utils import timeHelper, testResistanceHelper
+from utils.testResistanceHelper import get_r, standard_r
 
 """
 创建一个名user的蓝图,并在其中定义路由
@@ -23,7 +24,7 @@ user = Blueprint('user', __name__, url_prefix='/api/user')
 @user.route('/test_user_r', methods=['GET'])
 def test_user_r():
     print("重新测试阻值中--------------------------------------------------")
-    service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = testResistanceHelper.get_r()
+    service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = get_r()
     service = ServiceMapper.get_service_by_id(service_id)
     r_standard = RStandardMapper.get_r_standard_by_num(service.r_standard_num)
     hand_left_min = float(r_standard.hand_left_min)
@@ -54,8 +55,6 @@ def test_user_r():
         result_num = 1
     set_data = {
         'result_num': result_num,
-
-
 
         'value_hand_left': value_hand_left,
         'value_hand_right': value_hand_right,
@@ -170,3 +169,16 @@ def update_attend_table(access_time, card_id):
     except Exception as e:
         return jsonify({'error': e}), 500
     return True
+
+
+# 校准电阻
+@user.route('/standard_r', methods=['POST'])
+def do_standard_r():
+    print("校准阻值中--------------------------------------------------")
+    data = request.json  # 如果使用 JSON 形式
+    test_part = data.get('testPart')  # 1~4
+    test_step = data.get('testStep')  # 1~8
+    if standard_r(test_part, test_step):
+        return jsonify(), 500
+    else:
+        return jsonify(), 200

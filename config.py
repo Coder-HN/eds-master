@@ -26,10 +26,11 @@ class Config:
     test_leave_card_port = None  # 读卡出门的串口port
     # 串口命令
     hex_test_online = "01 01 01 00 00 00 00 01 CA"  # 测试是否在线
-    hex_test_online_succcess = "01 01 01 00 00 00 00 05 AB"  # 测试是否在线成功
+    hex_test_online_succces = "01 01 01 00 00 00 00 05 AB"  # 测试是否在线成功
     hex_open_door = "01 01 04 00 00 00 00 01 21"  # 开门请求
     hex_open_door_success = "01 01 04 00 00 00 00 05 40 "  # 开门请求成功
     hex_get_cow = "01 01 03 00 00 00 00 01 A4"  # 测试电阻
+    # 校准电阻指令直接定义在testResistanceHelper.py的方法中
 
 
 # 测试配置，暂时无用

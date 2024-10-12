@@ -21,7 +21,10 @@ def find_serial_port(_name):
 
 # 发送数据桢
 def set_hex_data(ser, hex_data):
-    data = bytearray.fromhex(hex_data)
+    if isinstance(hex_data, str):
+        data = bytearray.fromhex(hex_data)  # 如果是字符串，转换为 bytearray
+    else:
+        data = hex_data  # 否则直接使用传入的 hex_data
     ser.write(data)
     print("Sent Data:", ' '.join(f'{byte:02X}' for byte in data))
 
