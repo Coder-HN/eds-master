@@ -178,7 +178,9 @@ def do_standard_r():
     data = request.json  # 如果使用 JSON 形式
     test_part = data.get('testPart')  # 1~4
     test_step = data.get('testStep')  # 1~8
+    print(f"test_part = {test_part}")
+    print(f"test_step = {test_step}")
     if standard_r(test_part, test_step):
-        return jsonify(), 500
-    else:
         return jsonify(), 200
+    else:
+        return jsonify(), 500
