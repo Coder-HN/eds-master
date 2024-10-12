@@ -91,10 +91,8 @@ def _standard_r(_port, _baudrates, test_part: int, test_step: int):  # 1~4  # 1~
             # 收01 05 01(part) 00 00 00 01(step) 05 CRC
             _hex_r_standard_send = f"01 05 0{str(test_part)} 00 00 00 0{str(test_step)} 01"
             _hex_r_standard_get = f"01 05 0{str(test_part)} 00 00 00 0{str(test_step)} 05"
-            print(_hex_r_standard_send)
-            print(_hex_r_standard_get)
-            hex_r_standard_send = crc8(bytearray.fromhex(_hex_r_standard_send.replace(" ", "")))
-            hex_r_standard_get = crc8(bytearray.fromhex(_hex_r_standard_get.replace(" ", "")))
+            hex_r_standard_send = _hex_r_standard_send + f"{crc8(bytearray.fromhex(_hex_r_standard_send)):02X}"
+            hex_r_standard_get = _hex_r_standard_get + f"{crc8(bytearray.fromhex(_hex_r_standard_get)):02X}"
             print(hex_r_standard_send)
             print(hex_r_standard_get)
             set_hex_data(ser, hex_r_standard_send)
