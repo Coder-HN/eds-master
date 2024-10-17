@@ -103,7 +103,6 @@ def update_user():
             user = UserMapper.get_user_by_num(num)
             if user.pic_path:
                 path_delete = Config.STATIC_PUBLIC + user.pic_path
-                print(path_delete)
                 if os.path.exists(path_delete):
                     os.remove(path_delete)
             filename = secure_filename(file.filename)
@@ -132,7 +131,7 @@ def add_user():
     new_user.card_id = request.form.get('card_id')
     new_user.name = request.form.get('name')
     new_user.position_num = int(request.form.get('position_num'))
-    new_user.department_num = int(request.form.get('position_num'))
+    new_user.department_num = int(request.form.get('department_num'))
 
     # 处理头像
     if 'file' in request.files:
@@ -252,4 +251,42 @@ def add_user_excel():
         exc_info = sys.exc_info()
         current_app.log_exception(exc_info)
         current_app.logger.error(f"error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
+@manageUser.route('/exportUserExcel', methods=['GET'])  # 导出人员表
+def export_user_excel():
+    try:
+        # 从数据库中获取用户数据
+        users_db = UserMapper.get_all_users()
+        # 将数据库中的数据转换为字典格式
+        user_data = []
+        for user in users_db:
+            user_data.append({
+                'employee_id': user.employee_id,
+                'card_id': user.card_id,
+                'name': user.name,
+                'department_name': DepartmentMapper.get_department_by_num(
+                    user.department_num).department_name if user.department_num else "",
+                'position_name': PositionMapper.get_position_by_num(
+                    user.position_num).position_name if user.position_num else "",
+                'is_delete': user.is_delete
+            })
+        # 使用 pandas 将数据转换为 DataFrame
+        df = pd.DataFrame(user_data)
+        # 创建输出流，用于生成 Excel 文件
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            # 将 DataFrame 写入 Excel 文件，保持与导入格式一致的列
+            df.to_excel(writer, index=False, sheet_name='用户数据')
+        output.seek(0)  # 将指针移到文件开头
+
+        # 返回生成的 Excel 文件
+        return send_file(output,
+                         download_name='用户数据.xlsx',
+                         as_attachment=True,
+                         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    except Exception as e:
+        # 记录并返回错误信息
+        current_app.logger.error(f"Error exporting user Excel: {str(e)}")
         return jsonify({'error': str(e)}), 500

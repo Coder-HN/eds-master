@@ -25,7 +25,7 @@ def get_user_by_card_id(card_id):
 
 # 获取未离职人员列表
 def get_all_users():
-    return TableUser.query.filter(TableUser.is_delete == 0).all()
+    return TableUser.query.filter(TableUser.is_delete == 0).order_by(TableUser.num.desc()).all()
 
 
 # 获取离职人员列表
