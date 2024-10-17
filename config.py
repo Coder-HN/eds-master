@@ -12,9 +12,9 @@ class Config:
     # STATIC_PUBLIC = 'E:/workplaces/FrontProjects/edsFront/public'  # 静态文件位置
     # UPLOAD_FOLDER = 'E:/workplaces/FrontProjects/edsFront/public/profile_photo/'  # 头像位置
     # 部署环境
-    SQL_DATA = 'D:/edsMaster/static_data'  # 数据库下载位置
-    STATIC_PUBLIC = 'D:/edsFront/public'  # 静态文件位置
-    UPLOAD_FOLDER = 'D:/edsFront/public/profile_photo/'  # 头像位置
+    SQL_DATA = 'D:/eds-master/static_data'  # 数据库下载位置
+    STATIC_PUBLIC = 'D:/eds-front/public'  # 静态文件位置
+    UPLOAD_FOLDER = 'D:/eds-front/public/profile_photo/'  # 头像位置
 
     # 在岗时间要求、进出次数要求
     ATTEND_TIME_REQUIRE = 8
