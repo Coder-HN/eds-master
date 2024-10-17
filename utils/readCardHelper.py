@@ -219,7 +219,7 @@ def leave_card_process(_port, _baudrates, socketio=None):
                                 print("socketio未开启")
                             else:
                                 print("socketio已打开，跳转指令已发送")
-                                socketio.emit('read_card_status', {'data': "enter"})
+                                socketio.emit('read_card_status', {'status': 2})
                             # 先查询card_id是否在数据库中
                             user = dbHelper.get_user_by_card_id(card_id)
                             if user:  # 成功提示请测试电阻
