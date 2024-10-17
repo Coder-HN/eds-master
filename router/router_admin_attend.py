@@ -23,10 +23,16 @@ def get_all_attend():
             attend["employee_id"] = user.employee_id
             attend["card_id"] = user.card_id
             attend["name"] = user.name
-            department = DepartmentMapper.get_department_by_num(user.department_num)
-            attend["department"] = department.department_name
-            position = PositionMapper.get_position_by_num(user.position_num)
-            attend["position"] = position.position_name
+            department_name = None
+            if user.department_num is not None:
+                department = DepartmentMapper.get_department_by_num(user.department_num)
+                department_name = department.department_name
+            attend["department"] = department_name
+            position_name = None
+            if user.position_num is not None:
+                position = PositionMapper.get_position_by_num(user.position_num)
+                position_name = position.position_name
+            attend["position"] = position_name
     except Exception as e:
         return jsonify({'error': e}), 500
     response = {
