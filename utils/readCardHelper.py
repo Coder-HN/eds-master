@@ -241,7 +241,8 @@ def leave_card_process(_port, _baudrates, socketio=None):
                                     'card_id': card_id,
                                     'access_flag': access_flag,
                                     'service_id': service_id,
-                                    'num': user_num,
+
+                                    'user_num': user_num,
                                     'name': user_name,
                                     'employee_id': user_employee_id,
                                     'department': user_department,
