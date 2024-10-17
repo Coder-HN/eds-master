@@ -149,24 +149,27 @@ def update_attend_table(access_time, card_id):
         # 求这次进出的在岗时间
         _user = UserMapper.get_user_by_card_id(card_id=card_id)
         access_enter = AccessMapper.get_access_enter_by_leave(_user.num)
-        print(access_enter)
-        time_difference = access_time - timeHelper.get_utc_time(access_enter.access_time)
-        # 将时间差转换为以小时为单位的小数值
-        hours_difference = time_difference.total_seconds() / 3600
-        # 检查是否存在出勤记录
-        access_date = timeHelper.get_date_by_timestamp(access_time)
-        attend = AttendMapper.get_attend_by_user_num_attend_date(_user.num, access_date)
-        if attend is not None:
-            AttendMapper.update_attend(attend.num, hours_difference)
+        if access_enter is not None:
+            print(access_enter)
+            time_difference = access_time - timeHelper.get_utc_time(access_enter.access_time)
+            # 将时间差转换为以小时为单位的小数值
+            hours_difference = time_difference.total_seconds() / 3600
+            # 检查是否存在出勤记录
+            access_date = timeHelper.get_date_by_timestamp(access_time)
+            attend = AttendMapper.get_attend_by_user_num_attend_date(_user.num, access_date)
+            if attend is not None:
+                AttendMapper.update_attend(attend.num, hours_difference)
+            else:
+                new_attend = TableAttend()
+                new_attend.user_num = _user.num
+                new_attend.attend_date = access_date
+                new_attend.attend_time = hours_difference
+                new_attend.attend_time_require = Config.ATTEND_TIME_REQUIRE
+                new_attend.access_times = 1
+                new_attend.access_times_limit = Config.ACCESS_TIMES_LIMIT
+                AttendMapper.add_attend(new_attend)
         else:
-            new_attend = TableAttend()
-            new_attend.user_num = _user.num
-            new_attend.attend_date = access_date
-            new_attend.attend_time = hours_difference
-            new_attend.attend_time_require = Config.ATTEND_TIME_REQUIRE
-            new_attend.access_times = 1
-            new_attend.access_times_limit = Config.ACCESS_TIMES_LIMIT
-            AttendMapper.add_attend(new_attend)
+            print(f"{_user}人员无进门记录，但是存在出门记录")
     except Exception as e:
         return jsonify({'error': e}), 500
     return True
