@@ -42,7 +42,7 @@ def enter_card_process(_port, _baudrates, socketio=None):
                 if frame_started and (time.time() - start_time) * 1000 >= frame_timeout_ms:
                     if buffer:
                         hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
-                        print(f"=================={frame_timeout_ms}ms接收到的完整数据帧:", hex_data_string)
+                        print(f"==================进门串口{frame_timeout_ms}ms接收到的完整数据帧:", hex_data_string)
                         # 读取数据帧，原始二进制数据，十六进制格式
                         frame_data = buffer[1:-3]
                         hex_card_string = ' '.join(f'{byte:02X}' for byte in frame_data)
@@ -197,7 +197,7 @@ def leave_card_process(_port, _baudrates, socketio=None):
                 if frame_started and (time.time() - start_time) * 1000 >= frame_timeout_ms:
                     if buffer:
                         hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
-                        print(f"=================={frame_timeout_ms}ms接收到的完整数据帧:", hex_data_string)
+                        print(f"==================出门串口{frame_timeout_ms}ms接收到的完整数据帧:", hex_data_string)
                         # 读取数据帧，原始二进制数据，十六进制格式
                         frame_data = buffer[1:-3]
                         hex_card_string = ' '.join(f'{byte:02X}' for byte in frame_data)
