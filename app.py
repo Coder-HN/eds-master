@@ -42,22 +42,12 @@ def create_app(config_class=Config):
     _app = Flask(__name__)
     _app.config.from_object(config_class)
 
-    # # 在请求处理之前记录请求信息
-    # @_app.before_request
-    # def log_request_info():
-    #     _app.logger.info(f"Request: {request.method} {request.url}")
-    #
-    # # 在请求处理之后记录响应信息
-    # @_app.after_request
-    # def log_response_info(response):
-    #     _app.logger.info(f"Response Status: {response.status}")
-    #     return response
-
     # 串口IO
     socketio = SocketIO(_app, cors_allowed_origins="*", logger=False, engineio_logger=False)
     thread_enter = threading.Thread(target=enter_connect_socket, args=(socketio,))
     thread_enter.daemon = True
     thread_enter.start()
+
     thread_leave = threading.Thread(target=leave_connect_socket, args=(socketio,))
     thread_leave.daemon = True
     thread_leave.start()
