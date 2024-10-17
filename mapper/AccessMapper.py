@@ -59,7 +59,8 @@ def get_access_by_multiple_conditions(employee_id=None, name=None, service_name=
 # 获取出去记录的上一次进的记录
 def get_access_enter_by_leave(user_num):
     query = TableAccess.query
-    query = query.filter(TableAccess.user_num == user_num and TableAccess.result == 1)  # 只要成功进门的
+    query = query.filter(
+        TableAccess.user_num == user_num and TableAccess.access_flag == 1 and TableAccess.result == 1)  # 只要成功进门的
     # 获取最近一次进的记录
     second_record = query.order_by(desc(TableAccess.num)).offset(1).limit(1).first()
     # 处理结果

@@ -147,8 +147,9 @@ def add_access():
 def update_attend_table(access_time, card_id):
     try:
         # 求这次进出的在岗时间
-        _user = UserMapper.get_users_by_multiple_conditions(card_id=card_id)[0]
+        _user = UserMapper.get_user_by_card_id(card_id=card_id)
         access_enter = AccessMapper.get_access_enter_by_leave(_user.num)
+        print(access_enter)
         time_difference = access_time - timeHelper.get_utc_time(access_enter.access_time)
         # 将时间差转换为以小时为单位的小数值
         hours_difference = time_difference.total_seconds() / 3600
