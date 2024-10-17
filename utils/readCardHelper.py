@@ -67,7 +67,6 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                 socketio.emit('read_card_status', {'status': 1})
                             # 先查询card_id是否在数据库中
                             user = dbHelper.get_user_by_card_id(card_id)
-                            time.sleep(1)  # 等待跳转后页面开启监听
                             if user:  # 成功提示请测试电阻
                                 user_num = user['num']
                                 user_name = user['name']
@@ -92,7 +91,7 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                     'department': user_department,
                                     'pic_path': user_pic_path,
                                 }
-
+                                time.sleep(1)  # 等待跳转后页面开启监听
                                 print(cache_data)
                                 socketio.emit('cache_data', {'data': cache_data})
                                 print("发送cache_data数据到前端")
@@ -160,7 +159,8 @@ def enter_card_process(_port, _baudrates, socketio=None):
                                     }
                                     socketio.emit('fail_data', {'data': error_data})
                             else:  # 失败表示无权限通过
-                                print("该卡人员不在数据库中")
+                                time.sleep(1)  # 等待跳转后页面开启监听
+                                print(f"card_id={card_id}无权限通过")
                                 error_data = {
                                     'error_message': f"该卡人员不在数据库中,card_id={card_id}",
                                 }
@@ -223,7 +223,6 @@ def leave_card_process(_port, _baudrates, socketio=None):
                                 socketio.emit('read_card_status', {'status': 2})
                             # 先查询card_id是否在数据库中
                             user = dbHelper.get_user_by_card_id(card_id)
-                            time.sleep(1)  # 等待跳转后页面开启监听
                             if user:  # 成功提示请测试电阻
                                 user_num = user['num']
                                 user_name = user['name']
@@ -250,12 +249,14 @@ def leave_card_process(_port, _baudrates, socketio=None):
                                     'department': user_department,
                                     'pic_path': user_pic_path,
                                 }
+                                time.sleep(1)  # 等待跳转后页面开启监听
                                 print(set_data)
                                 socketio.emit('success_data', {'data': set_data})
                                 print("开门中...")
                                 open_door()
                             else:  # 失败表示无权限通过
-                                print("无权限通过")
+                                time.sleep(1)  # 等待跳转后页面开启监听
+                                print(f"card_id={card_id}无权限通过")
                                 error_data = {
                                     'error_message': f"该卡人员不在数据库中,card_id={card_id}",
                                 }
