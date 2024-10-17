@@ -234,9 +234,10 @@ def leave_card_process(_port, _baudrates, socketio=None):
                                         user_department = None
                                 user_employee_id = user['employee_id']
                                 user_pic_path = user['pic_path']
+                                access_flag = 2
                                 set_data = {
                                     'card_id': card_id,
-                                    'access_flag': 1,
+                                    'access_flag': access_flag,
                                     'num': user_num,
                                     'name': user_name,
                                     'employee_id': user_employee_id,
