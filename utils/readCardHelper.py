@@ -146,7 +146,6 @@ def enter_card_process(_port, _baudrates, socketio=None):
 
                                         'result_num': result_num,
                                     }
-                                    time.sleep(1)  # 等待跳转后页面开启监听
                                     print(set_data)
                                     socketio.emit('success_data', {'data': set_data})
                                     print("发送success_data数据到前端")
@@ -245,6 +244,7 @@ def leave_card_process(_port, _baudrates, socketio=None):
                                     'department': user_department,
                                     'pic_path': user_pic_path,
                                 }
+                                time.sleep(1)  # 等待跳转后页面开启监听
                                 print(set_data)
                                 socketio.emit('success_data', {'data': set_data})
                                 print("开门中...")
