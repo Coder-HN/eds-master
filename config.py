@@ -24,7 +24,7 @@ class Config:
     default_baud_rate = 9600
     default_com_timeout = 10
     # 串口名
-    test_r_port = "COM7"  # 测试电阻的串口port
+    test_r_port = "COM12"  # 测试电阻的串口port
     # test_enter_card_port = "COM3" # 读卡进门的串口port
     test_enter_card_port = "COM10"  # 串口测试用10->11
     # test_leave_card_port = "COM1" # 读卡出门的串口port
