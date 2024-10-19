@@ -2,7 +2,7 @@ import logging
 import threading
 import time
 
-from flask import Flask
+from flask import Flask, request
 from flask_socketio import SocketIO
 
 from config import Config
@@ -13,7 +13,7 @@ from router.router_admin_manager_department import manageDepartment
 from router.router_admin_manager_service import manageService
 from router.router_admin_manager_user import manageUser
 from router.router_user import user
-from utils.readCardHelper import card_process
+from utils.readCardHelper import enter_card_process, leave_card_process
 
 # 锁用于防止并发刷卡
 enter_lock = threading.Lock()
@@ -26,7 +26,7 @@ get_except_leave = False
 
 # 进门串口
 def enter_connect_socket(socketio):
-    baud_rate = Config.default_baud_rate
+    baudrates = Config.default_baudrates
     port_enter = Config.test_enter_card_port
 
     while True:
@@ -35,7 +35,7 @@ def enter_connect_socket(socketio):
             if not is_processing_enter:
                 try:
                     # 处理刷卡逻辑
-                    card_process(1, port_enter, baud_rate, socketio)
+                    enter_card_process(port_enter, baudrates, socketio)
                     is_processing_enter = True  # 标记刷卡处理中
                     global get_except_enter
                     get_except_enter = False
@@ -53,7 +53,7 @@ def enter_connect_socket(socketio):
 
 # 出门串口
 def leave_connect_socket(socketio):
-    baud_rate = Config.default_baud_rate
+    baudrates = Config.default_baudrates
     port_leave = Config.test_leave_card_port
     while True:
         with leave_lock:
@@ -61,12 +61,12 @@ def leave_connect_socket(socketio):
             if not is_processing_leave:
                 try:
                     # 处理刷卡逻辑
-                    card_process(2, port_leave, baud_rate, socketio)
+                    leave_card_process(port_leave, baudrates, socketio)
                     is_processing_leave = True  # 标记刷卡处理中
                     global get_except_leave
                     get_except_leave = False
                 except Exception as e:
-                    if not get_except_leave:
+                    if not get_except_enter:
                         print(f"出门串口错误: {e}")
                         get_except_leave = True
                     socketio.emit('card_process', {'status': 'error', 'message': f'出门串口错误: {e}'})
@@ -87,7 +87,6 @@ def create_app(config_class=Config):
     thread_enter = threading.Thread(target=enter_connect_socket, args=(socketio,))
     thread_enter.daemon = True
     thread_enter.start()
-
     thread_leave = threading.Thread(target=leave_connect_socket, args=(socketio,))
     thread_leave.daemon = True
     thread_leave.start()
