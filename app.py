@@ -26,27 +26,28 @@ get_except_enter = False
 get_except_leave = False
 
 
-# 通用串口连接处理函数
-def connect_socket(socketio, process_type, port, baud_rate, lock, is_processing_flag, get_except_flag):
+# 进门串口
+def enter_connect_socket(socketio):
+    baud_rate = Config.default_baud_rate
+    port_enter = Config.test_enter_card_port
+
     while True:
-        with lock:
-            if not is_processing_flag[0]:
+        with enter_lock:
+            global is_processing_enter
+            if not is_processing_enter:
                 try:
                     # 打开串行端口
                     frame_timeout_ms = Config.default_com_timeout
-                    with serial.Serial(port, baud_rate, timeout=frame_timeout_ms / 1000) as ser:
+                    with serial.Serial(port_enter, baud_rate, timeout=frame_timeout_ms / 1000) as ser:
                         buffer = bytearray()  # 临时存储数据
                         frame_started = False  # 标记数据帧是否已经开始
                         start_time = time.time()  # 记录帧开始的时间
-                        print(
-                            f"=================={'进门' if process_type == 1 else '出门'}读卡监听中==================")
-
+                        print("==================进门读卡监听中==================")
                         # 检查socketio连接
                         if socketio is None:
                             print("socketio未开启")
                         else:
                             print("socketio已开启")
-
                         while True:
                             time.sleep(0.001)
                             if ser.in_waiting > 0:
@@ -58,26 +59,75 @@ def connect_socket(socketio, process_type, port, baud_rate, lock, is_processing_
                                         frame_started = True  # 标记帧开始
                                         start_time = time.time()  # 记录开始时间
                                     buffer.append(byte)  # 将接收到的字节加入缓冲区
-
                             # 检查是否已经超过帧超时时间（frame_timeout_ms 毫秒）
                             if frame_started and (time.time() - start_time) * 1000 >= frame_timeout_ms:
-                                card_process(buffer, process_type, socketio, frame_timeout_ms)
-                                buffer.clear()  # 清空缓冲区
-                                frame_started = False  # 重置帧标记
-
-                    is_processing_flag[0] = True  # 标记刷卡处理中
-                    get_except_flag[0] = False
+                                card_process(buffer, 1, socketio, frame_timeout_ms)
+                            buffer.clear()  # 清空缓冲区
+                            frame_started = False  # 重置帧标记
+                    is_processing_enter = True  # 标记刷卡处理中
+                    global get_except_enter
+                    get_except_enter = False
                 except Exception as e:
-                    if not get_except_flag[0]:
-                        print(f"{'进门' if process_type == 1 else '出门'}串口错误: {e}")
-                        get_except_flag[0] = True
-                    socketio.emit('card_process', {'status': 'error',
-                                                   'message': f"{'进门' if process_type == 1 else '出门'}串口错误: {e}"})
-            else:
+                    if not get_except_enter:
+                        print(f"进门串口错误: {e}")
+                        get_except_enter = True
+                    socketio.emit('card_process', {'status': 'error', 'message': f'进门串口错误: {e}'})  # 在视频页面监听
+            elif not get_except_enter:
                 # 发送重复刷卡信息到前端
-                if not get_except_flag[0]:
-                    print(f"{'进门' if process_type == 1 else '出门'}重复刷卡，忽略此次刷卡")
-                    socketio.emit('card_process', {'status': 'error', 'message': '请勿重复刷卡'})
+                print("进门重复刷卡，忽略此次刷卡")
+                socketio.emit('card_process', {'status': 'error', 'message': '请勿重复刷卡'})
+        time.sleep(0.5)
+
+
+# 出门串口
+def leave_connect_socket(socketio):
+    baud_rate = Config.default_baud_rate
+    port_leave = Config.test_leave_card_port
+    while True:
+        with leave_lock:
+            global is_processing_leave
+            if not is_processing_leave:
+                try:
+                    # 打开串行端口
+                    frame_timeout_ms = Config.default_com_timeout
+                    with serial.Serial(port_leave, baud_rate, timeout=frame_timeout_ms / 1000) as ser:
+                        buffer = bytearray()  # 临时存储数据
+                        frame_started = False  # 标记数据帧是否已经开始
+                        start_time = time.time()  # 记录帧开始的时间
+                        print("==================出门读卡监听中==================")
+                        # 检查socketio连接
+                        if socketio is None:
+                            print("socketio未开启")
+                        else:
+                            print("socketio已开启")
+                        while True:
+                            time.sleep(0.001)
+                            if ser.in_waiting > 0:
+                                # 读取所有可用的数据
+                                data = ser.read(ser.in_waiting)
+                                # 遍历每个字节
+                                for byte in data:
+                                    if not frame_started:
+                                        frame_started = True  # 标记帧开始
+                                        start_time = time.time()  # 记录开始时间
+                                    buffer.append(byte)  # 将接收到的字节加入缓冲区
+                            # 检查是否已经超过帧超时时间（frame_timeout_ms 毫秒）
+                            if frame_started and (time.time() - start_time) * 1000 >= frame_timeout_ms:
+                                card_process(buffer, 2, socketio, frame_timeout_ms)
+                            buffer.clear()  # 清空缓冲区
+                            frame_started = False  # 重置帧标记
+                    is_processing_leave = True  # 标记刷卡处理中
+                    global get_except_leave
+                    get_except_leave = False
+                except Exception as e:
+                    if not get_except_leave:
+                        print(f"出门串口错误: {e}")
+                        get_except_leave = True
+                    socketio.emit('card_process', {'status': 'error', 'message': f'出门串口错误: {e}'})
+            elif not get_except_leave:
+                # 发送重复刷卡信息到前端
+                print("出门重复刷卡，忽略此次刷卡")
+                socketio.emit('card_process', {'status': 'error', 'message': '请勿重复刷卡'})
         time.sleep(0.5)
 
 
@@ -87,16 +137,12 @@ def create_app(config_class=Config):
     _app.config.from_object(config_class)
 
     # 串口IO
-    baud_rate = Config.default_baud_rate
     socketio = SocketIO(_app, cors_allowed_origins="*", logger=False, engineio_logger=False)
-    # 启动进门串口线程
-    thread_enter = threading.Thread(target=connect_socket, args=(
-        socketio, 1, Config.test_enter_card_port, baud_rate, enter_lock, [is_processing_enter], [get_except_enter]))
+    thread_enter = threading.Thread(target=enter_connect_socket, args=(socketio,))
     thread_enter.daemon = True
     thread_enter.start()
-    # 启动出门串口线程
-    thread_leave = threading.Thread(target=connect_socket, args=(
-        socketio, 2, Config.test_leave_card_port, baud_rate, leave_lock, [is_processing_leave], [get_except_leave]))
+
+    thread_leave = threading.Thread(target=leave_connect_socket, args=(socketio,))
     thread_leave.daemon = True
     thread_leave.start()
 
