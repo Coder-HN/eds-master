@@ -34,6 +34,7 @@ def card_process(process_type, _port, _baud_rate, socketio=None):
         else:
             print("socketio已开启")
         while True:
+            print("in while True")
             time.sleep(0.001)
             if ser.in_waiting > 0:
                 # 读取所有可用的数据
@@ -45,6 +46,7 @@ def card_process(process_type, _port, _baud_rate, socketio=None):
                         start_time = time.time()  # 记录开始时间
                     buffer.append(byte)  # 将接收到的字节加入缓冲区
             # 检查是否已经超过帧超时时间（frame_timeout_ms 毫秒）
+            print("buffer:", buffer)
             if frame_started and (time.time() - start_time) * 1000 >= frame_timeout_ms:
                 if buffer:
                     hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
