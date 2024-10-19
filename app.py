@@ -18,7 +18,7 @@ from utils.readCardHelper import enter_card_process, leave_card_process
 
 
 def enter_connect_socket(socketio):
-    baudrates = Config.default_baudrates
+    baudrates = Config.default_baud_rate
     # 开门
     port_enter = Config.test_enter_card_port
     if port_enter is None:
@@ -28,7 +28,7 @@ def enter_connect_socket(socketio):
 
 
 def leave_connect_socket(socketio):
-    baudrates = Config.default_baudrates
+    baudrates = Config.default_baud_rate
     # 关门
     port_leave = Config.test_leave_card_port
     if port_leave is None:
