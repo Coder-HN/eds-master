@@ -29,7 +29,7 @@ def _open_door(_port, _baudrates):
 
 
 def open_door():
-    baudrates = Config.default_baudrates
+    baudrates = Config.default_baud_rate
     port = Config.test_r_port
     if port is None:
         print(f"测试电阻串口{port}未找到，请检查设备连接。")
@@ -72,7 +72,7 @@ def _get_r(_port, _baudrates):
 
 
 def get_r():
-    baudrates = Config.default_baudrates
+    baudrates = Config.default_baud_rate
     port = Config.test_r_port
     if port is None:
         print(f"测试电阻串口{port}未找到，请检查设备连接。")
@@ -110,7 +110,7 @@ def _standard_r(_port, _baudrates, test_part: int, test_step: int):  # 1~4  # 1~
 
 
 def standard_r(test_part: int, test_step: int):
-    baudrates = Config.default_baudrates
+    baudrates = Config.default_baud_rate
     port = Config.test_r_port
     if port is None:
         print(f"测试电阻串口{port}未找到，请检查设备连接。")
