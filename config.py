@@ -28,7 +28,7 @@ class Config:
     # test_enter_card_port = "COM3" # 读卡进门的串口port
     test_enter_card_port = "COM10"  # 串口测试用10->11
     # test_leave_card_port = "COM1" # 读卡出门的串口port
-    test_leave_card_port = "COM8"  # 串口测试用8->9
+    test_leave_card_port = "COM7"  # 串口测试用7->8
     # 串口命令
     hex_test_online = "01 01 01 00 00 00 00 01 CA"  # 测试是否在线
     hex_test_online_succces = "01 01 01 00 00 00 00 05 AB"  # 测试是否在线成功
