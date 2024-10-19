@@ -48,7 +48,7 @@ def _get_r(_port, _baudrates):
             received_data = get_return_msg(ser)
             printf_byte(received_data)
             # CRC校验
-            if crc8_check(received_data) and bytearray.fromhex(Config.hex_test_online_succces) == received_data:
+            if crc8_check(received_data) and bytearray.fromhex(Config.hex_test_online_success) == received_data:
                 print("获取在线状态成功")
                 service_id = turn_16_to_10(received_data[0:1])
                 # 获取电阻
