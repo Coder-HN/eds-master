@@ -1,9 +1,5 @@
 import time
 
-import serial
-import serial.tools.list_ports
-
-from config import Config
 from utils import dbHelper
 from utils.dbHelper import get_r_standard_by_service_id
 from utils.testResistanceHelper import get_r, open_door

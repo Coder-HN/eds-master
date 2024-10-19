@@ -14,6 +14,8 @@ from router.router_admin_manager_service import manageService
 from router.router_admin_manager_user import manageUser
 from router.router_user import user
 from utils.readCardHelper import card_process
+import serial
+import serial.tools.list_ports
 
 # 锁用于防止并发刷卡
 enter_lock = threading.Lock()
