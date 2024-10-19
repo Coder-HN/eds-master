@@ -21,7 +21,7 @@ class Config:
     ACCESS_TIMES_LIMIT = 6
 
     # 默认波特率、端口超时时间ms
-    default_baudrates = 9600
+    default_baud_rate = 9600
     default_com_timeout = 10
     # 串口名
     test_r_port = "COM7"  # 测试电阻的串口port
