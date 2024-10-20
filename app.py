@@ -15,18 +15,25 @@ from router.router_user import user
 from utils.readCardHelper import card_process
 
 
+# 开门
 def enter_connect_socket(socketio):
     baud_rate = Config.default_baud_rate
-    # 开门
     port_enter = Config.test_enter_card_port
-    card_process(1, port_enter, baud_rate, socketio)
+    try:
+        card_process(1, port_enter, baud_rate, socketio)
+    except Exception as e:
+        print(f"串口错误: {e}")
+
+    # 关门
 
 
 def leave_connect_socket(socketio):
     baud_rate = Config.default_baud_rate
-    # 关门
     port_leave = Config.test_leave_card_port
-    card_process(2, port_leave, baud_rate, socketio)
+    try:
+        card_process(2, port_leave, baud_rate, socketio)
+    except Exception as e:
+        print(f"串口错误: {e}")
 
 
 # 使用配置文件配置数据库配置

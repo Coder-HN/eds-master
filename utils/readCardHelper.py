@@ -21,13 +21,6 @@ get_except_leave = False
 target_end_data = bytes([0x0D, 0x0A, 0x03])
 
 
-# def card_process(access_flag, _port, _baudrates, socketio=None):
-#     try:
-#         common_card_process(_port, _baudrates, access_flag=access_flag, socketio=socketio)
-#     except Exception as e:
-#         print(f"串口错误: {e}")
-
-
 def card_process(access_flag, _port, _baudrates, socketio=None):
     if access_flag == 1:
         door = "进门"
