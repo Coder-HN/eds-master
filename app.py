@@ -29,9 +29,9 @@ def enter_connect_socket(socketio):
             set_hex_data(ser, Config.hex_test_online)
             received_data = get_return_msg(ser)
             printf_byte(received_data)
-        # CRC校验
-        if crc8_check(received_data) and bytearray.fromhex(Config.hex_test_online_success) == received_data:
-            print("获取测试电阻串口在线状态成功")
+            # CRC校验
+            if crc8_check(received_data) and bytearray.fromhex(Config.hex_test_online_success) == received_data:
+                print("获取测试电阻串口在线状态成功")
         card_process(1, port_enter, baud_rate, socketio)
     except Exception as e:
         print(f"进门串口错误: {e}")
