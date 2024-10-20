@@ -30,7 +30,7 @@ def enter_connect_socket(socketio):
             received_data = get_return_msg(ser)
             # CRC校验
             if crc8_check(received_data) and bytearray.fromhex(Config.hex_test_online_success) == received_data:
-                print("获取测试电阻串口在线状态成功")
+                print("==================测试电阻串口在线")
         card_process(1, port_enter, baud_rate, socketio)
     except Exception as e:
         print(f"进门串口错误: {e}")
@@ -60,9 +60,9 @@ def create_app(config_class=Config):
     # 串口IO
     socketio = SocketIO(_app, cors_allowed_origins="*", logger=False, engineio_logger=False)
     if socketio is None:
-        print("socketio未开启")
+        print("==================socketio未开启")
     else:
-        print("socketio已开启")
+        print("==================socketio已开启")
     thread_enter = threading.Thread(target=enter_connect_socket, args=(socketio,))
     thread_enter.daemon = True
     thread_enter.start()

@@ -58,8 +58,8 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
                     print(f"card_id={card_id}无权限通过")
                     error_data = {'error_message': f"该卡人员不在数据库中,card_id={card_id}"}
                     socketio.emit('fail_data', {'data': error_data})
-                if access_flag == 1:
-                    is_processing_enter = 0
+                # if access_flag == 1:
+                #     is_processing_enter = 0
             buffer.clear()  # 清空缓冲区
 
 
