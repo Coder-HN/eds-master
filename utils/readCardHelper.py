@@ -49,7 +49,9 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
                     is_processing = True
                 if access_flag == 2 and is_processing_leave:
                     is_processing = True
-                if buffer and is_processing:
+                if not (buffer and is_processing):
+                    print("!!!!!!!!!!!!!!!!!!!!重复刷卡!!!!!!!!!!!!!!!!!!!!")
+                else:
                     if access_flag == 1:
                         is_processing_enter = False
                     else:
