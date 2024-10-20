@@ -72,20 +72,21 @@ def handle_valid_card(user, card_id, access_flag, socketio):
 
     user_employee_id = user['employee_id']
     user_pic_path = user['pic_path']
-    if access_flag == 1 and is_repeat_enter == 0:
-        cache_data = {
-            'access_flag': access_flag,
-            'card_id': card_id,
-            'user_num': user_num,
-            'name': user_name,
-            'employee_id': user_employee_id,
-            'department': user_department,
-            'pic_path': user_pic_path,
-        }
-        time.sleep(1)  # 等待前端监听
-        print(cache_data)
-        socketio.emit('cache_data', {'data': cache_data})
-        print("发送cache_data数据到前端")
+    if access_flag == 1:
+        if is_repeat_enter == 0:  # 重复刷卡不需要发送cache_data
+            cache_data = {
+                'access_flag': access_flag,
+                'card_id': card_id,
+                'user_num': user_num,
+                'name': user_name,
+                'employee_id': user_employee_id,
+                'department': user_department,
+                'pic_path': user_pic_path,
+            }
+            time.sleep(1)  # 等待前端监听
+            print(cache_data)
+            socketio.emit('cache_data', {'data': cache_data})
+            print("发送cache_data数据到前端")
         process_enter_routine(user_num, card_id, access_flag, socketio)
     elif access_flag == 2:
         # TODO 出门无法获取service_id
