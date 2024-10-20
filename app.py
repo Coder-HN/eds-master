@@ -28,7 +28,6 @@ def enter_connect_socket(socketio):
             # 你的串口通信代码
             set_hex_data(ser, Config.hex_test_online)
             received_data = get_return_msg(ser)
-            printf_byte(received_data)
             # CRC校验
             if crc8_check(received_data) and bytearray.fromhex(Config.hex_test_online_success) == received_data:
                 print("获取测试电阻串口在线状态成功")

@@ -28,7 +28,7 @@ def set_hex_data(ser, hex_data):
     else:
         data = hex_data  # 否则直接使用传入的 hex_data
     ser.write(data)
-    print("Sent Data:", ' '.join(f'{byte:02X}' for byte in data))
+    # print("Sent Data:", ' '.join(f'{byte:02X}' for byte in data))
 
 
 # 获取返回信息
@@ -47,6 +47,7 @@ def get_return_msg(ser, timeout=Config.default_com_timeout):
             time.sleep(0.1)  # 稍作等待，以确保数据传输稳定
             if ser.in_waiting == 0:
                 break
+    printf_byte(buffer)
     return buffer
 
 

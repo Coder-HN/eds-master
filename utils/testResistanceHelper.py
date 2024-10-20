@@ -16,7 +16,6 @@ def _open_door(_port, _baudrates):
             # 开门
             set_hex_data(ser, Config.hex_open_door)
             received_data = get_return_msg(ser)
-            printf_byte(received_data)
             if crc8_check(received_data) and bytearray.fromhex(Config.hex_open_door_success) == received_data:
                 print("获取开门请求成功")
                 return True
@@ -46,7 +45,6 @@ def _get_r(_port, _baudrates):
             # 获取电阻
             set_hex_data(ser, Config.hex_get_cow)
             received_data = get_return_msg(ser)
-            printf_byte(received_data)
             service_id = turn_16_to_10(received_data[0:1])
             if crc8_check(received_data):
                 cow_data = received_data[3:-2]
@@ -88,7 +86,6 @@ def _standard_r(_port, _baudrates, test_part: int, test_step: int):  # 1~4  # 1~
             print(hex_r_standard_get)
             set_hex_data(ser, hex_r_standard_send)
             received_data = get_return_msg(ser)
-            printf_byte(received_data)
             if received_data == hex_r_standard_get:
                 print(f"test_part={test_part},test_step={test_step},电阻校准成功")
                 return True
