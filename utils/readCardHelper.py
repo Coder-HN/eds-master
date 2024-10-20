@@ -223,9 +223,11 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
             socketio.emit('success_data', {'data': set_data})
             print("发送success_data数据到前端")
             if remaining_time <= 0:
+                print("set_data:", set_data)
                 print("测试已完成")
                 return  # 测试完成，退出循环
             if result_num == 1:
+                print("set_data:", set_data)
                 print("人员及电阻均符合要求,通行")
                 open_door()
             if remaining_time <= 0:
