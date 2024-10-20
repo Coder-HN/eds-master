@@ -42,23 +42,21 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
                         start_time = time.time()  # 记录开始时间
                     buffer.append(byte)  # 将接收到的字节加入缓冲区
             if frame_started and (time.time() - start_time) * 1000 >= frame_timeout_ms:
-                if buffer:
+                global target_end_data
+                if buffer[0] == 2 and buffer[-3:] == target_end_data:
                     hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
-                    print(f"=================={door}串口{frame_timeout_ms}ms接收到的完整数据帧:", hex_data_string)
-                    global target_end_data
-                    if buffer[0] == 2 and buffer[-3:] == target_end_data:
-                        # 获取卡号
-                        frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
-                        ascii_chars_card = [chr(byte) for byte in frame_data]
-                        card_id = ''.join(ascii_chars_card)
-                        print("数据帧校验通过")
-                        socketio.emit('read_card_status', {'status': access_flag})
-                        # 读取用户信息并处理
-                        user = dbHelper.get_user_by_card_id(card_id)
-                        if user:
-                            handle_valid_card(user, card_id, access_flag, socketio)
-                        else:
-                            handle_invalid_card(card_id, socketio)
+                    print(f"==================数据帧校验通过,{door}串口{frame_timeout_ms}ms接收到的完整数据帧:", hex_data_string)
+                    # 获取卡号
+                    frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
+                    ascii_chars_card = [chr(byte) for byte in frame_data]
+                    card_id = ''.join(ascii_chars_card)
+                    socketio.emit('read_card_status', {'status': access_flag})
+                    # 读取用户信息并处理
+                    user = dbHelper.get_user_by_card_id(card_id)
+                    if user:
+                        handle_valid_card(user, card_id, access_flag, socketio)
+                    else:
+                        handle_invalid_card(card_id, socketio)
                 buffer.clear()  # 清空缓冲区
                 frame_started = False  # 重置帧标记
 
