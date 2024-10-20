@@ -38,7 +38,7 @@ def open_door():
         return _open_door(port, baudrates)
 
 
-def _get_r(_port, _baudrates):
+def get_r(_port=Config.test_r_port, _baudrates=Config.default_baud_rate):
     try:
         # 打开串行端口
         with serial.Serial(_port, _baudrates, timeout=1) as ser:
@@ -60,18 +60,8 @@ def _get_r(_port, _baudrates):
         print(f"其他错误: {e}")
 
 
-def get_r():
-    baudrates = Config.default_baud_rate
-    port = Config.test_r_port
-    if port is None:
-        print(f"测试电阻串口{port}未找到，请检查设备连接。")
-        return None
-    else:
-        # 获取电阻
-        return _get_r(port, baudrates)
-
-
-def _standard_r(_port, _baudrates, test_part: int, test_step: int):  # 1~4  # 1~8
+def standard_r(test_part: int, test_step: int, _port=Config.test_r_port,
+               _baudrates=Config.default_baud_rate):  # 1~4  # 1~8
     try:
         # 打开串行端口
         with serial.Serial(_port, _baudrates, timeout=1) as ser:
@@ -95,14 +85,3 @@ def _standard_r(_port, _baudrates, test_part: int, test_step: int):  # 1~4  # 1~
         print(f"串口错误: {e}")
     except Exception as e:
         print(f"其他错误: {e}")
-
-
-def standard_r(test_part: int, test_step: int):
-    baudrates = Config.default_baud_rate
-    port = Config.test_r_port
-    if port is None:
-        print(f"测试电阻串口{port}未找到，请检查设备连接。")
-        return None
-    else:
-        # 开门
-        return _standard_r(port, baudrates, test_part, test_step)

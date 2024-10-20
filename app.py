@@ -59,6 +59,10 @@ def create_app(config_class=Config):
 
     # 串口IO
     socketio = SocketIO(_app, cors_allowed_origins="*", logger=False, engineio_logger=False)
+    if socketio is None:
+        print("socketio未开启")
+    else:
+        print("socketio已开启")
     thread_enter = threading.Thread(target=enter_connect_socket, args=(socketio,))
     thread_enter.daemon = True
     thread_enter.start()

@@ -26,11 +26,7 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
     global is_repeat_enter, is_processing_enter
     door = "进门" if access_flag == 1 else "出门"
     with serial.Serial(_port, _baudrates, timeout=Config.default_com_timeout) as ser:
-        print(f"=================={door}读卡监听中==================")
-        if socketio is None:
-            print("socketio未开启")
-        else:
-            print("socketio已开启")
+        print(f"=================={door}读卡监听中")
         # 循环监听读卡
         while True:
             time.sleep(0.001)
@@ -40,7 +36,7 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
             if len(buffer) > 4 and buffer[0] == 2 and buffer[-3:]:
                 if access_flag == 1 and is_processing_enter == 1:
                     # 打断前端过程
-                    print(f"=================={door}串口重复刷卡!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    print(f"=================={door}串口重复刷卡")
                     is_repeat_enter = 1
                 is_processing_enter = 1
                 hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
