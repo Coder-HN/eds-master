@@ -22,10 +22,7 @@ target_end_data = bytes([0x0D, 0x0A, 0x03])
 
 
 def card_process(access_flag, _port, _baudrates, socketio=None):
-    if access_flag == 1:
-        door = "进门"
-    else:
-        door = "出门"
+    door = "进门" if access_flag == 1 else "出门"
     frame_timeout_ms = Config.default_com_timeout
     with serial.Serial(_port, _baudrates, timeout=frame_timeout_ms / 1000) as ser:
         buffer = bytearray()  # 临时存储数据
