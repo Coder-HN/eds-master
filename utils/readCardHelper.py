@@ -14,18 +14,16 @@ from utils.testResistanceHelper import get_r, open_door
 读卡器
 02 + 卡号 +0D 0A 03
 """
-# 用于防止并发刷卡
-is_processing_enter = False
-is_processing_leave = False
-is_repeat_enter = False
-is_repeat_leave = False
+# 用于防止进门并发刷卡
+is_processing_enter = 0  # 0表示正在执行进门刷卡
+is_repeat_enter = 0  # 0表示重复刷卡
+
 # 目标二进制数组
 target_end_data = bytes([0x0D, 0x0A, 0x03])
 
 
 def card_process(access_flag, _port, _baudrates, socketio=None):
-    global is_repeat_enter, is_repeat_leave
-    global is_processing_enter, is_processing_leave
+    global is_repeat_enter, is_processing_enter
     door = "进门" if access_flag == 1 else "出门"
     with serial.Serial(_port, _baudrates, timeout=Config.default_com_timeout) as ser:
         print(f"=================={door}读卡监听中==================")
@@ -40,22 +38,19 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
             global target_end_data
             # 读取到完整数据帧
             if len(buffer) > 4 and buffer[0] == 2 and buffer[-3:]:
-                if access_flag == 1 and is_processing_enter:
+                if access_flag == 1 and is_processing_enter == 1:
                     # 打断前端过程
                     print(f"=================={door}串口重复刷卡!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                    is_repeat_enter = True
-                if access_flag == 2 and is_processing_leave:
-                    print(f"=================={door}串口重复刷卡!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                    is_repeat_leave = True
-                is_processing_enter = True if access_flag == 1 else False
-                is_processing_leave = True if access_flag == 2 else False
+                    is_repeat_enter = 1
+                is_processing_enter = 1
                 hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
                 print(f"==================数据帧校验通过,{door}串口接收到的完整数据帧:", hex_data_string)
                 # 获取卡号
                 frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
                 ascii_chars_card = [chr(byte) for byte in frame_data]
                 card_id = ''.join(ascii_chars_card)
-                socketio.emit('read_card_status', {'status': access_flag})
+                if is_repeat_enter == 0:
+                    socketio.emit('read_card_status', {'status': access_flag})
                 # 读取用户信息并处理
                 user = dbHelper.get_user_by_card_id(card_id)
                 if user:
@@ -66,9 +61,7 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
                     error_data = {'error_message': f"该卡人员不在数据库中,card_id={card_id}"}
                     socketio.emit('fail_data', {'data': error_data})
                 if access_flag == 1:
-                    is_processing_enter = False
-                else:
-                    is_processing_leave = False
+                    is_processing_enter = 0
             buffer.clear()  # 清空缓冲区
 
 
@@ -180,9 +173,9 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
 
         def test_resistance_loop():
             global is_repeat_enter
-            if is_repeat_enter:
+            if is_repeat_enter == 1:
                 print("================重复刷卡结束重复测试")
-                is_repeat_enter = False
+                is_repeat_enter = 0
                 return
 
             # 控制重复刷卡
