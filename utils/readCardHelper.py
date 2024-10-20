@@ -60,6 +60,10 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
                     handle_valid_card(user, card_id, access_flag, socketio)
                 else:
                     handle_invalid_card(card_id, socketio)
+                if access_flag == 1:
+                    is_processing_enter = False
+                else:
+                    is_processing_leave = False
             buffer.clear()  # 清空缓冲区
 
 
