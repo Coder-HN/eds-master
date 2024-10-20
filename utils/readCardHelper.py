@@ -182,9 +182,6 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
 
         def test_resistance_loop():
             nonlocal remaining_time
-            if remaining_time <= 0:
-                print("测试已完成")
-                return  # 测试完成，退出循环
             # 每次测试并发送数据
             _, value_hand_left, value_hand_right, value_foot_left, value_foot_right = get_r()
             result_hand_left, result_hand_right, result_foot_left, result_foot_right = 2, 2, 2, 2
@@ -230,14 +227,19 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
             print(set_data)
             socketio.emit('success_data', {'data': set_data})
             print("发送success_data数据到前端")
+            if remaining_time <= 0:
+                print("测试已完成")
+                return  # 测试完成，退出循环
             if result_num == 1:
                 print("人员及电阻均符合要求,通行")
                 open_door()
-            else:
-                # 减少剩余时间
-                remaining_time -= interval
-                # 0.5秒后再次调用自己
-                threading.Timer(interval, test_resistance_loop).start()
+            if remaining_time <= 0:
+                print("测试已完成")
+                return  # 测试完成，退出循环
+            # 减少剩余时间
+            remaining_time -= interval
+            # 0.5秒后再次调用自己
+            threading.Timer(interval, test_resistance_loop).start()
 
         # 开始测试阻值
         test_resistance_loop()
