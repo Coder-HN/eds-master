@@ -238,6 +238,4 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
 
         # 开始测试阻值
         test_resistance_loop()
-    global is_processing_enter
-    if access_flag == 1:
-        is_processing_enter = 0
+
