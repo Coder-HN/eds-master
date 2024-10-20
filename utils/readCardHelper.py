@@ -37,14 +37,13 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
             # 读取到完整数据帧
             if len(buffer) > 4 and buffer[0] == 2 and buffer[-3:]:
                 if access_flag == 1 and is_processing_enter:
-                    print(f"{door}串口重复刷卡")
+                    print(f"=================={door}串口重复刷卡!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 if access_flag == 2 and is_processing_leave:
-                    print(f"{door}串口重复刷卡")
+                    print(f"=================={door}串口重复刷卡!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 is_processing_enter = True if access_flag == 1 else False
                 is_processing_leave = True if access_flag == 2 else False
                 hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
-                print(f"==================数据帧校验通过,{door}串口接收到的完整数据帧:",
-                      hex_data_string)
+                print(f"==================数据帧校验通过,{door}串口接收到的完整数据帧:",hex_data_string)
                 # 获取卡号
                 frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
                 ascii_chars_card = [chr(byte) for byte in frame_data]
