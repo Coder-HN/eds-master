@@ -224,7 +224,6 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
                 'result_num': result_num,
                 'second': remaining_time
             }
-            print(set_data)
             socketio.emit('success_data', {'data': set_data})
             print("发送success_data数据到前端")
             if remaining_time <= 0:
