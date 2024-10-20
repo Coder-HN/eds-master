@@ -23,7 +23,8 @@ def enter_connect_socket(socketio):
         card_process(1, port_enter, baud_rate, socketio)
     except Exception as e:
         print(f"进门串口错误: {e}")
-        socketio.emit('fail_data', {'error_message': f"进门串口错误: {e}"})
+        error_data = {'error_message': f"进门串口错误: {e}"}
+        socketio.emit('fail_data', {'data': error_data})
         print("已发送fail_data")
 
 
@@ -35,8 +36,10 @@ def leave_connect_socket(socketio):
         card_process(2, port_leave, baud_rate, socketio)
     except Exception as e:
         print(f"出门串口错误: {e}")
-        socketio.emit('fail_data', {'error_message': f"出门串口错误: {e}"})
+        error_data = {'error_message': f"出门串口错误: {e}"}
+        socketio.emit('fail_data', {'data': error_data})
         print("已发送fail_data")
+
 
 # 使用配置文件配置数据库配置
 def create_app(config_class=Config):
