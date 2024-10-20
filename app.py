@@ -16,17 +16,17 @@ from utils.readCardHelper import card_process
 
 
 def enter_connect_socket(socketio):
-    baudrates = Config.default_baud_rate
+    baud_rate = Config.default_baud_rate
     # 开门
     port_enter = Config.test_enter_card_port
-    card_process(1, port_enter, baudrates, socketio)
+    card_process(1, port_enter, baud_rate, socketio)
 
 
 def leave_connect_socket(socketio):
-    baudrates = Config.default_baud_rate
+    baud_rate = Config.default_baud_rate
     # 关门
     port_leave = Config.test_leave_card_port
-    card_process(2, port_leave, baudrates, socketio)
+    card_process(2, port_leave, baud_rate, socketio)
 
 
 # 使用配置文件配置数据库配置
