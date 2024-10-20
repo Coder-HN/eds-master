@@ -24,10 +24,10 @@ def enter_connect_socket(socketio):
     except Exception as e:
         print(f"进门串口错误: {e}")
         socketio.emit('fail_data', {'error_message': f"进门串口错误: {e}"})
+        print("已发送fail_data")
 
-    # 关门
 
-
+# 出门
 def leave_connect_socket(socketio):
     baud_rate = Config.default_baud_rate
     port_leave = Config.test_leave_card_port
@@ -36,7 +36,7 @@ def leave_connect_socket(socketio):
     except Exception as e:
         print(f"出门串口错误: {e}")
         socketio.emit('fail_data', {'error_message': f"出门串口错误: {e}"})
-
+        print("已发送fail_data")
 
 # 使用配置文件配置数据库配置
 def create_app(config_class=Config):
