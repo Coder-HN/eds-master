@@ -87,7 +87,6 @@ def crc8_check(data):
     calculated_crc_hex = crc8(data[:le - 1])
     # 检查接收的 CRC 是否与计算出的一致
     if calculated_crc_hex == received_crc:
-        print("CRC 校验成功！")
         return True
     else:
         print(f"CRC 校验失败！data: {data}, 计算出的 CRC: {calculated_crc_hex}, 接收的 CRC: {received_crc}")
