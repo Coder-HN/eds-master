@@ -143,62 +143,58 @@ def handle_invalid_card(card_id, socketio):
 def process_enter_routine(user_num, card_id, access_flag, socketio):
     print("测试电阻中...")
     result = False
+    # 未检查该门禁与员工的权限关系
     service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = get_r()
-    if service_id:
-        hand_left_min, hand_left_max, hand_right_min, hand_right_max, foot_left_min, foot_left_max, foot_right_min, foot_right_max = get_r_standard_by_service_id(
-            service_id)
+    hand_left_min, hand_left_max, hand_right_min, hand_right_max, foot_left_min, foot_left_max, foot_right_min, foot_right_max = get_r_standard_by_service_id(
+        service_id)
 
-        result_hand_left = 2
-        result_hand_right = 2
-        result_foot_left = 2
-        result_foot_right = 2
+    result_hand_left = 2
+    result_hand_right = 2
+    result_foot_left = 2
+    result_foot_right = 2
 
-        if hand_left_min <= value_hand_left <= hand_left_max:
-            result_hand_left = 1
-        if hand_right_min <= value_hand_right <= hand_right_max:
-            result_hand_right = 1
-        if foot_left_min <= value_foot_left <= foot_left_max:
-            result_foot_left = 1
-        if foot_right_min <= value_foot_right <= foot_right_max:
-            result_foot_right = 1
+    if hand_left_min <= value_hand_left <= hand_left_max:
+        result_hand_left = 1
+    if hand_right_min <= value_hand_right <= hand_right_max:
+        result_hand_right = 1
+    if foot_left_min <= value_foot_left <= foot_left_max:
+        result_foot_left = 1
+    if foot_right_min <= value_foot_right <= foot_right_max:
+        result_foot_right = 1
 
-        if result_hand_left * result_hand_right * result_foot_left * result_foot_right == 1:
-            result = True
+    if result_hand_left * result_hand_right * result_foot_left * result_foot_right == 1:
+        result = True
 
-        result_num = 1 if result else 2
-        set_data = {
-            'user_num': user_num,
-            'access_flag': access_flag,
-            'card_id': card_id,
-            'service_id': service_id,
+    result_num = 1 if result else 2
+    set_data = {
+        'user_num': user_num,
+        'access_flag': access_flag,
+        'card_id': card_id,
+        'service_id': service_id,
 
-            'hand_left_min': hand_left_min,
-            'hand_left_max': hand_left_max,
-            'hand_right_min': hand_right_min,
-            'hand_right_max': hand_right_max,
-            'foot_left_min': foot_left_min,
-            'foot_left_max': foot_left_max,
-            'foot_right_min': foot_right_min,
-            'foot_right_max': foot_right_max,
+        'hand_left_min': hand_left_min,
+        'hand_left_max': hand_left_max,
+        'hand_right_min': hand_right_min,
+        'hand_right_max': hand_right_max,
+        'foot_left_min': foot_left_min,
+        'foot_left_max': foot_left_max,
+        'foot_right_min': foot_right_min,
+        'foot_right_max': foot_right_max,
 
-            'value_hand_left': value_hand_left,
-            'value_hand_right': value_hand_right,
-            'value_foot_left': value_foot_left,
-            'value_foot_right': value_foot_right,
-            'result_hand_left': result_hand_left,
-            'result_hand_right': result_hand_right,
-            'result_foot_left': result_foot_left,
-            'result_foot_right': result_foot_right,
+        'value_hand_left': value_hand_left,
+        'value_hand_right': value_hand_right,
+        'value_foot_left': value_foot_left,
+        'value_foot_right': value_foot_right,
+        'result_hand_left': result_hand_left,
+        'result_hand_right': result_hand_right,
+        'result_foot_left': result_foot_left,
+        'result_foot_right': result_foot_right,
 
-            'result_num': result_num,
-        }
-        print(set_data)
-        socketio.emit('success_data', {'data': set_data})
-        print("发送success_data数据到前端")
-        if result:
-            print("人员及电阻均符合要求,通行")
-            open_door()
-    else:
-        print("该门禁此人员无权限通过")
-        error_data = {'error_message': f"该门禁未录入数据库,card_id={card_id},service_id={service_id}"}
-        socketio.emit('fail_data', {'data': error_data})
+        'result_num': result_num,
+    }
+    print(set_data)
+    socketio.emit('success_data', {'data': set_data})
+    print("发送success_data数据到前端")
+    if result:
+        print("人员及电阻均符合要求,通行")
+        open_door()
