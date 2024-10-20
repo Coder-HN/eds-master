@@ -45,23 +45,14 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
                 if buffer:
                     hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
                     print(f"=================={door}串口{frame_timeout_ms}ms接收到的完整数据帧:", hex_data_string)
-                    frame_data = buffer[1:-3]
-                    hex_card_string = ' '.join(f'{byte:02X}' for byte in frame_data)
-                    print(f"Hex card_id: {hex_card_string}")
-                    # 将每个十六进制数转换为对应的 ASCII 字符
-                    ascii_chars_card = [chr(byte) for byte in frame_data]
-                    # 将字符数组连接成字符串
-                    card_id = ''.join(ascii_chars_card)
-                    print("card_id:", card_id)
-                    # 读取末尾桢
-                    frame_end = buffer[-3:]
-                    hex_end = ' '.join(f'{byte:02X}' for byte in frame_end)
-                    print(f"Hex end: {hex_end}")
                     global target_end_data
-                    if len(buffer) > 4 and buffer[0] == 2 and frame_end == target_end_data:
+                    if buffer[0] == 2 and buffer[-3:] == target_end_data:
+                        # 获取卡号
+                        frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
+                        ascii_chars_card = [chr(byte) for byte in frame_data]
+                        card_id = ''.join(ascii_chars_card)
                         print("数据帧校验通过")
                         socketio.emit('read_card_status', {'status': access_flag})
-
                         # 读取用户信息并处理
                         user = dbHelper.get_user_by_card_id(card_id)
                         if user:
