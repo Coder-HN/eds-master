@@ -47,7 +47,8 @@ def get_return_msg(ser, timeout=Config.default_com_timeout):
             time.sleep(0.1)  # 稍作等待，以确保数据传输稳定
             if ser.in_waiting == 0:
                 break
-    printf_byte(buffer)
+    # if len(buffer) > 4:
+    #     printf_byte(buffer)
     return buffer
 
 

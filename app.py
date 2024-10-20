@@ -12,7 +12,7 @@ from router.router_admin_manager_department import manageDepartment
 from router.router_admin_manager_service import manageService
 from router.router_admin_manager_user import manageUser
 from router.router_user import user
-from utils.portHelper import set_hex_data, get_return_msg, printf_byte, crc8_check
+from utils.portHelper import set_hex_data, get_return_msg, crc8_check
 from utils.readCardHelper import card_process
 import serial
 import serial.tools.list_ports
