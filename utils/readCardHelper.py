@@ -21,6 +21,7 @@ target_end_data = bytes([0x0D, 0x0A, 0x03])
 
 
 def card_process(access_flag, _port, _baudrates, socketio=None):
+    global is_processing_enter, is_processing_leave
     door = "进门" if access_flag == 1 else "出门"
     with serial.Serial(_port, _baudrates, timeout=Config.default_com_timeout) as ser:
         print(f"=================={door}读卡监听中==================")
@@ -28,11 +29,19 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
             print("socketio未开启")
         else:
             print("socketio已开启")
+        # 循环监听读卡
         while True:
             time.sleep(0.001)
             buffer = get_return_msg(ser)
+            enter = (access_flag == 1 and is_processing_enter)
+            leave = (access_flag == 2 and is_processing_leave)
             global target_end_data
-            if len(buffer) > 4 and buffer[0] == 2 and buffer[-3:] == target_end_data:
+            # 读取到完整数据帧
+            if len(buffer) > 4 and buffer[0] == 2 and buffer[-3:] and (enter or leave):
+                if access_flag == 1:
+                    is_processing_enter = False
+                else:
+                    is_processing_leave = False
                 hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
                 print(f"==================数据帧校验通过,{door}串口接收到的完整数据帧:",
                       hex_data_string)
