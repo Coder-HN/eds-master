@@ -6,6 +6,7 @@ import serial.tools.list_ports
 from config import Config
 from utils import dbHelper
 from utils.dbHelper import get_r_standard_by_service_id
+from utils.portHelper import get_return_msg
 from utils.testResistanceHelper import get_r, open_door
 
 """
@@ -21,11 +22,7 @@ target_end_data = bytes([0x0D, 0x0A, 0x03])
 
 def card_process(access_flag, _port, _baudrates, socketio=None):
     door = "进门" if access_flag == 1 else "出门"
-    frame_timeout_ms = Config.default_com_timeout
-    with serial.Serial(_port, _baudrates, timeout=frame_timeout_ms / 1000) as ser:
-        buffer = bytearray()  # 临时存储数据
-        frame_started = False  # 标记数据帧是否已经开始
-        start_time = time.time()  # 记录帧开始的时间
+    with serial.Serial(_port, _baudrates, timeout=Config.default_com_timeout) as ser:
         print(f"=================={door}读卡监听中==================")
         if socketio is None:
             print("socketio未开启")
@@ -33,32 +30,24 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
             print("socketio已开启")
         while True:
             time.sleep(0.001)
-            if ser.in_waiting > 0:
-                # 读取所有可用的数据
-                data = ser.read(ser.in_waiting)
-                for byte in data:
-                    if not frame_started:
-                        frame_started = True  # 标记帧开始
-                        start_time = time.time()  # 记录开始时间
-                    buffer.append(byte)  # 将接收到的字节加入缓冲区
-            if frame_started and (time.time() - start_time) * 1000 >= frame_timeout_ms:
-                global target_end_data
-                if buffer[0] == 2 and buffer[-3:] == target_end_data:
-                    hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
-                    print(f"==================数据帧校验通过,{door}串口{frame_timeout_ms}ms接收到的完整数据帧:", hex_data_string)
-                    # 获取卡号
-                    frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
-                    ascii_chars_card = [chr(byte) for byte in frame_data]
-                    card_id = ''.join(ascii_chars_card)
-                    socketio.emit('read_card_status', {'status': access_flag})
-                    # 读取用户信息并处理
-                    user = dbHelper.get_user_by_card_id(card_id)
-                    if user:
-                        handle_valid_card(user, card_id, access_flag, socketio)
-                    else:
-                        handle_invalid_card(card_id, socketio)
-                buffer.clear()  # 清空缓冲区
-                frame_started = False  # 重置帧标记
+            buffer = get_return_msg(ser)
+            global target_end_data
+            if buffer[0] == 2 and buffer[-3:] == target_end_data:
+                hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
+                print(f"==================数据帧校验通过,{door}串口接收到的完整数据帧:",
+                      hex_data_string)
+                # 获取卡号
+                frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
+                ascii_chars_card = [chr(byte) for byte in frame_data]
+                card_id = ''.join(ascii_chars_card)
+                socketio.emit('read_card_status', {'status': access_flag})
+                # 读取用户信息并处理
+                user = dbHelper.get_user_by_card_id(card_id)
+                if user:
+                    handle_valid_card(user, card_id, access_flag, socketio)
+                else:
+                    handle_invalid_card(card_id, socketio)
+            buffer.clear()  # 清空缓冲区
 
 
 def handle_valid_card(user, card_id, access_flag, socketio):

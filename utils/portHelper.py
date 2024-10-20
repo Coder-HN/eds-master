@@ -2,6 +2,8 @@ import serial
 import serial.tools.list_ports
 import time
 
+from config import Config
+
 
 def turn_16_to_10(hex_array):
     decimal_value = 0
@@ -30,7 +32,7 @@ def set_hex_data(ser, hex_data):
 
 
 # 获取返回信息
-def get_return_msg(ser, timeout=2):
+def get_return_msg(ser, timeout=Config.default_com_timeout):
     start_time = time.time()
     buffer = bytearray()
     while True:

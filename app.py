@@ -24,7 +24,7 @@ def enter_connect_socket(socketio):
     port_enter = Config.test_enter_card_port
     try:
         # 检查测试电阻串口在线状态
-        with serial.Serial(Config.test_r_port, Config.default_baud_rate, timeout=1) as ser:
+        with serial.Serial(Config.test_r_port, Config.default_baud_rate, timeout=Config.default_com_timeout) as ser:
             # 你的串口通信代码
             set_hex_data(ser, Config.hex_test_online)
             received_data = get_return_msg(ser)
