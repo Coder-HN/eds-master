@@ -57,6 +57,8 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
                     print(f"card_id={card_id}无权限通过")
                     error_data = {'error_message': f"该卡人员不在数据库中,card_id={card_id}"}
                     socketio.emit('fail_data', {'data': error_data})
+                    is_repeat_enter = 0
+                    is_processing_enter = 0
             buffer.clear()  # 清空缓冲区
 
 
@@ -110,6 +112,7 @@ def handle_valid_card(user, card_id, access_flag, socketio):
 
 
 def process_enter_routine(user_num, card_id, access_flag, socketio):
+    global is_repeat_enter, is_processing_enter
     print("测试电阻中...")
     # TODO 未检查该门禁与员工的权限关系
     service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = get_r()
@@ -158,8 +161,10 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
     socketio.emit('success_data', {'data': set_data})
     print("发送success_data数据到前端")
     if result_num == 1:
-        print("==================人员及电阻均符合要求,通行")
+        print("==================人员及电阻均符合要求,通行==================")
         open_door()
+        is_processing_enter = 0
+        is_repeat_enter = 0
     else:
         print("==================重新测试电阻")
         # 失败则开始再次测试电阻，测试6s，每0.5s发送一次数据更新到前端
@@ -172,6 +177,7 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
             if is_repeat_enter == 1:
                 print("==================重复刷卡结束重复测试")
                 is_repeat_enter = 0
+                is_processing_enter = 0
                 return
 
             # 控制重复刷卡
@@ -220,19 +226,20 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
             }
             socketio.emit('success_data', {'data': set_data})
             print("发送success_data数据到前端")
-            if result_num == 1:
+            if result_num == 1:  # 重新测试已成功
                 print("set_data:", set_data)
                 print("==================人员及电阻均符合要求,通行")
                 open_door()
-                if is_processing_enter == 1:
-                    is_processing_enter = 0
+                is_processing_enter = 0
+                is_repeat_enter = 0
                 return
 
-            if remaining_time <= 0:
+            if remaining_time <= 0:  # 重新测试一直未成功
                 print("==================重新测试电阻已完成")
-                if is_processing_enter == 1:
-                    is_processing_enter = 0
-                return  # 测试完成，退出循环
+                is_processing_enter = 0
+                is_repeat_enter = 0
+                return
+
             # 减少剩余时间
             remaining_time -= interval
             # 0.5秒后再次调用自己
