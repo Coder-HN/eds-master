@@ -20,7 +20,6 @@ target_end_data = bytes([0x0D, 0x0A, 0x03])
 
 
 def card_process(access_flag, _port, _baudrates, socketio=None):
-    global is_processing_enter, is_processing_leave
     door = "进门" if access_flag == 1 else "出门"
     frame_timeout_ms = Config.default_com_timeout
     with serial.Serial(_port, _baudrates, timeout=frame_timeout_ms / 1000) as ser:
@@ -42,24 +41,10 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
                         frame_started = True  # 标记帧开始
                         start_time = time.time()  # 记录开始时间
                     buffer.append(byte)  # 将接收到的字节加入缓冲区
-
             if frame_started and (time.time() - start_time) * 1000 >= frame_timeout_ms:
-                is_processing = False
-                if access_flag == 1 and is_processing_enter:
-                    is_processing = True
-                if access_flag == 2 and is_processing_leave:
-                    is_processing = True
-                if not (buffer and is_processing):
-                    print("!!!!!!!!!!!!!!!!!!!!重复刷卡!!!!!!!!!!!!!!!!!!!!")
-                else:
-                    if access_flag == 1:
-                        is_processing_enter = False
-                    else:
-                        is_processing_leave = False
+                if buffer:
                     hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
-
                     print(f"=================={door}串口{frame_timeout_ms}ms接收到的完整数据帧:", hex_data_string)
-
                     frame_data = buffer[1:-3]
                     hex_card_string = ' '.join(f'{byte:02X}' for byte in frame_data)
                     print(f"Hex card_id: {hex_card_string}")
