@@ -30,12 +30,22 @@ def set_hex_data(ser, hex_data):
 
 
 # 获取返回信息
-def get_return_msg(ser):
-    # 等待一段时间，让数据被处理
-    time.sleep(1)
-    # 读取所有可用的数据
-    received_data = ser.read(ser.in_waiting)
-    return received_data
+def get_return_msg(ser, timeout=2):
+    start_time = time.time()
+    buffer = bytearray()
+    while True:
+        # 如果有数据可读
+        if ser.in_waiting > 0:
+            buffer.extend(ser.read(ser.in_waiting))
+        # 超过指定时间退出
+        if time.time() - start_time > timeout:
+            break
+        # 检查是否已经收到数据，如果有数据且稳定，则提前退出
+        if len(buffer) > 0:
+            time.sleep(0.1)  # 稍作等待，以确保数据传输稳定
+            if ser.in_waiting == 0:
+                break
+    return buffer
 
 
 # 打印获取的信息的十六进制表示
