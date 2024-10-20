@@ -12,7 +12,10 @@ from router.router_admin_manager_department import manageDepartment
 from router.router_admin_manager_service import manageService
 from router.router_admin_manager_user import manageUser
 from router.router_user import user
+from utils.portHelper import set_hex_data, get_return_msg, printf_byte, crc8_check
 from utils.readCardHelper import card_process
+import serial
+import serial.tools.list_ports
 
 
 # 开门
@@ -20,6 +23,15 @@ def enter_connect_socket(socketio):
     baud_rate = Config.default_baud_rate
     port_enter = Config.test_enter_card_port
     try:
+        # 检查测试电阻串口在线状态
+        with serial.Serial(port_enter, baud_rate, timeout=1) as ser:
+            # 你的串口通信代码
+            set_hex_data(ser, Config.hex_test_online)
+            received_data = get_return_msg(ser)
+            printf_byte(received_data)
+        # CRC校验
+        if crc8_check(received_data) and bytearray.fromhex(Config.hex_test_online_success) == received_data:
+            print("获取测试电阻串口在线状态成功")
         card_process(1, port_enter, baud_rate, socketio)
     except Exception as e:
         print(f"进门串口错误: {e}")
