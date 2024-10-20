@@ -37,8 +37,11 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
             # 读取到完整数据帧
             if len(buffer) > 4 and buffer[0] == 2 and buffer[-3:]:
                 if access_flag == 1 and is_processing_enter:
+                    # 打断前端过程
+                    socketio.emit('repeat_card', {'status': access_flag})
                     print(f"=================={door}串口重复刷卡!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 if access_flag == 2 and is_processing_leave:
+                    socketio.emit('repeat_card', {'status': access_flag})
                     print(f"=================={door}串口重复刷卡!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 is_processing_enter = True if access_flag == 1 else False
                 is_processing_leave = True if access_flag == 2 else False
