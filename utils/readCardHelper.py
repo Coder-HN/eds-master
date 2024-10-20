@@ -32,7 +32,7 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
             time.sleep(0.001)
             buffer = get_return_msg(ser)
             global target_end_data
-            if buffer[0] == 2 and buffer[-3:] == target_end_data:
+            if len(buffer) > 4 and buffer[0] == 2 and buffer[-3:] == target_end_data:
                 hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
                 print(f"==================数据帧校验通过,{door}串口接收到的完整数据帧:",
                       hex_data_string)
