@@ -157,7 +157,7 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
     socketio.emit('success_data', {'data': set_data})
     print("发送success_data数据到前端")
     if result_num == 1:
-        print("人员及电阻均符合要求,通行")
+        print("==================人员及电阻均符合要求,通行")
         open_door()
     else:
         print("==================重新测试电阻")
@@ -167,7 +167,7 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
         remaining_time = total_duration  # 剩余时间
 
         def test_resistance_loop():
-            global is_repeat_enter
+            global is_repeat_enter, is_processing_enter
             if is_repeat_enter == 1:
                 print("==================重复刷卡结束重复测试")
                 is_repeat_enter = 0
@@ -219,16 +219,18 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
             }
             socketio.emit('success_data', {'data': set_data})
             print("发送success_data数据到前端")
-            if remaining_time <= 0:
-                print("set_data:", set_data)
-                print("测试已完成")
-                return  # 测试完成，退出循环
             if result_num == 1:
                 print("set_data:", set_data)
-                print("人员及电阻均符合要求,通行")
+                print("==================人员及电阻均符合要求,通行")
                 open_door()
+                if is_processing_enter == 1:
+                    is_processing_enter = 0
+                return
+
             if remaining_time <= 0:
                 print("==================重新测试电阻已完成")
+                if is_processing_enter == 1:
+                    is_processing_enter = 0
                 return  # 测试完成，退出循环
             # 减少剩余时间
             remaining_time -= interval
@@ -237,6 +239,3 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
 
         # 开始测试阻值
         test_resistance_loop()
-    global is_processing_enter
-    if is_processing_enter == 1:
-        is_processing_enter = 0
