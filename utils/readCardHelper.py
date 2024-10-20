@@ -1,3 +1,4 @@
+import threading
 import time
 
 import serial
@@ -48,7 +49,7 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
                 is_processing_enter = True if access_flag == 1 else False
                 is_processing_leave = True if access_flag == 2 else False
                 hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
-                print(f"==================数据帧校验通过,{door}串口接收到的完整数据帧:",hex_data_string)
+                print(f"==================数据帧校验通过,{door}串口接收到的完整数据帧:", hex_data_string)
                 # 获取卡号
                 frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
                 ascii_chars_card = [chr(byte) for byte in frame_data]
@@ -124,59 +125,79 @@ def handle_invalid_card(card_id, socketio):
 
 def process_enter_routine(user_num, card_id, access_flag, socketio):
     print("测试电阻中...")
-    result = False
     # 未检查该门禁与员工的权限关系
     service_id, value_hand_left, value_hand_right, value_foot_left, value_foot_right = get_r()
     hand_left_min, hand_left_max, hand_right_min, hand_right_max, foot_left_min, foot_left_max, foot_right_min, foot_right_max = get_r_standard_by_service_id(
         service_id)
+    result_num = 0  # 0表示未成功，1表示成功
 
-    result_hand_left = 2
-    result_hand_right = 2
-    result_foot_left = 2
-    result_foot_right = 2
+    def sent_success_data(second=None):
+        global result_num
+        result_hand_left = 2
+        result_hand_right = 2
+        result_foot_left = 2
+        result_foot_right = 2
+        if hand_left_min <= value_hand_left <= hand_left_max:
+            result_hand_left = 1
+        if hand_right_min <= value_hand_right <= hand_right_max:
+            result_hand_right = 1
+        if foot_left_min <= value_foot_left <= foot_left_max:
+            result_foot_left = 1
+        if foot_right_min <= value_foot_right <= foot_right_max:
+            result_foot_right = 1
+        if result_hand_left * result_hand_right * result_foot_left * result_foot_right == 1:
+            result_num = 1
+        set_data = {
+            'user_num': user_num,
+            'access_flag': access_flag,
+            'card_id': card_id,
+            'service_id': service_id,
 
-    if hand_left_min <= value_hand_left <= hand_left_max:
-        result_hand_left = 1
-    if hand_right_min <= value_hand_right <= hand_right_max:
-        result_hand_right = 1
-    if foot_left_min <= value_foot_left <= foot_left_max:
-        result_foot_left = 1
-    if foot_right_min <= value_foot_right <= foot_right_max:
-        result_foot_right = 1
+            'hand_left_min': hand_left_min,
+            'hand_left_max': hand_left_max,
+            'hand_right_min': hand_right_min,
+            'hand_right_max': hand_right_max,
+            'foot_left_min': foot_left_min,
+            'foot_left_max': foot_left_max,
+            'foot_right_min': foot_right_min,
+            'foot_right_max': foot_right_max,
 
-    if result_hand_left * result_hand_right * result_foot_left * result_foot_right == 1:
-        result = True
+            'value_hand_left': value_hand_left,
+            'value_hand_right': value_hand_right,
+            'value_foot_left': value_foot_left,
+            'value_foot_right': value_foot_right,
+            'result_hand_left': result_hand_left,
+            'result_hand_right': result_hand_right,
+            'result_foot_left': result_foot_left,
+            'result_foot_right': result_foot_right,
 
-    result_num = 1 if result else 2
-    set_data = {
-        'user_num': user_num,
-        'access_flag': access_flag,
-        'card_id': card_id,
-        'service_id': service_id,
+            'result_num': result_num,
+            'second': second
+        }
+        print(set_data)
+        socketio.emit('success_data', {'data': set_data})
+        print("发送success_data数据到前端")
 
-        'hand_left_min': hand_left_min,
-        'hand_left_max': hand_left_max,
-        'hand_right_min': hand_right_min,
-        'hand_right_max': hand_right_max,
-        'foot_left_min': foot_left_min,
-        'foot_left_max': foot_left_max,
-        'foot_right_min': foot_right_min,
-        'foot_right_max': foot_right_max,
-
-        'value_hand_left': value_hand_left,
-        'value_hand_right': value_hand_right,
-        'value_foot_left': value_foot_left,
-        'value_foot_right': value_foot_right,
-        'result_hand_left': result_hand_left,
-        'result_hand_right': result_hand_right,
-        'result_foot_left': result_foot_left,
-        'result_foot_right': result_foot_right,
-
-        'result_num': result_num,
-    }
-    print(set_data)
-    socketio.emit('success_data', {'data': set_data})
-    print("发送success_data数据到前端")
-    if result:
+    sent_success_data()
+    if result_num == 1:
         print("人员及电阻均符合要求,通行")
         open_door()
+    else:  # 失败则开始再次测试电阻，测试6s，每0.5s发送一次数据更新到前端
+        total_duration = 6  # 测试的总时间为6秒
+        interval = 0.5  # 每0.5秒测试一次
+        remaining_time = total_duration  # 剩余时间
+
+        def test_resistance_loop():
+            nonlocal remaining_time
+            if remaining_time <= 0:
+                print("测试已完成")
+                return  # 测试完成，退出循环
+            # 每次测试并发送数据
+            sent_success_data(remaining_time)
+            # 减少剩余时间
+            remaining_time -= interval
+            # 0.5秒后再次调用自己
+            threading.Timer(interval, test_resistance_loop).start()
+
+        # 开始测试阻值
+        test_resistance_loop()
