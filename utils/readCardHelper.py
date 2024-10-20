@@ -17,11 +17,14 @@ from utils.testResistanceHelper import get_r, open_door
 # 用于防止并发刷卡
 is_processing_enter = False
 is_processing_leave = False
+is_repeat_enter = False
+is_repeat_leave = False
 # 目标二进制数组
 target_end_data = bytes([0x0D, 0x0A, 0x03])
 
 
 def card_process(access_flag, _port, _baudrates, socketio=None):
+    global is_repeat_enter, is_repeat_leave
     global is_processing_enter, is_processing_leave
     door = "进门" if access_flag == 1 else "出门"
     with serial.Serial(_port, _baudrates, timeout=Config.default_com_timeout) as ser:
@@ -39,13 +42,11 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
             if len(buffer) > 4 and buffer[0] == 2 and buffer[-3:]:
                 if access_flag == 1 and is_processing_enter:
                     # 打断前端过程
-                    socketio.emit('repeat_card', {'status': access_flag})
                     print(f"=================={door}串口重复刷卡!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                    time.sleep(1)
+                    is_repeat_enter = True
                 if access_flag == 2 and is_processing_leave:
-                    socketio.emit('repeat_card', {'status': access_flag})
                     print(f"=================={door}串口重复刷卡!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                    time.sleep(1)
+                    is_repeat_leave = True
                 is_processing_enter = True if access_flag == 1 else False
                 is_processing_leave = True if access_flag == 2 else False
                 hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
@@ -175,12 +176,19 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
         print("人员及电阻均符合要求,通行")
         open_door()
     else:
+        print("================重新测试电阻")
         # 失败则开始再次测试电阻，测试6s，每0.5s发送一次数据更新到前端
         total_duration = 6  # 测试的总时间为6秒
         interval = 0.5  # 每0.5秒测试一次
         remaining_time = total_duration  # 剩余时间
 
         def test_resistance_loop():
+            global is_repeat_enter
+            if is_repeat_enter:
+                is_repeat_enter = False
+                return
+
+            # 控制重复刷卡
             nonlocal remaining_time
             # 每次测试并发送数据
             _, value_hand_left, value_hand_right, value_foot_left, value_foot_right = get_r()
@@ -233,7 +241,7 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
                 print("人员及电阻均符合要求,通行")
                 open_door()
             if remaining_time <= 0:
-                print("测试已完成")
+                print("================重新测试电阻已完成")
                 return  # 测试完成，退出循环
             # 减少剩余时间
             remaining_time -= interval
