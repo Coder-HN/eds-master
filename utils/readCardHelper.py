@@ -40,9 +40,11 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
                     # 打断前端过程
                     socketio.emit('repeat_card', {'status': access_flag})
                     print(f"=================={door}串口重复刷卡!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    time.sleep(1)
                 if access_flag == 2 and is_processing_leave:
                     socketio.emit('repeat_card', {'status': access_flag})
                     print(f"=================={door}串口重复刷卡!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    time.sleep(1)
                 is_processing_enter = True if access_flag == 1 else False
                 is_processing_leave = True if access_flag == 2 else False
                 hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
