@@ -14,8 +14,8 @@ from utils.testResistanceHelper import get_r, open_door
 02 + 卡号 +0D 0A 03
 """
 # 用于防止并发刷卡
-is_processing_enter = True
-is_processing_leave = True
+is_processing_enter = False
+is_processing_leave = False
 # 目标二进制数组
 target_end_data = bytes([0x0D, 0x0A, 0x03])
 
@@ -33,15 +33,15 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
         while True:
             time.sleep(0.001)
             buffer = get_return_msg(ser)
-            enter = (access_flag == 1 and is_processing_enter)
-            leave = (access_flag == 2 and is_processing_leave)
             global target_end_data
             # 读取到完整数据帧
-            if len(buffer) > 4 and buffer[0] == 2 and buffer[-3:] and (enter or leave):
-                if access_flag == 1:
-                    is_processing_enter = False
-                else:
-                    is_processing_leave = False
+            if len(buffer) > 4 and buffer[0] == 2 and buffer[-3:]:
+                if access_flag == 1 and is_processing_enter:
+                    print(f"{door}串口重复刷卡")
+                if access_flag == 2 and is_processing_leave:
+                    print(f"{door}串口重复刷卡")
+                is_processing_enter = True if access_flag == 1 else False
+                is_processing_leave = True if access_flag == 2 else False
                 hex_data_string = ' '.join(f'{byte:02X}' for byte in buffer)
                 print(f"==================数据帧校验通过,{door}串口接收到的完整数据帧:",
                       hex_data_string)
