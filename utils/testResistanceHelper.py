@@ -49,14 +49,12 @@ def _get_r(_port, _baudrates):
             printf_byte(received_data)
             service_id = turn_16_to_10(received_data[0:1])
             if crc8_check(received_data):
-                print("获取电阻成功")
                 cow_data = received_data[3:-2]
                 left_hand = turn_16_to_10(cow_data[:4]) / 1000
                 right_hand = turn_16_to_10(cow_data[4:8]) / 1000
                 left_foot = turn_16_to_10(cow_data[8:12]) / 1000
                 right_foot = turn_16_to_10(cow_data[12:16]) / 1000
-                print(
-                    f"service_id:{service_id}, left_hand:{left_hand}, right_hand:{right_hand}, left_foot:{left_foot}, right_foot:{right_foot}")
+                # print(f"service_id:{service_id}, left_hand:{left_hand}, right_hand:{right_hand}, left_foot:{left_foot}, right_foot:{right_foot}")
                 return service_id, left_hand, right_hand, left_foot, right_foot
     except serial.SerialException as e:
         print(f"串口错误: {e}")
