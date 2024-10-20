@@ -58,8 +58,6 @@ def card_process(access_flag, _port, _baudrates, socketio=None):
                     print(f"card_id={card_id}无权限通过")
                     error_data = {'error_message': f"该卡人员不在数据库中,card_id={card_id}"}
                     socketio.emit('fail_data', {'data': error_data})
-                # if access_flag == 1:
-                #     is_processing_enter = 0
             buffer.clear()  # 清空缓冲区
 
 
@@ -75,7 +73,7 @@ def handle_valid_card(user, card_id, access_flag, socketio):
 
     user_employee_id = user['employee_id']
     user_pic_path = user['pic_path']
-    if access_flag == 1:
+    if access_flag == 1 and is_repeat_enter == 0:
         cache_data = {
             'access_flag': access_flag,
             'card_id': card_id,
@@ -172,7 +170,7 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
         def test_resistance_loop():
             global is_repeat_enter
             if is_repeat_enter == 1:
-                print("================重复刷卡结束重复测试")
+                print("=================重复刷卡结束重复测试")
                 is_repeat_enter = 0
                 return
 
@@ -240,3 +238,6 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
 
         # 开始测试阻值
         test_resistance_loop()
+    global is_processing_enter
+    if access_flag == 1:
+        is_processing_enter = 0
