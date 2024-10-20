@@ -185,6 +185,7 @@ def process_enter_routine(user_num, card_id, access_flag, socketio):
         def test_resistance_loop():
             global is_repeat_enter
             if is_repeat_enter:
+                print("================重复刷卡结束重复测试")
                 is_repeat_enter = False
                 return
 
