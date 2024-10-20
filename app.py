@@ -12,21 +12,21 @@ from router.router_admin_manager_department import manageDepartment
 from router.router_admin_manager_service import manageService
 from router.router_admin_manager_user import manageUser
 from router.router_user import user
-from utils.readCardHelper import enter_card_process, leave_card_process
+from utils.readCardHelper import card_process
 
 
 def enter_connect_socket(socketio):
     baud_rate = Config.default_baud_rate
     # 开门
     port_enter = Config.test_enter_card_port
-    enter_card_process(port_enter, baud_rate, socketio)
+    card_process(1, port_enter, baud_rate, socketio)
 
 
 def leave_connect_socket(socketio):
     baud_rate = Config.default_baud_rate
     # 关门
     port_leave = Config.test_leave_card_port
-    leave_card_process(port_leave, baud_rate, socketio)
+    card_process(2, port_leave, baud_rate, socketio)
 
 
 # 使用配置文件配置数据库配置

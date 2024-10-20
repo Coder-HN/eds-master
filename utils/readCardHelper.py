@@ -12,9 +12,23 @@ from utils.testResistanceHelper import get_r, open_door
 读卡器
 02 + 卡号 +0D 0A 03
 """
-
+# 用于防止并发刷卡
+is_processing_enter = False
+is_processing_leave = False
+get_except_enter = False
+get_except_leave = False
 # 目标二进制数组
 target_end_data = bytes([0x0D, 0x0A, 0x03])
+
+
+def card_process(process_type, _port, _baudrates, socketio=None):
+    try:
+        if process_type == 1:
+            enter_card_process(_port, _baudrates, socketio)
+        elif process_type == 2:
+            leave_card_process(_port, _baudrates, socketio)
+    except Exception as e:
+        print(f"串口错误: {e}")
 
 
 # 整个读卡进门access_flag=1，读卡、测试电阻、开关门
