@@ -261,7 +261,7 @@ def repeat_test_resistance(ser, user_info, r_standard):
         else:  # TODO 可以来检查是否被中断
             queue_length = enter_queue.qsize()
             print(f"重新测试：queue_length={queue_length}")
-            if queue_length > 1:
+            if queue_length == 1:
                 # 重新测试过程中有人重复刷卡
                 data = get_send_resistance_info(user_info, resistance_value, r_standard, results)
                 data['repeat'] = 1
