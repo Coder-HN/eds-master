@@ -36,7 +36,7 @@ def monitor_entrance(port, baudrate):
                 time.sleep(0.01)
     except Exception as e:
         print(f"进门串口错误: {e}")
-        error_data = {'error_message': f"进门串口错误: {e}"}
+        error_data = {'error_message': f"进门串口错误: {e}", 'access_flag': 1}
         set_data = {'data': error_data}
         manage_queue.put(('fail_data', set_data))
 
@@ -61,7 +61,7 @@ def monitor_exit(port, baudrate):
                 time.sleep(0.01)
     except Exception as e:
         print(f"出门串口错误: {e}")
-        error_data = {'error_message': f"出门串口错误: {e}"}
+        error_data = {'error_message': f"出门串口错误: {e}", 'access_flag': 2}
         set_data = {'data': error_data}
         manage_queue.put(('fail_data', set_data))
 
@@ -149,7 +149,7 @@ def electric_control(port, baudrate):
                 time.sleep(0.01)
     except Exception as e:
         print(f"电阻串口错误: {e}")
-        error_data = {'error_message': f"电阻串口错误: {e}"}
+        error_data = {'error_message': f"电阻串口错误: {e}", 'access_flag': 1}
         set_data = {'data': error_data}
         manage_queue.put(('fail_data', set_data))
 
@@ -176,7 +176,7 @@ def send_user_info(access_flag, user, card_id, socketio):
             'pic_path': user_pic_path,
         }
         time.sleep(1)  # 等待前端监听
-        print(f"进门-发送cache_data数据到前端,cache_data={cache_data}")
+        print(f"发送cache_data数据到前端,cache_data={cache_data}")
         socketio.emit('cache_data', {'data': cache_data})
     elif access_flag == 2:
         # TODO 出门无法获取service_id
@@ -194,7 +194,7 @@ def send_user_info(access_flag, user, card_id, socketio):
         }
         time.sleep(1)  # 等待跳转后页面开启监听
         print(set_data)
-        print(f"出门-发送success_data数据到前端,success_data={set_data}")
+        print(f"发送success_data数据到前端,success_data={set_data}")
         socketio.emit('success_data', {'data': set_data})
 
 
