@@ -112,7 +112,10 @@ def manage_system(socketio):
         if not manage_queue.empty():
             res, set_data = manage_queue.get()
             if res == 'success_data':
-                print(f"发送success_data数据到前端,success_data={set_data}")
+                access_flag = 1
+                if set_data['data']['access_flag'] is not None:
+                    access_flag = set_data['data']['access_flag']
+                print(f"发送success_data数据到前端,access_flag={access_flag}")
                 socketio.emit('success_data', set_data)
             elif res == 'fail_data':
                 print(f"发送fail_data数据到前端,fail_data={set_data}")
@@ -194,7 +197,7 @@ def send_user_info(access_flag, user, card_id, socketio):
         }
         time.sleep(1)  # 等待跳转后页面开启监听
         print(set_data)
-        print(f"发送success_data数据到前端,success_data={set_data}")
+        print(f"发送success_data数据到前端")
         socketio.emit('success_data', {'data': set_data})
 
 
