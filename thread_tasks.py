@@ -26,7 +26,8 @@ def monitor_entrance(port, baudrate):
                 # 读取数据
                 buffer = get_return_msg(ser)
                 # 读取到完整数据帧
-                if len(buffer) > 4 and buffer[0] == Config.card_start_data and buffer[-3:] == Config.card_end_data:
+                if len(buffer) > 4 and buffer[0] == 2 and buffer[-3:] == Config.card_end_data:
+                # if len(buffer) > 4 and buffer[0] == Config.card_start_data and buffer[-3:] == Config.card_end_data:
                     # 获取卡号card_id = buffer[1:-3].decode('ascii')
                     frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
                     ascii_chars_card = [chr(byte) for byte in frame_data]
