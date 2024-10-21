@@ -129,7 +129,6 @@ def electric_control(port, baudrate):
                     if task == 'test_resistance':
                         print(f"电阻测试中: user_info={user_info}")
                         resistance_value = get_resistance(ser)
-                        print(f"电阻测试中2: resistance_value={resistance_value}")
                         r_standard = get_r_standard_by_service_id(resistance_value['service_id'])
                         results = compare_resistance_values(resistance_value, r_standard)
                         if results['result_num'] == 1:
@@ -234,13 +233,13 @@ def compare_resistance_values(resistance_value, r_standard):
         'result_foot_right': 2
     }
     # 对比手和脚的测试值与限制值
-    if r_standard['hand_left_min'] <= resistance_value['hand_left'] <= r_standard['hand_left_max']:
+    if r_standard['hand_left_min'] <= resistance_value['value_hand_left'] <= r_standard['hand_left_max']:
         results['result_hand_left'] = 1
-    if r_standard['hand_right_min'] <= resistance_value['hand_right'] <= r_standard['hand_right_max']:
+    if r_standard['hand_right_min'] <= resistance_value['value_hand_right'] <= r_standard['hand_right_max']:
         results['result_hand_right'] = 1
-    if r_standard['foot_left_min'] <= resistance_value['foot_left'] <= r_standard['foot_left_max']:
+    if r_standard['foot_left_min'] <= resistance_value['value_foot_left'] <= r_standard['foot_left_max']:
         results['result_foot_left'] = 1
-    if r_standard['foot_right_min'] <= resistance_value['foot_right'] <= r_standard['foot_right_max']:
+    if r_standard['foot_right_min'] <= resistance_value['value_foot_right'] <= r_standard['foot_right_max']:
         results['result_foot_right'] = 1
 
     # 计算综合结果 result_num，所有值都为 1 时为通过
