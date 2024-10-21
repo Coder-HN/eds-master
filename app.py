@@ -16,6 +16,7 @@ from utils.portHelper import set_hex_data, get_return_msg, crc8_check
 from utils.readCardHelper import card_process
 import serial
 import serial.tools.list_ports
+from thread_tasks import monitor_entrance, monitor_exit, manage_system, electric_control
 
 
 # 开门
@@ -57,19 +58,32 @@ def create_app(config_class=Config):
     _app = Flask(__name__)
     _app.config.from_object(config_class)
 
-    # 串口IO
+    # 发送信息给前端的串口IO
     socketio = SocketIO(_app, cors_allowed_origins="*", logger=False, engineio_logger=False)
     if socketio is None:
         print("==================socketio未开启")
     else:
         print("==================socketio已开启")
-    thread_enter = threading.Thread(target=enter_connect_socket, args=(socketio,))
-    thread_enter.daemon = True
-    thread_enter.start()
 
-    thread_leave = threading.Thread(target=leave_connect_socket, args=(socketio,))
-    thread_leave.daemon = True
-    thread_leave.start()
+    # 启动线程的逻辑
+    def start_threads():
+        threading.Thread(target=monitor_entrance, args=(Config.test_enter_card_port, Config.default_baud_rate),
+                         daemon=True).start()
+        threading.Thread(target=monitor_exit, args=(Config.test_leave_card_port, Config.default_baud_rate),
+                         daemon=True).start()
+        threading.Thread(target=manage_system, args=(socketio,), daemon=True).start()
+        threading.Thread(target=electric_control, args=(Config.test_r_port, Config.default_baud_rate),
+                         daemon=True).start()
+
+    # 启动后台线程来处理刷卡逻辑
+    start_threads()
+    # thread_enter = threading.Thread(target=enter_connect_socket, args=(socketio,))
+    # thread_enter.daemon = True
+    # thread_enter.start()
+    #
+    # thread_leave = threading.Thread(target=leave_connect_socket, args=(socketio,))
+    # thread_leave.daemon = True
+    # thread_leave.start()
 
     # 配置日志记录
     _app.logger.setLevel(logging.INFO)
@@ -104,4 +118,5 @@ if __name__ == "__main__":
     app = create_app()
     with app.app_context():
         db.create_all()
+    # TODO 是否需要使用 SocketIO 启动应用
     app.run(debug=True)

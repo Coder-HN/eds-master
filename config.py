@@ -30,6 +30,8 @@ class Config:
     # test_leave_card_port = "COM1" # 读卡出门的串口port
     test_leave_card_port = "COM7"  # 串口测试用7->8
     # 串口命令
+    card_start_data = bytes(0x02)
+    card_end_data = bytes([0x0D, 0x0A, 0x03])
     hex_test_online = "01 01 01 00 00 00 00 01 CA"  # 测试是否在线
     hex_test_online_success = "01 01 01 00 00 00 00 05 AB"  # 测试是否在线成功
     hex_open_door = "01 01 04 00 00 00 00 01 21"  # 开门请求
