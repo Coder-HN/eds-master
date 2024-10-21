@@ -12,45 +12,7 @@ from router.router_admin_manager_department import manageDepartment
 from router.router_admin_manager_service import manageService
 from router.router_admin_manager_user import manageUser
 from router.router_user import user
-from utils.portHelper import set_hex_data, get_return_msg, crc8_check
-from utils.readCardHelper import card_process
-import serial
-import serial.tools.list_ports
 from thread_tasks import monitor_entrance, monitor_exit, manage_system, electric_control
-
-
-# 开门
-def enter_connect_socket(socketio):
-    baud_rate = Config.default_baud_rate
-    port_enter = Config.test_enter_card_port
-    try:
-        # 检查测试电阻串口在线状态
-        with serial.Serial(Config.test_r_port, Config.default_baud_rate, timeout=Config.default_com_timeout) as ser:
-            # 你的串口通信代码
-            set_hex_data(ser, Config.hex_test_online)
-            received_data = get_return_msg(ser)
-            # CRC校验
-            if crc8_check(received_data) and bytearray.fromhex(Config.hex_test_online_success) == received_data:
-                print("==================测试电阻串口在线")
-        card_process(1, port_enter, baud_rate, socketio)
-    except Exception as e:
-        print(f"进门串口错误: {e}")
-        error_data = {'error_message': f"进门串口错误: {e}"}
-        socketio.emit('fail_data', {'data': error_data})
-        print("已发送fail_data")
-
-
-# 出门
-def leave_connect_socket(socketio):
-    baud_rate = Config.default_baud_rate
-    port_leave = Config.test_leave_card_port
-    try:
-        card_process(2, port_leave, baud_rate, socketio)
-    except Exception as e:
-        print(f"出门串口错误: {e}")
-        error_data = {'error_message': f"出门串口错误: {e}"}
-        socketio.emit('fail_data', {'data': error_data})
-        print("已发送fail_data")
 
 
 # 使用配置文件配置数据库配置
@@ -77,13 +39,6 @@ def create_app(config_class=Config):
 
     # 启动后台线程来处理刷卡逻辑
     start_threads()
-    # thread_enter = threading.Thread(target=enter_connect_socket, args=(socketio,))
-    # thread_enter.daemon = True
-    # thread_enter.start()
-    #
-    # thread_leave = threading.Thread(target=leave_connect_socket, args=(socketio,))
-    # thread_leave.daemon = True
-    # thread_leave.start()
 
     # 配置日志记录
     _app.logger.setLevel(logging.INFO)
