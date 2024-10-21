@@ -113,14 +113,14 @@ def manage_system(socketio):
             res, set_data = manage_queue.get()
             if res == 'success_data':
                 access_flag = 1
-                if set_data['data']['access_flag'] is not None:
-                    access_flag = set_data['data']['access_flag']
+                if set_data['data'].get('access_flag') is not None:
+                    access_flag = set_data['data'].get('access_flag')
                 msg = "重新测试电阻更新数据"
-                if set_data['data']['second'] is not None and set_data['data']['second'] == 0:
+                if set_data['data'].get('second')== 0:
                     msg = "重新测试电阻正常结束,增加进出记录"
-                elif set_data['data']['repeat'] is not None and set_data['data']['repeat'] == 1:
+                elif set_data['data'].get('repeat') == 1:
                     msg = "重复刷卡导致重新测试电阻提前结束,增加进出记录"
-                elif set_data['data']['result_num'] == 1:
+                elif set_data['data'].get('result_num') == 1:
                     msg = "测试通过,添加进出记录"
                 print(f"发送success_data数据到前端,access_flag={access_flag},msg={msg}")
                 socketio.emit('success_data', set_data)
