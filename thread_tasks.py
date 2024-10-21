@@ -112,8 +112,10 @@ def manage_system(socketio):
         if not manage_queue.empty():
             res, set_data = manage_queue.get()
             if res == 'success_data':
+                print(f"发送success_data数据到前端,success_data={set_data}")
                 socketio.emit('success_data', set_data)
             elif res == 'fail_data':
+                print(f"发送fail_data数据到前端,fail_data={set_data}")
                 socketio.emit('fail_data', set_data)
         time.sleep(0.1)
 
@@ -127,7 +129,7 @@ def electric_control(port, baudrate):
                 if not electric_queue.empty():
                     task, user_info = electric_queue.get()
                     if task == 'test_resistance':
-                        print(f"电阻测试中: user_info={user_info}")
+                        print("电阻测试中...")
                         resistance_value = get_resistance(ser)
                         r_standard = get_r_standard_by_service_id(resistance_value['service_id'])
                         results = compare_resistance_values(resistance_value, r_standard)
@@ -174,9 +176,8 @@ def send_user_info(access_flag, user, card_id, socketio):
             'pic_path': user_pic_path,
         }
         time.sleep(1)  # 等待前端监听
-        print(cache_data)
+        print(f"进门-发送cache_data数据到前端,cache_data={cache_data}")
         socketio.emit('cache_data', {'data': cache_data})
-        print("发送cache_data数据到前端")
     elif access_flag == 2:
         # TODO 出门无法获取service_id
         service_id = 1
@@ -193,6 +194,7 @@ def send_user_info(access_flag, user, card_id, socketio):
         }
         time.sleep(1)  # 等待跳转后页面开启监听
         print(set_data)
+        print(f"出门-发送success_data数据到前端,success_data={set_data}")
         socketio.emit('success_data', {'data': set_data})
 
 
@@ -261,7 +263,7 @@ def repeat_test_resistance(ser, user_info, r_standard):
         else:  # TODO 可以来检查是否被中断
             queue_length = enter_queue.qsize()
             print(f"重新测试：queue_length={queue_length},i={i}")
-            if queue_length == 1:
+            if queue_length >= 1:
                 # 重新测试过程中有人重复刷卡
                 data = get_send_resistance_info(user_info, resistance_value, r_standard, results)
                 data['repeat'] = 1
