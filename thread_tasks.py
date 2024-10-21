@@ -260,13 +260,14 @@ def repeat_test_resistance(ser, user_info, r_standard):
             return
         else:  # TODO 可以来检查是否被中断
             queue_length = enter_queue.qsize()
-            print(f"重新测试：queue_length={queue_length}")
+            print(f"重新测试：queue_length={queue_length},i={i}")
             if queue_length == 1:
                 # 重新测试过程中有人重复刷卡
                 data = get_send_resistance_info(user_info, resistance_value, r_standard, results)
                 data['repeat'] = 1
                 set_data = {'data': data}
                 manage_queue.put(('success_data', set_data))
+                return
             if i != 1:
                 # 重新测试过程中未通过需要在每秒刷新页面
                 if i % 2 == 0:
@@ -280,7 +281,9 @@ def repeat_test_resistance(ser, user_info, r_standard):
                 data['second'] = 0
                 set_data = {'data': data}
                 manage_queue.put(('success_data', set_data))  # 最终测试失败
+                return
             time.sleep(0.5)
+
 
 def get_resistance(ser):
     # 获取电阻
