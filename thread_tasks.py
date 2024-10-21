@@ -144,7 +144,7 @@ def electric_control(port, baudrate):
                     elif task == 'open_door':
                         print(f"开门操作中: user_info={user_info}")
                         open_door(ser)
-                time.sleep(0.1)
+                time.sleep(0.01)
     except Exception as e:
         print(f"电阻串口错误: {e}")
         error_data = {'error_message': f"电阻串口错误: {e}"}
@@ -259,8 +259,8 @@ def repeat_test_resistance(ser, user_info, r_standard):
             open_door(ser)  # 一次测试成功开门
             return
         else:  # TODO 可以来检查是否被中断
-            time.sleep(0.5)
             queue_length = enter_queue.qsize()
+            print(f"重新测试：queue_length={queue_length}")
             if queue_length > 1:
                 # 重新测试过程中有人重复刷卡
                 data = get_send_resistance_info(user_info, resistance_value, r_standard, results)
@@ -280,7 +280,7 @@ def repeat_test_resistance(ser, user_info, r_standard):
                 data['second'] = 0
                 set_data = {'data': data}
                 manage_queue.put(('success_data', set_data))  # 最终测试失败
-
+            time.sleep(0.5)
 
 def get_resistance(ser):
     # 获取电阻
