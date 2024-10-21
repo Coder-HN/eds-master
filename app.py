@@ -73,5 +73,4 @@ if __name__ == "__main__":
     app = create_app()
     with app.app_context():
         db.create_all()
-    # TODO 是否需要使用 SocketIO 启动应用
     app.run(debug=True)

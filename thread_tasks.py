@@ -185,7 +185,7 @@ def send_user_info(access_flag, user, card_id, socketio):
             'department': user_department,
             'pic_path': user_pic_path,
         }
-        # time.sleep(1)  # 等待前端监听
+        time.sleep(1)  # 等待前端监听
         print(f"发送cache_data数据到前端,cache_data={cache_data}")
         socketio.emit('cache_data', {'data': cache_data})
     elif access_flag == 2:
@@ -270,7 +270,7 @@ def repeat_test_resistance(ser, user_info, r_standard):
             manage_queue.put(('success_data', set_data))
             open_door(ser)  # 一次测试成功开门
             return
-        else:  # TODO 可以来检查是否被中断
+        else:
             queue_length = enter_queue.qsize()
             print(f"重新测试：queue_length={queue_length},i={i}")
             if queue_length >= 1:
