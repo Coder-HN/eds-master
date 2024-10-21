@@ -267,6 +267,7 @@ def repeat_test_resistance(ser, user_info, r_standard):
                 data['repeat'] = 1
                 set_data = {'data': data}
                 manage_queue.put(('success_data', set_data))
+                print(f"==================提前结束本次刷卡: user_info={user_info}")
                 return
             if i != 1:
                 # 重新测试过程中未通过需要在每秒刷新页面
