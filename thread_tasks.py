@@ -129,6 +129,7 @@ def electric_control(port, baudrate):
                     if task == 'test_resistance':
                         print(f"电阻测试中: user_info={user_info}")
                         resistance_value = get_resistance(ser)
+                        print(f"电阻测试中2: resistance_value={resistance_value}")
                         r_standard = get_r_standard_by_service_id(resistance_value['service_id'])
                         results = compare_resistance_values(resistance_value, r_standard)
                         if results['result_num'] == 1:
