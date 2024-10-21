@@ -276,7 +276,9 @@ def repeat_test_resistance(ser, user_info, r_standard):
                     manage_queue.put(('success_data', set_data))
             else:
                 # 最后一次未通过
-                set_data = {'data': get_send_resistance_info(user_info, resistance_value, r_standard, results)}
+                data = get_send_resistance_info(user_info, resistance_value, r_standard, results)
+                data['second'] = 0
+                set_data = {'data': data}
                 manage_queue.put(('success_data', set_data))  # 最终测试失败
 
 
