@@ -26,14 +26,13 @@ def monitor_entrance(port, baudrate):
                 # 读取数据
                 buffer = get_return_msg(ser)
                 # 读取到完整数据帧
-                if len(buffer) > 4 and buffer[0] == 2 and buffer[-3:] == Config.card_end_data:
-                # if len(buffer) > 4 and buffer[0] == Config.card_start_data and buffer[-3:] == Config.card_end_data:
+                if len(buffer) > 4 and buffer[0] == Config.card_start_data and buffer[-3:] == Config.card_end_data:
                     # 获取卡号card_id = buffer[1:-3].decode('ascii')
                     frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
                     ascii_chars_card = [chr(byte) for byte in frame_data]
                     card_id = ''.join(ascii_chars_card)
                     enter_queue.put(card_id)  # 将卡号放入队列
-                    print(f"==================进门刷卡: {enter_queue}")
+                    print(f"==================进门刷卡: {list(enter_queue.queue)}")
                 time.sleep(0.01)
     except Exception as e:
         print(f"进门串口错误: {e}")
@@ -58,7 +57,7 @@ def monitor_exit(port, baudrate):
                     ascii_chars_card = [chr(byte) for byte in frame_data]
                     card_id = ''.join(ascii_chars_card)
                     exit_queue.put(card_id)  # 将卡号放入队列
-                    print(f"==================出门刷卡: {exit_queue}")
+                    print(f"==================出门刷卡: {list(exit_queue.queue)}")
                 time.sleep(0.01)
     except Exception as e:
         print(f"出门串口错误: {e}")
@@ -71,7 +70,7 @@ def monitor_exit(port, baudrate):
 def manage_system(socketio):
     """管理线程"""
     while True:
-        if not enter_queue.empty():
+        if not enter_queue.empty() and enter_queue.qsize() == 1:
             access_flag = 1
             socketio.emit('read_card_status', {'status': access_flag})
             card_id = enter_queue.queue[0]  # 获取队头元素但不移除
