@@ -70,7 +70,7 @@ def monitor_exit(port, baudrate):
 def manage_system(socketio):
     """管理线程"""
     while True:
-        if not enter_queue.empty() and enter_queue.qsize() == 1:
+        if not enter_queue.empty():
             access_flag = 1
             socketio.emit('read_card_status', {'status': access_flag})
             card_id = enter_queue.queue[0]  # 获取队头元素但不移除
@@ -82,13 +82,14 @@ def manage_system(socketio):
                 send_user_info(access_flag, user, card_id, socketio)
                 user_info = {'user_num': user['num'], 'card_id': card_id}
                 electric_queue.put(('test_resistance', user_info))
+
             else:
                 # TODO 需要把前端video和enter页面放在一起，实现一块监听
                 time.sleep(1)  # 等待前端监听
                 print(f"card_id={card_id}不在数据库中，无权限通过")
                 error_data = {'error_message': f"该卡人员不在数据库中,无权限通过,card_id={card_id}"}
                 socketio.emit('fail_data', {'data': error_data})
-                enter_queue.get()  # 移除进门读卡
+            enter_queue.get()  # 移除进门读卡
 
         if not exit_queue.empty():
             access_flag = 2
@@ -106,7 +107,7 @@ def manage_system(socketio):
                 print(f"card_id={card_id}不在数据库中，无权限通过")
                 error_data = {'error_message': f"该卡人员不在数据库中,无权限通过,card_id={card_id}"}
                 socketio.emit('fail_data', {'data': error_data})
-                exit_queue.get()
+            exit_queue.get()
 
         if not manage_queue.empty():
             res, set_data = manage_queue.get()
@@ -136,7 +137,6 @@ def electric_control(port, baudrate):
                                 'data': get_send_resistance_info(user_info, resistance_value, r_standard, results)}
                             manage_queue.put(('success_data', set_data))
                             open_door(ser)  # 一次测试成功开门
-                            enter_queue.get()  # 移除进门读卡
                         else:
                             print(f"电阻测试失败，重新测试: user_info={user_info}")
                             repeat_test_resistance(ser, user_info, r_standard)
@@ -144,7 +144,6 @@ def electric_control(port, baudrate):
                     elif task == 'open_door':
                         print(f"开门操作中: user_info={user_info}")
                         open_door(ser)
-                        exit_queue.get()
                 time.sleep(0.1)
     except Exception as e:
         print(f"电阻串口错误: {e}")
@@ -258,7 +257,6 @@ def repeat_test_resistance(ser, user_info, r_standard):
             set_data = {'data': get_send_resistance_info(user_info, resistance_value, r_standard, results)}
             manage_queue.put(('success_data', set_data))
             open_door(ser)  # 一次测试成功开门
-            enter_queue.get()  # 移除进门读卡
             return
         else:  # TODO 可以来检查是否被中断
             time.sleep(0.5)
@@ -280,7 +278,6 @@ def repeat_test_resistance(ser, user_info, r_standard):
                 # 最后一次未通过
                 set_data = {'data': get_send_resistance_info(user_info, resistance_value, r_standard, results)}
                 manage_queue.put(('success_data', set_data))  # 最终测试失败
-                enter_queue.get()  # 移除进门读卡
 
 
 def get_resistance(ser):
