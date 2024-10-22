@@ -3,9 +3,9 @@ from flask import Blueprint, jsonify, make_response, request
 from config import Config
 from mapper import UserMapper, ServiceMapper, AccessMapper, AttendMapper, RStandardMapper
 from models import TableAccess, TableAttend
+from thread_tasks import add_task_standard_r
 
 from utils import timeHelper
-from utils.testResistanceHelper import standard_r
 
 """
 创建一个名user的蓝图,并在其中定义路由
@@ -132,7 +132,7 @@ def do_standard_r():
     test_step = data.get('testStep')  # 1~8
     print(f"test_part = {test_part}")
     print(f"test_step = {test_step}")
-    if standard_r(test_part, test_step):
+    if add_task_standard_r(test_part, test_step):
         return jsonify(), 200
     else:
         return jsonify(), 201

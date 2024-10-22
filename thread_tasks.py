@@ -8,13 +8,14 @@ from config import Config
 from utils import dbHelper
 from utils.dbHelper import get_r_standard_by_service_id
 from utils.portHelper import get_return_msg
-from utils.testResistanceHelper import get_resistance, open_door
+from utils.testResistanceHelper import get_resistance, open_door, standard_r
 
 # 全局队列
 enter_queue = queue.Queue()
 exit_queue = queue.Queue()
 electric_queue = queue.Queue()
 manage_queue = queue.Queue()
+standard_r_queue = queue.Queue()
 
 
 # 进门读卡监听线程
@@ -23,17 +24,21 @@ def monitor_entrance(port, baudrate):
     try:
         with serial.Serial(port, baudrate, timeout=Config.default_com_timeout) as ser:
             print("进门读卡监听中......")
+            is_standard_r = standard_r_queue.qsize()
+            if is_standard_r != 0:
+                print("正在进行电阻校验，刷卡无效！")
             while True:
-                # 读取数据
-                buffer = get_return_msg(ser)
-                # 读取到完整数据帧
-                if len(buffer) > 4 and buffer[0] == Config.card_start_data and buffer[-3:] == Config.card_end_data:
-                    # 获取卡号card_id = buffer[1:-3].decode('ascii')
-                    frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
-                    ascii_chars_card = [chr(byte) for byte in frame_data]
-                    card_id = ''.join(ascii_chars_card)
-                    enter_queue.put(card_id)  # 将卡号放入队列
-                    print(f"==================进门刷卡: {list(enter_queue.queue)}")
+                if is_standard_r == 0:
+                    # 读取数据
+                    buffer = get_return_msg(ser)
+                    # 读取到完整数据帧
+                    if len(buffer) > 4 and buffer[0] == Config.card_start_data and buffer[-3:] == Config.card_end_data:
+                        # 获取卡号card_id = buffer[1:-3].decode('ascii')
+                        frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
+                        ascii_chars_card = [chr(byte) for byte in frame_data]
+                        card_id = ''.join(ascii_chars_card)
+                        enter_queue.put(card_id)  # 将卡号放入队列
+                        print(f"==================进门刷卡: {list(enter_queue.queue)}")
                 time.sleep(0.01)
     except Exception as e:
         print(f"进门串口错误: {e}")
@@ -48,17 +53,21 @@ def monitor_exit(port, baudrate):
     try:
         with serial.Serial(port, baudrate, timeout=Config.default_com_timeout) as ser:
             print("出门读卡监听中......")
+            is_standard_r = standard_r_queue.qsize()
+            if is_standard_r != 0:
+                print("正在进行电阻校验，刷卡无效！")
             while True:
-                # 读取数据
-                buffer = get_return_msg(ser)
-                # 读取到完整数据帧
-                if len(buffer) > 4 and buffer[0] == Config.card_start_data and buffer[-3:] == Config.card_end_data:
-                    # 获取卡号card_id = buffer[1:-3].decode('ascii')
-                    frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
-                    ascii_chars_card = [chr(byte) for byte in frame_data]
-                    card_id = ''.join(ascii_chars_card)
-                    exit_queue.put(card_id)  # 将卡号放入队列
-                    print(f"==================出门刷卡: {list(exit_queue.queue)}")
+                if is_standard_r == 0:
+                    # 读取数据
+                    buffer = get_return_msg(ser)
+                    # 读取到完整数据帧
+                    if len(buffer) > 4 and buffer[0] == Config.card_start_data and buffer[-3:] == Config.card_end_data:
+                        # 获取卡号card_id = buffer[1:-3].decode('ascii')
+                        frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
+                        ascii_chars_card = [chr(byte) for byte in frame_data]
+                        card_id = ''.join(ascii_chars_card)
+                        exit_queue.put(card_id)  # 将卡号放入队列
+                        print(f"==================出门刷卡: {list(exit_queue.queue)}")
                 time.sleep(0.01)
     except Exception as e:
         print(f"出门串口错误: {e}")
@@ -157,6 +166,10 @@ def electric_control(port, baudrate):
                     elif task == 'open_door':  # 出门那边发来的请求打开出门的门
                         print(f"开门操作中: user_info={user_info}")
                         open_door(ser, access_flag=2)
+                if not standard_r_queue.empty():
+                    test_data = standard_r_queue.get()
+                    standard_r(test_data['test_part'], test_data['test_step'], ser)
+
                 time.sleep(0.01)
     except Exception as e:
         print(f"电阻串口错误: {e}")
@@ -297,3 +310,12 @@ def repeat_test_resistance(ser, user_info, r_standard):
                 manage_queue.put(('success_data', set_data))  # 最终测试失败
                 return
             time.sleep(0.25)
+
+
+def add_task_standard_r(test_part, test_step):
+    test_data = {
+        'test_part': test_part,
+        'test_step': test_step
+    }
+    standard_r_queue.put(test_data)
+    return True
