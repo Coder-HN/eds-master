@@ -7,7 +7,8 @@ import serial.tools.list_ports
 from config import Config
 from utils import dbHelper
 from utils.dbHelper import get_r_standard_by_service_id
-from utils.portHelper import get_return_msg, set_hex_data, turn_16_to_10, crc8_check
+from utils.portHelper import get_return_msg
+from utils.testResistanceHelper import get_resistance, open_door
 
 # 全局队列
 enter_queue = queue.Queue()
@@ -84,7 +85,6 @@ def manage_system(socketio):
                 electric_queue.put(('test_resistance', user_info))
 
             else:
-                # TODO 需要把前端video和enter页面放在一起，实现一块监听
                 time.sleep(1)  # 等待前端监听
                 print(f"card_id={card_id}不在数据库中，无权限通过")
                 error_data = {'error_message': f"该卡人员不在数据库中,无权限通过,card_id={card_id}"}
@@ -101,7 +101,8 @@ def manage_system(socketio):
             if user is not None:
                 socketio.emit('read_card_status', {'status': access_flag})
                 send_user_info(access_flag, user, card_id, socketio)
-                electric_queue.put(('open_door', card_id))
+                user_info = {"card_id": card_id, "access_flag": access_flag}
+                electric_queue.put(('open_door', user_info))
             else:
                 time.sleep(1)  # 等待前端监听
                 print(f"card_id={card_id}不在数据库中，无权限通过")
@@ -116,7 +117,7 @@ def manage_system(socketio):
                 if set_data['data'].get('access_flag') is not None:
                     access_flag = set_data['data'].get('access_flag')
                 msg = "重新测试电阻更新数据"
-                if set_data['data'].get('second')== 0:
+                if set_data['data'].get('second') == 0:
                     msg = "重新测试电阻正常结束,增加进出记录"
                 elif set_data['data'].get('repeat') == 1:
                     msg = "重复刷卡导致重新测试电阻提前结束,增加进出记录"
@@ -127,7 +128,7 @@ def manage_system(socketio):
             elif res == 'fail_data':
                 print(f"发送fail_data数据到前端,fail_data={set_data}")
                 socketio.emit('fail_data', set_data)
-        time.sleep(0.1)
+        time.sleep(0.01)
 
 
 # 电阻串口线程
@@ -148,14 +149,14 @@ def electric_control(port, baudrate):
                             set_data = {
                                 'data': get_send_resistance_info(user_info, resistance_value, r_standard, results)}
                             manage_queue.put(('success_data', set_data))
-                            open_door(ser)  # 一次测试成功开门
+                            open_door(ser, access_flag=1)  # 一次测试成功开门
                         else:
                             print(f"电阻测试失败，重新测试: user_info={user_info}")
                             repeat_test_resistance(ser, user_info, r_standard)
 
-                    elif task == 'open_door':
+                    elif task == 'open_door':  # 出门那边发来的请求打开出门的门
                         print(f"开门操作中: user_info={user_info}")
-                        open_door(ser)
+                        open_door(ser, access_flag=2)
                 time.sleep(0.01)
     except Exception as e:
         print(f"电阻串口错误: {e}")
@@ -204,7 +205,7 @@ def send_user_info(access_flag, user, card_id, socketio):
         }
         time.sleep(1)  # 等待跳转后页面开启监听
         print(set_data)
-        print(f"发送success_data数据到前端")
+        print("发送success_data数据到前端")
         socketio.emit('success_data', {'data': set_data})
 
 
@@ -260,15 +261,15 @@ def compare_resistance_values(resistance_value, r_standard):
 
 
 def repeat_test_resistance(ser, user_info, r_standard):
-    """6秒反复测试电阻，每0.5秒测试一次"""
-    for i in range(12, 0, -1):  # 6秒，每0.5秒一次
+    """6秒反复测试电阻，每0.25秒测试一次，每0.5秒一次发送一次数据"""
+    for i in range(24, 0, -1):
         resistance_value = get_resistance(ser)
         results = compare_resistance_values(resistance_value, r_standard)
         if results['result_num'] == 1:
             print(f"电阻重新测试成功: user_info={user_info}")
             set_data = {'data': get_send_resistance_info(user_info, resistance_value, r_standard, results)}
             manage_queue.put(('success_data', set_data))
-            open_door(ser)  # 一次测试成功开门
+            open_door(ser, access_flag=1)  # 一次测试成功开门
             return
         else:
             queue_length = enter_queue.qsize()
@@ -285,7 +286,7 @@ def repeat_test_resistance(ser, user_info, r_standard):
                 # 重新测试过程中未通过需要在每秒刷新页面
                 if i % 2 == 0:
                     data = get_send_resistance_info(user_info, resistance_value, r_standard, results)
-                    data['second'] = i / 2
+                    data['second'] = i / 4
                     set_data = {'data': data}
                     manage_queue.put(('success_data', set_data))
             else:
@@ -295,35 +296,4 @@ def repeat_test_resistance(ser, user_info, r_standard):
                 set_data = {'data': data}
                 manage_queue.put(('success_data', set_data))  # 最终测试失败
                 return
-            time.sleep(0.5)
-
-
-def get_resistance(ser):
-    # 获取电阻
-    set_hex_data(ser, Config.hex_get_cow)
-    received_data = get_return_msg(ser)
-    service_id = turn_16_to_10(received_data[0:1])
-    if crc8_check(received_data):
-        cow_data = received_data[3:-2]
-        left_hand = turn_16_to_10(cow_data[:4]) / 1000
-        right_hand = turn_16_to_10(cow_data[4:8]) / 1000
-        left_foot = turn_16_to_10(cow_data[8:12]) / 1000
-        right_foot = turn_16_to_10(cow_data[12:16]) / 1000
-        return {
-            'service_id': service_id,
-            'value_hand_left': left_hand,
-            'value_hand_right': right_hand,
-            'value_foot_left': left_foot,
-            'value_foot_right': right_foot
-        }
-
-
-def open_door(ser):
-    # 开门
-    set_hex_data(ser, Config.hex_open_door)
-    received_data = get_return_msg(ser)
-    if crc8_check(received_data) and bytearray.fromhex(Config.hex_open_door_success) == received_data:
-        print("获取开门请求成功")
-        return True
-    else:
-        return False
+            time.sleep(0.25)

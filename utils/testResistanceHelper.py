@@ -9,6 +9,46 @@ from config import Config
 """
 
 
+def get_resistance(ser):
+    # 获取电阻
+    set_hex_data(ser, Config.hex_get_cow)
+    received_data = get_return_msg(ser)
+    service_id = turn_16_to_10(received_data[0:1])
+    if crc8_check(received_data):
+        cow_data = received_data[3:-2]
+        left_hand = turn_16_to_10(cow_data[:4]) / 1000
+        right_hand = turn_16_to_10(cow_data[4:8]) / 1000
+        left_foot = turn_16_to_10(cow_data[8:12]) / 1000
+        right_foot = turn_16_to_10(cow_data[12:16]) / 1000
+        return {
+            'service_id': service_id,
+            'value_hand_left': left_hand,
+            'value_hand_right': right_hand,
+            'value_foot_left': left_foot,
+            'value_foot_right': right_foot
+        }
+
+
+def open_door(ser, access_flag):
+    # 开门
+    if access_flag == 1:
+        set_hex_data(ser, Config.hex_open_enter_door)
+        received_data = get_return_msg(ser)
+        if crc8_check(received_data) and bytearray.fromhex(Config.hex_open_enter_door_success) == received_data:
+            print("获取开门请求成功")
+            return True
+        else:
+            return False
+    else:
+        set_hex_data(ser, Config.hex_open_leave_door)
+        received_data = get_return_msg(ser)
+        if crc8_check(received_data) and bytearray.fromhex(Config.hex_open_leave_door_success) == received_data:
+            print("获取开门请求成功")
+            return True
+        else:
+            return False
+
+
 def standard_r(test_part: int, test_step: int, _port=Config.test_r_port,
                _baudrates=Config.default_baud_rate):  # 1~4  # 1~8
     try:
