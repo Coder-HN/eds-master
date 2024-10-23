@@ -292,14 +292,14 @@ def compare_resistance_values(resistance_value, test_standard):
 
     # 计算综合结果 result_num，所有值都为 1 时为通过
     results['result_num'] = 1 if all((value == 1 or value == 0) for value in results.values()) else 0
-    return results
+    return results, resistance_value
 
 
 def repeat_test_resistance(ser, user_info, test_standard):
     """6秒反复测试电阻，每0.25秒测试一次，每0.5秒一次发送一次数据"""
     for i in range(24, 0, -1):
         resistance_value = get_resistance(ser)
-        results = compare_resistance_values(resistance_value, test_standard)
+        results, resistance_value = compare_resistance_values(resistance_value, test_standard)
         if results['result_num'] == 1:
             print(f"电阻重新测试成功: user_info={user_info}")
             set_data = {'data': get_send_resistance_info(user_info, resistance_value, test_standard, results)}
