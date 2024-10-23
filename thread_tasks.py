@@ -158,7 +158,7 @@ def electric_control(port, baudrate):
                         print("电阻测试中...")
                         resistance_value = get_resistance(ser)
                         test_standard = get_test_standard_by_service_id(resistance_value['service_id'])
-                        results = compare_resistance_values(resistance_value, test_standard)
+                        results, resistance_value = compare_resistance_values(resistance_value, test_standard)
                         if results['result_num'] == 1:
                             print(f"电阻测试成功: user_info={user_info}")
                             set_data = {
@@ -269,10 +269,16 @@ def compare_resistance_values(resistance_value, test_standard):
         results['result_hand_left'] = 2
         if test_standard['hand_left_min'] <= resistance_value['value_hand_left'] <= test_standard['hand_left_max']:
             results['result_hand_left'] = 1
+    else:
+        resistance_value['value_hand_left'] = -1
+
     if test_part[1] == '1':
         results['result_hand_right'] = 2
         if test_standard['hand_right_min'] <= resistance_value['value_hand_right'] <= test_standard['hand_right_max']:
             results['result_hand_right'] = 1
+    else:
+        resistance_value['result_hand_right'] = -1
+
     if test_part[2] == '1':
         results['result_foot_left'] = 2
         results['result_foot_right'] = 2
@@ -280,6 +286,10 @@ def compare_resistance_values(resistance_value, test_standard):
             results['result_foot_left'] = 1
         if test_standard['foot_right_min'] <= resistance_value['value_foot_right'] <= test_standard['foot_right_max']:
             results['result_foot_right'] = 1
+    else:
+        resistance_value['value_foot_left'] = -1
+        resistance_value['value_foot_right'] = -1
+
     # 计算综合结果 result_num，所有值都为 1 时为通过
     results['result_num'] = 1 if all((value == 1 or value == 0) for value in results.values()) else 0
     return results
