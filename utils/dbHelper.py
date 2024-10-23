@@ -70,7 +70,7 @@ def get_department_by_num(department_num):
     return result
 
 
-def get_r_standard_by_service_id(service_id):
+def get_test_standard_by_service_id(service_id):
     conn = mysql.connector.connect(**mysql_config)
     cursor = conn.cursor(dictionary=True)
     query = "SELECT * FROM table_service WHERE service_id = %s"
@@ -78,12 +78,16 @@ def get_r_standard_by_service_id(service_id):
     service = cursor.fetchone()
 
     r_num = service['r_standard_num']
+    test_part = service['test_part']
+
     query = "SELECT * FROM table_r_standard WHERE num = %s"
     cursor.execute(query, (r_num,))
     r_standard = cursor.fetchone()
     cursor.close()
     conn.close()
     return {
+        'test_part': test_part,
+
         'hand_left_min': float(r_standard['hand_left_min']),
         'hand_left_max': float(r_standard['hand_left_max']),
         'hand_right_min': float(r_standard['hand_right_min']),

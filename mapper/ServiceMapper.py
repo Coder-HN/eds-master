@@ -42,6 +42,16 @@ def update_service(service_num, updated_service: TableService):
         return None
 
 
+def update_service_test_part(service_num, new_test_part):
+    service = TableService.query.filter_by(num=service_num).first()
+    if service:
+        service.test_part = new_test_part
+        db.session.commit()
+        return service
+    else:
+        return None
+
+
 # 删除设备
 def delete_service(service_num):
     service = TableService.query.filter_by(num=service_num).first()

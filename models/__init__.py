@@ -201,6 +201,7 @@ class TableService(db.Model):
     num = Column(Integer, primary_key=True, info='设备序号,主键')
     service_id = Column(String(50, 'utf8mb4_0900_ai_ci'), nullable=False, info='设备编号', unique=True)
     service_name = Column(String(50, 'utf8mb4_0900_ai_ci'), nullable=False, info='设备名称', unique=True)
+    test_part = Column(String(3), nullable=False, default='111', info='电阻测试的部分，默认111表示测试左手、右手和双脚')
     r_standard_num = Column(ForeignKey('table_r_standard.num', ondelete='CASCADE', onupdate='CASCADE'), nullable=False,
                             index=True, info='电阻标准序号、外键')
     table_r_standard = relationship('TableRStandard',
@@ -215,6 +216,7 @@ class TableService(db.Model):
             'num': self.num,
             'service_id': self.service_id,
             'service_name': self.service_name,
+            'test_part': self.test_part,
             'r_standard_num': self.r_standard_num
         }
 

@@ -12,6 +12,17 @@ def add_access(access: TableAccess):
     return new_access
 
 
+def delete_access(access_num):
+    access = TableAccess.query.filter_by(num=access_num).first()
+    # 如果找到，执行删除操作
+    if access:
+        db.session.delete(access)
+        db.session.commit()
+        return True  # 删除成功
+    else:
+        return False  # 未找到
+
+
 def get_access_by_num(access_num):
     return TableAccess.query.filter_by(num=access_num).first()
 

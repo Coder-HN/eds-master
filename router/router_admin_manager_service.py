@@ -69,7 +69,7 @@ def add_service():
 
 
 @manageService.route('/updateService', methods=['POST'])  # 修改设备
-def update_user():
+def update_service():
     data = request.get_json()
     new_service = TableService()
     # 处理其他数据
@@ -80,6 +80,17 @@ def update_user():
     r_standard = RStandardMapper.get_r_standard_by_name(r_name)
     new_service.r_standard_num = r_standard.num
     if ServiceMapper.update_service(num, new_service):
+        return make_response('', 200)
+    else:
+        return jsonify({'error': '更新设备数据失败'}), 500
+
+
+@manageService.route('/updateServiceTestPart', methods=['POST'])  # 修改设备
+def update_service_test_part():
+    data = request.get_json()
+    num = data.get('num')
+    new_test_part = data.get('test_part')
+    if ServiceMapper.update_service_test_part(num, new_test_part):
         return make_response('', 200)
     else:
         return jsonify({'error': '更新设备数据失败'}), 500

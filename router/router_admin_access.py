@@ -1,10 +1,11 @@
 import datetime
 import os
 
-from flask import Blueprint, request, jsonify, send_file
+from flask import Blueprint, request, jsonify, send_file, make_response
 
 from config import Config
 from mapper import UserMapper, ServiceMapper, AccessMapper, DepartmentMapper, RStandardMapper
+from models import TableAccess
 from utils import timeHelper
 from utils.dbHelper import export_mysql_to_sql
 
@@ -63,6 +64,17 @@ def get_detail_access():
         "data": data
     }
     return jsonify(response), 200
+
+
+@searchAccess.route('/deleteAccess', methods=['POST'])  # 删除进出记录
+def delete_access():
+    data = request.get_json()
+    num = data.get('num')
+    is_change = AccessMapper.delete_access(num)
+    if is_change:
+        return make_response('', 200)
+    else:
+        return jsonify({'error': '删除进出记录失败'}), 500
 
 
 @searchAccess.route('/search', methods=['POST'])  # 搜索进出记录

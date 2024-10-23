@@ -6,7 +6,7 @@ import serial.tools.list_ports
 
 from config import Config
 from utils import dbHelper
-from utils.dbHelper import get_r_standard_by_service_id
+from utils.dbHelper import get_test_standard_by_service_id
 from utils.portHelper import get_return_msg
 from utils.testResistanceHelper import get_resistance, open_door, standard_r
 
@@ -42,9 +42,8 @@ def monitor_entrance(port, baudrate):
                 time.sleep(0.01)
     except Exception as e:
         print(f"进门串口错误: {e}")
-        error_data = {'error_message': f"进门串口错误: {e}", 'access_flag': 1}
-        set_data = {'data': error_data}
-        manage_queue.put(('fail_data', set_data))
+        error_data = {'message_type': 2, 'error_message': f"进门串口错误: {e}", 'access_flag': 1}
+        manage_queue.put(('fail_data', {'data': error_data}))
 
 
 # 出门读卡监听线程
@@ -71,9 +70,8 @@ def monitor_exit(port, baudrate):
                 time.sleep(0.01)
     except Exception as e:
         print(f"出门串口错误: {e}")
-        error_data = {'error_message': f"出门串口错误: {e}", 'access_flag': 2}
-        set_data = {'data': error_data}
-        manage_queue.put(('fail_data', set_data))
+        error_data = {'message_type': 2, 'error_message': f"出门串口错误: {e}", 'access_flag': 2}
+        manage_queue.put(('fail_data', {'data': error_data}))
 
 
 # 发送信息到前端线程
@@ -96,7 +94,11 @@ def manage_system(socketio):
             else:
                 time.sleep(1)  # 等待前端监听
                 print(f"card_id={card_id}不在数据库中，无权限通过")
-                error_data = {'error_message': f"该卡人员不在数据库中,无权限通过,card_id={card_id}"}
+                error_data = {
+                    'message_type': 1,
+                    'error_message': f"该卡人员不在数据库中,无权限通过,card_id={card_id}",
+                    'access_flag': access_flag
+                }
                 socketio.emit('fail_data', {'data': error_data})
             enter_queue.get()  # 移除进门读卡
 
@@ -115,7 +117,11 @@ def manage_system(socketio):
             else:
                 time.sleep(1)  # 等待前端监听
                 print(f"card_id={card_id}不在数据库中，无权限通过")
-                error_data = {'error_message': f"该卡人员不在数据库中,无权限通过,card_id={card_id}"}
+                error_data = {
+                    'message_type': 1,
+                    'error_message': f"该卡人员不在数据库中,无权限通过,card_id={card_id}",
+                    'access_flag': access_flag
+                }
                 socketio.emit('fail_data', {'data': error_data})
             exit_queue.get()
 
@@ -151,17 +157,17 @@ def electric_control(port, baudrate):
                     if task == 'test_resistance':
                         print("电阻测试中...")
                         resistance_value = get_resistance(ser)
-                        r_standard = get_r_standard_by_service_id(resistance_value['service_id'])
-                        results = compare_resistance_values(resistance_value, r_standard)
+                        test_standard = get_test_standard_by_service_id(resistance_value['service_id'])
+                        results = compare_resistance_values(resistance_value, test_standard)
                         if results['result_num'] == 1:
                             print(f"电阻测试成功: user_info={user_info}")
                             set_data = {
-                                'data': get_send_resistance_info(user_info, resistance_value, r_standard, results)}
+                                'data': get_send_resistance_info(user_info, resistance_value, test_standard, results)}
                             manage_queue.put(('success_data', set_data))
                             open_door(ser, access_flag=1)  # 一次测试成功开门
                         else:
                             print(f"电阻测试失败，重新测试: user_info={user_info}")
-                            repeat_test_resistance(ser, user_info, r_standard)
+                            repeat_test_resistance(ser, user_info, test_standard)
 
                     elif task == 'open_door':  # 出门那边发来的请求打开出门的门
                         print(f"开门操作中: user_info={user_info}")
@@ -173,7 +179,7 @@ def electric_control(port, baudrate):
                 time.sleep(0.01)
     except Exception as e:
         print(f"电阻串口错误: {e}")
-        error_data = {'error_message': f"电阻串口错误: {e}", 'access_flag': 1}
+        error_data = {'message_type': 2, 'error_message': f"电阻串口错误: {e}", 'access_flag': 1}
         set_data = {'data': error_data}
         manage_queue.put(('fail_data', set_data))
 
@@ -251,36 +257,42 @@ def get_send_resistance_info(user_info, resistance_value, r_standard, results):
     }
 
 
-def compare_resistance_values(resistance_value, r_standard):
+def compare_resistance_values(resistance_value, test_standard):
     results = {
-        'result_hand_left': 2,  # 默认值为 2，表示超出范围
-        'result_hand_right': 2,
-        'result_foot_left': 2,
-        'result_foot_right': 2
+        'result_hand_left': 0,  # 默认值为 0，表示不进行测试
+        'result_hand_right': 0,
+        'result_foot_left': 0,
+        'result_foot_right': 0
     }
-    # 对比手和脚的测试值与限制值
-    if r_standard['hand_left_min'] <= resistance_value['value_hand_left'] <= r_standard['hand_left_max']:
-        results['result_hand_left'] = 1
-    if r_standard['hand_right_min'] <= resistance_value['value_hand_right'] <= r_standard['hand_right_max']:
-        results['result_hand_right'] = 1
-    if r_standard['foot_left_min'] <= resistance_value['value_foot_left'] <= r_standard['foot_left_max']:
-        results['result_foot_left'] = 1
-    if r_standard['foot_right_min'] <= resistance_value['value_foot_right'] <= r_standard['foot_right_max']:
-        results['result_foot_right'] = 1
-
+    test_part = test_standard['test_part']
+    if test_part[0] == '1':
+        results['result_hand_left'] = 2
+        if test_standard['hand_left_min'] <= resistance_value['value_hand_left'] <= test_standard['hand_left_max']:
+            results['result_hand_left'] = 1
+    if test_part[1] == '1':
+        results['result_hand_right'] = 2
+        if test_standard['hand_right_min'] <= resistance_value['value_hand_right'] <= test_standard['hand_right_max']:
+            results['result_hand_right'] = 1
+    if test_part[2] == '1':
+        results['result_foot_left'] = 2
+        results['result_foot_right'] = 2
+        if test_standard['foot_left_min'] <= resistance_value['value_foot_left'] <= test_standard['foot_left_max']:
+            results['result_foot_left'] = 1
+        if test_standard['foot_right_min'] <= resistance_value['value_foot_right'] <= test_standard['foot_right_max']:
+            results['result_foot_right'] = 1
     # 计算综合结果 result_num，所有值都为 1 时为通过
-    results['result_num'] = 1 if all(value == 1 for value in results.values()) else 0
+    results['result_num'] = 1 if all((value == 1 or value == 0) for value in results.values()) else 0
     return results
 
 
-def repeat_test_resistance(ser, user_info, r_standard):
+def repeat_test_resistance(ser, user_info, test_standard):
     """6秒反复测试电阻，每0.25秒测试一次，每0.5秒一次发送一次数据"""
     for i in range(24, 0, -1):
         resistance_value = get_resistance(ser)
-        results = compare_resistance_values(resistance_value, r_standard)
+        results = compare_resistance_values(resistance_value, test_standard)
         if results['result_num'] == 1:
             print(f"电阻重新测试成功: user_info={user_info}")
-            set_data = {'data': get_send_resistance_info(user_info, resistance_value, r_standard, results)}
+            set_data = {'data': get_send_resistance_info(user_info, resistance_value, test_standard, results)}
             manage_queue.put(('success_data', set_data))
             open_door(ser, access_flag=1)  # 一次测试成功开门
             return
@@ -289,7 +301,7 @@ def repeat_test_resistance(ser, user_info, r_standard):
             print(f"重新测试：queue_length={queue_length},i={i}")
             if queue_length >= 1:
                 # 重新测试过程中有人重复刷卡
-                data = get_send_resistance_info(user_info, resistance_value, r_standard, results)
+                data = get_send_resistance_info(user_info, resistance_value, test_standard, results)
                 data['repeat'] = 1
                 set_data = {'data': data}
                 manage_queue.put(('success_data', set_data))
@@ -298,13 +310,13 @@ def repeat_test_resistance(ser, user_info, r_standard):
             if i != 1:
                 # 重新测试过程中未通过需要在每秒刷新页面
                 if i % 2 == 0:
-                    data = get_send_resistance_info(user_info, resistance_value, r_standard, results)
+                    data = get_send_resistance_info(user_info, resistance_value, test_standard, results)
                     data['second'] = i / 4
                     set_data = {'data': data}
                     manage_queue.put(('success_data', set_data))
             else:
                 # 最后一次未通过
-                data = get_send_resistance_info(user_info, resistance_value, r_standard, results)
+                data = get_send_resistance_info(user_info, resistance_value, test_standard, results)
                 data['second'] = 0
                 set_data = {'data': data}
                 manage_queue.put(('success_data', set_data))  # 最终测试失败
