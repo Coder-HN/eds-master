@@ -35,7 +35,7 @@ def monitor_entrance(port, baudrate):
                     # 读取到完整数据帧
                     if len(buffer) > 4 and buffer[0] == Config.card_start_data and buffer[-3:] == Config.card_end_data:
                         # 打印当前时间
-                        print("进门读卡-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
+                        # print("进门读卡-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
                         # 获取卡号
                         card_id = buffer[1:-3].decode('ascii')
                         enter_queue.put(card_id)  # 将卡号放入队列
@@ -62,6 +62,8 @@ def monitor_exit(port, baudrate):
                     buffer = get_return_msg(ser)
                     # 读取到完整数据帧
                     if len(buffer) > 4 and buffer[0] == Config.card_start_data and buffer[-3:] == Config.card_end_data:
+                        # 打印当前时间
+                        print("出门读卡-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
                         # 获取卡号
                         card_id = buffer[1:-3].decode('ascii')
                         exit_queue.put(card_id)  # 将卡号放入队列
@@ -80,7 +82,7 @@ def manage_system(socketio):
         if not enter_queue.empty():
             access_flag = 1
             # 打印当前时间
-            print("发送跳转指令-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
+            # print("进门发送跳转指令-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
             # 先跳转
             socketio.emit('read_card_status', {'status': access_flag})
             card_id = enter_queue.queue[0]  # 获取队头元素但不移除
@@ -104,6 +106,8 @@ def manage_system(socketio):
 
         if not exit_queue.empty():
             access_flag = 2
+            # 打印当前时间
+            print("出门发送跳转指令-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
             socketio.emit('read_card_status', {'status': access_flag})
             card_id = exit_queue.queue[0]  # 获取队头元素但不移除
 
@@ -170,6 +174,7 @@ def electric_control(port, baudrate):
 
                     elif task == 'open_door':  # 出门那边发来的请求打开出门的门
                         print(f"开门操作中: user_info={user_info}")
+                        print("发送开门指令-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
                         open_door(ser, access_flag=2)
                 if not standard_r_queue.empty():
                     test_data = standard_r_queue.get()
