@@ -91,7 +91,7 @@ def manage_system(socketio):
                 electric_queue.put(('test_resistance', user_info))
 
             else:
-                # time.sleep(1)  # 等待前端监听
+                time.sleep(1)  # 等待前端监听
                 print(f"card_id={card_id}不在数据库中，无权限通过")
                 error_data = {
                     'message_type': 1,
@@ -113,7 +113,7 @@ def manage_system(socketio):
                 user_info = {"card_id": card_id, "access_flag": access_flag}
                 electric_queue.put(('open_door', user_info))
             else:
-                # time.sleep(1)  # 等待前端监听
+                time.sleep(1)  # 等待前端监听
                 print(f"card_id={card_id}不在数据库中，无权限通过")
                 error_data = {
                     'message_type': 1,
@@ -220,7 +220,7 @@ def send_user_info(access_flag, user, card_id, socketio):
             'department': user_department,
             'pic_path': user_pic_path,
         }
-        # time.sleep(1)  # 等待跳转后页面开启监听
+        time.sleep(1)  # 等待跳转后页面开启监听
         print(set_data)
         print("发送success_data数据到前端")
         socketio.emit('success_data', {'data': set_data})
