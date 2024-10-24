@@ -116,6 +116,7 @@ def manage_system(socketio):
             if user is not None:
                 send_user_info(access_flag, user, card_id, socketio)
                 user_info = {"card_id": card_id, "access_flag": access_flag}
+                print("发送开门指令给电阻线程-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
                 electric_queue.put(('open_door', user_info))
             else:
                 time.sleep(1)  # 等待前端监听
@@ -174,7 +175,7 @@ def electric_control(port, baudrate):
 
                     elif task == 'open_door':  # 出门那边发来的请求打开出门的门
                         print(f"开门操作中: user_info={user_info}")
-                        print("发送开门指令-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
+                        print("发送开门指令给设备-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
                         open_door(ser, access_flag=2)
                 if not standard_r_queue.empty():
                     test_data = standard_r_queue.get()
