@@ -37,9 +37,9 @@ class Config:
     hex_test_online = "01 01 01 00 00 00 00 01 CA"  # 测试是否在线
     hex_test_online_success = "01 01 01 00 00 00 00 05 AB"  # 测试是否在线成功
     hex_open_enter_door = "01 01 04 00 00 00 00 01 21"  # 进门开门请求
-    hex_open_leave_door = "01 01 04 00 00 00 01 01 21"  # 出门开门请求
+    hex_open_leave_door = "01 01 04 00 00 00 01 01 E5"  # 出门开门请求
     hex_open_enter_door_success = "01 01 04 00 00 00 00 05 40 "  # 进门开门请求成功
-    hex_open_leave_door_success = "01 01 04 00 00 00 01 05 40 "  # 出门开门请求成功
+    hex_open_leave_door_success = "01 01 04 00 00 00 01 05 84 "  # 出门开门请求成功
     hex_get_cow = "01 01 03 00 00 00 00 01 A4"  # 测试电阻
     # 校准电阻指令直接定义在testResistanceHelper.py的方法中
 
