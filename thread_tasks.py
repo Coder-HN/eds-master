@@ -80,13 +80,12 @@ def manage_system(socketio):
     while True:
         if not enter_queue.empty():
             access_flag = 1
+            # 先跳转
             socketio.emit('read_card_status', {'status': access_flag})
             card_id = enter_queue.queue[0]  # 获取队头元素但不移除
             print(f"处理进门卡号: {card_id}")
             user = dbHelper.get_user_by_card_id(card_id)
             if user is not None:
-                # 先跳转
-                socketio.emit('read_card_status', {'status': access_flag})
                 send_user_info(access_flag, user, card_id, socketio)
                 user_info = {'user_num': user['num'], 'card_id': card_id}
                 electric_queue.put(('test_resistance', user_info))
@@ -110,7 +109,6 @@ def manage_system(socketio):
             print(f"处理出门卡号: {card_id}")
             user = dbHelper.get_user_by_card_id(card_id)
             if user is not None:
-                socketio.emit('read_card_status', {'status': access_flag})
                 send_user_info(access_flag, user, card_id, socketio)
                 user_info = {"card_id": card_id, "access_flag": access_flag}
                 electric_queue.put(('open_door', user_info))
@@ -205,7 +203,7 @@ def send_user_info(access_flag, user, card_id, socketio):
             'department': user_department,
             'pic_path': user_pic_path,
         }
-        # time.sleep(1)  # 等待前端监听
+        time.sleep(0.1)  # 等待前端监听
         print(f"发送cache_data数据到前端,cache_data={cache_data}")
         socketio.emit('cache_data', {'data': cache_data})
     elif access_flag == 2:
