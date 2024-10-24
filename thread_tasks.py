@@ -141,7 +141,7 @@ def manage_system(socketio):
             elif res == 'fail_data':
                 print(f"发送fail_data数据到前端,fail_data={set_data}")
                 socketio.emit('fail_data', set_data)
-        time.sleep(0.01)
+        time.sleep(0.001)
 
 
 # 电阻串口线程
@@ -174,7 +174,7 @@ def electric_control(port, baudrate):
                     test_data = standard_r_queue.get()
                     standard_r(test_data['test_part'], test_data['test_step'], ser)
 
-                time.sleep(0.01)
+                time.sleep(0.001)
     except Exception as e:
         print(f"电阻串口错误: {e}")
         error_data = {'message_type': 2, 'error_message': f"电阻串口错误: {e}", 'access_flag': 1}
