@@ -38,9 +38,6 @@ def monitor_entrance(port, baudrate):
                         print("读取到卡号-当前时间：", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
                         # 获取卡号
                         card_id = buffer[1:-3].decode('ascii')
-                        # frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
-                        # ascii_chars_card = [chr(byte) for byte in frame_data]
-                        # card_id = ''.join(ascii_chars_card)
                         enter_queue.put(card_id)  # 将卡号放入队列
                         print(f"==================进门刷卡: {list(enter_queue.queue)}")
                 time.sleep(0.01)
@@ -67,9 +64,6 @@ def monitor_exit(port, baudrate):
                     if len(buffer) > 4 and buffer[0] == Config.card_start_data and buffer[-3:] == Config.card_end_data:
                         # 获取卡号
                         card_id = buffer[1:-3].decode('ascii')
-                        # frame_data = buffer[1:-3]  # 将每个十六进制数转换为对应的 ASCII 字符
-                        # ascii_chars_card = [chr(byte) for byte in frame_data]
-                        # card_id = ''.join(ascii_chars_card)
                         exit_queue.put(card_id)  # 将卡号放入队列
                         print(f"==================出门刷卡: {list(exit_queue.queue)}")
                 time.sleep(0.01)
