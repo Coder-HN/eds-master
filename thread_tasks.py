@@ -35,7 +35,7 @@ def monitor_entrance(port, baudrate):
                     # 读取到完整数据帧
                     if len(buffer) > 4 and buffer[0] == Config.card_start_data and buffer[-3:] == Config.card_end_data:
                         # 打印当前时间
-                        print("读取到卡号-当前时间：", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                        print("进门读卡-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
                         # 获取卡号
                         card_id = buffer[1:-3].decode('ascii')
                         enter_queue.put(card_id)  # 将卡号放入队列
@@ -80,7 +80,7 @@ def manage_system(socketio):
         if not enter_queue.empty():
             access_flag = 1
             # 打印当前时间
-            print("发送跳转指令-当前时间：", datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            print("发送跳转指令-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
             # 先跳转
             socketio.emit('read_card_status', {'status': access_flag})
             card_id = enter_queue.queue[0]  # 获取队头元素但不移除
