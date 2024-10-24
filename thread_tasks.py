@@ -203,7 +203,7 @@ def send_user_info(access_flag, user, card_id, socketio):
             'department': user_department,
             'pic_path': user_pic_path,
         }
-        time.sleep(0.5)  # 等待前端监听
+        time.sleep(1)  # 等待前端监听
         print(f"发送cache_data数据到前端,cache_data={cache_data}")
         socketio.emit('cache_data', {'data': cache_data})
     elif access_flag == 2:
