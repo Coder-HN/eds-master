@@ -114,12 +114,10 @@ def manage_system(socketio):
             print(f"处理出门卡号: {card_id}")
             user = dbHelper.get_user_by_card_id(card_id)
             if user is not None:
-                print("send_user_info前-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
-                send_user_info(access_flag, user, card_id, socketio)
-                print("send_user_info后-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
                 user_info = {"card_id": card_id, "access_flag": access_flag}
                 print("发送开门指令给电阻线程-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
                 electric_queue.put(('open_door', user_info))
+                send_user_info(access_flag, user, card_id, socketio)
             else:
                 time.sleep(1)  # 等待前端监听
                 print(f"card_id={card_id}不在数据库中，无权限通过")
@@ -177,7 +175,8 @@ def electric_control(port, baudrate):
 
                     elif task == 'open_door':  # 出门那边发来的请求打开出门的门
                         print(f"开门操作中: user_info={user_info}")
-                        print("发送开门指令给设备-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
+                        print("发送开门指令给设备-当前时间（时:分:秒.毫秒）：",
+                              datetime.now().strftime("%H:%M:%S.%f")[:-3])
                         open_door(ser, access_flag=2)
                 if not standard_r_queue.empty():
                     test_data = standard_r_queue.get()
