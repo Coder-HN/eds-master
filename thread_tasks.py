@@ -114,7 +114,9 @@ def manage_system(socketio):
             print(f"处理出门卡号: {card_id}")
             user = dbHelper.get_user_by_card_id(card_id)
             if user is not None:
+                print("send_user_info前-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
                 send_user_info(access_flag, user, card_id, socketio)
+                print("send_user_info后-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
                 user_info = {"card_id": card_id, "access_flag": access_flag}
                 print("发送开门指令给电阻线程-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
                 electric_queue.put(('open_door', user_info))
