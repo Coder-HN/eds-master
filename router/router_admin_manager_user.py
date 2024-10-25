@@ -181,6 +181,7 @@ def add_user_excel():
                          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']:
         return jsonify({'error': '文件类型不支持，请上传Excel文件'}), 200
     users_employee_id_excel = []
+    users_card_id_excel = []
     try:
         # 使用 pandas 读取 Excel 文件
         df = pd.read_excel(file)
@@ -208,41 +209,42 @@ def add_user_excel():
                 _position_name = ""
 
             try:
-                # 处理
-                department_num = None
-                position_num = None
-                if len(_department_name) > 0:
-                    department = DepartmentMapper.get_department_by_name(_department_name)
-                    department_num = department.num
-                    if len(_position_name) > 0:
-                        position_list = DepartmentMapper.get_position_by_department_num(department_num)
-                        for position in position_list:
-                            if position.position_name == _position_name:
-                                position_num = position.num
-                                break
-                user_db = TableUser()
-                user_db.employee_id = _employee_id
-                user_db.card_id = _card_id
-                user_db.name = _name
-                user_db.department_num = department_num
-                user_db.position_num = position_num
-                user_get = UserMapper.get_user_by_employee_id(user_db.employee_id)
-                if user_get:
-                    users_employee_id_excel.append(user_get.employee_id)
-                    if user_get.is_delete == 1:
-                        UserMapper.update_user(user_get.num, TableUser(num=user_get.num, is_delete=0))
-                        results.append({**row.to_dict(), '处理情况': '数据库中已删除、复原'})
-                    else:
-                        results.append({**row.to_dict(), '处理情况': '数据库中已存在、跳过'})
+                if _employee_id == "" or _card_id == "":
+                    results.append({**row.to_dict(), '处理情况': '没有工号或卡号、跳过'})
                 else:
-                    UserMapper.add_user(user_db)
-                    results.append({**row.to_dict(), '处理情况': '成功添加'})
+                    users_employee_id_excel.append(_employee_id)
+                    users_card_id_excel.append(_card_id)
+                    user_get = None
+                    user_get_employee_id = UserMapper.get_user_by_employee_id(_employee_id)
+                    user_get_card_id = UserMapper.get_user_by_card_id(_card_id)
+                    if user_get_employee_id is not None:
+                        user_get = user_get_employee_id
+                    elif user_get_card_id is not None:
+                        user_get = user_get_card_id
+                    if user_get is not None:  # 数据库原来有
+                        if user_get.is_delete == 1:
+                            UserMapper.update_user(user_get.num, TableUser(num=user_get.num, is_delete=0))
+                            results.append({**row.to_dict(), '处理情况': '数据库中已删除、复原'})
+                        else:
+                            results.append({**row.to_dict(), '处理情况': '数据库中已存在相同工号或卡号、跳过'})
+                    else:  # 数据库原来没有
+                        department_num, position_num = handle_dp(_department_name, _position_name)
+                        user_db = TableUser()
+                        user_db.employee_id = _employee_id
+                        user_db.card_id = _card_id
+                        user_db.name = _name
+                        user_db.department_num = department_num
+                        user_db.position_num = position_num
+                        UserMapper.add_user(user_db)
+                        results.append({**row.to_dict(), '处理情况': '成功添加'})
+
             except Exception as process_error:
                 results.append({**row.to_dict(), '处理情况': f'失败: {str(process_error)}'})
         # 在Excel中不存在，而数据库中有的，将该员工从当前表中移至离职人员表中，但进出记录需要保存，可查询
         users_db = UserMapper.get_all_users()
         for user_db in users_db:
-            if user_db.employee_id not in users_employee_id_excel:  # 存在excel表中
+            # 存在excel表中
+            if user_db.employee_id not in users_employee_id_excel and user_db.card_id not in users_card_id_excel:
                 UserMapper.update_user(user_db.num, TableUser(num=user_db.num, is_delete=1))
 
         # 创建新的 DataFrame 并保存为 Excel 文件
@@ -261,6 +263,34 @@ def add_user_excel():
         current_app.log_exception(exc_info)
         current_app.logger.error(f"error: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+
+def handle_dp(_department_name, _position_name):
+    # 处理
+    department_num = None
+    position_num = None
+    # 查看部门
+    if len(_department_name) > 0:
+        department = DepartmentMapper.get_department_by_name(_department_name)
+        if department is not None:  # 已经存在该部门
+            department_num = department.num
+        else:
+            new_department = DepartmentMapper.add_department(_department_name)
+            if new_department:  # 不存在该部门则重新创建并创建
+                department_num = new_department.num
+    # 查看职位
+    if len(_position_name) > 0:  # 在position表中查找是否存在该职位
+        position = PositionMapper.get_position_by_name(_position_name)
+        if position is not None:
+            position_num = position.num
+        else:
+            new_position = PositionMapper.add_position(_position_name)
+            position_num = new_position.num
+    # 查看部门职位关系
+    department_num_list = DepartmentMapper.get_department_by_position_num(position_num)
+    if department_num not in department_num_list:
+        PositionMapper.add_position_department(position_num, department_num)
+    return department_num, position_num
 
 
 @manageUser.route('/exportUserExcel', methods=['GET'])  # 导出人员表

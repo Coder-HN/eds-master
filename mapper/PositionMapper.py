@@ -3,8 +3,8 @@ from models import TablePosition, TableDepartmentPosition
 from database import db
 
 
-def add_position(position: TablePosition):
-    new_position = TablePosition(position_name=position.position_name)
+def add_position(position_name):
+    new_position = TablePosition(position_name=position_name)
     db.session.add(new_position)
     db.session.commit()
     return new_position

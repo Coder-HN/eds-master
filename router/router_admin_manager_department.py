@@ -81,10 +81,9 @@ def get_positions():
 
 @manageDepartment.route('/addDepartment', methods=['POST'])  # 添加部门
 def add_department():
-    new_department = TableDepartment()
-    # 处理其他数据
-    new_department.department_name = request.form.get('department_name')
-    if DepartmentMapper.add_department(new_department):
+    # 处理数据
+    department_name = request.form.get('department_name')
+    if DepartmentMapper.add_department(department_name):
         return make_response('', 200)
     else:
         return jsonify({'error': '添加数据失败'}), 500
@@ -100,9 +99,7 @@ def add_position():
     if position_db:
         position_num = position_db.num
     else:
-        new_position = TablePosition()
-        new_position.position_name = position_name
-        position = PositionMapper.add_position(new_position)
+        position = PositionMapper.add_position(position_name)
         position_num = position.num
     if PositionMapper.add_position_department(position_num=position_num, department_num=department_num):
         return make_response('', 200)

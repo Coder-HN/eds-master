@@ -3,8 +3,8 @@ from database import db
 from mapper import PositionMapper
 
 
-def add_department(department: TableDepartment):
-    new_department = TableDepartment(department_name=department.department_name)
+def add_department(department_name):
+    new_department = TableDepartment(department_name=department_name)
     db.session.add(new_department)
     db.session.commit()
     return new_department
