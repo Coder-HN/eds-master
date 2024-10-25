@@ -159,6 +159,7 @@ def manage_system(socketio):
                 send_user_data(access_flag, user, card_id, socketio)
                 user_info = {'access_flag': access_flag, 'user_num': user['num'], 'card_id': card_id}
                 electric_queue.put(('test_resistance', user_info))
+                print("已放置electric_queue")
 
             else:
                 fail_data = generate_fail_data(access_flag, 1, None, card_id)
