@@ -56,10 +56,19 @@ def search_user():
                                                                 position_num)
         users_list = [user.to_dict() for user in all_users]
         for user_dict in users_list:
-            department_name = (DepartmentMapper.get_department_by_num(int(user_dict['department_num']))).department_name
-            position_name = (PositionMapper.get_position_by_num(int(user_dict['position_num']))).position_name
+            department_num = user_dict['department_num']
+            position_num = user_dict['position_num']
+            if department_num:
+                department_name = (DepartmentMapper.get_department_by_num(int(department_num))).department_name
+            else:
+                department_name = ''
+            if position_num:
+                position_name = (PositionMapper.get_position_by_num(int(position_num))).position_name
+            else:
+                position_name = ''
             user_dict["department_name"] = department_name
             user_dict["position_name"] = position_name
+
     except Exception as e:
         return jsonify({'error': e}), 500
     response = {
