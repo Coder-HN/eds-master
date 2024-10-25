@@ -182,20 +182,20 @@ def manage_system(socketio):
                 send_user_data(access_flag, user, card_id, socketio)
             else:
                 fail_data = generate_fail_data(access_flag, 1, None, card_id)
-                socketio.emit('fail_data', {'data': fail_data})
+                socketio.emit('fail_data', fail_data)
                 print(f"card_id={card_id}不在数据库中，无权限通过，发送fail_data={fail_data}")
             exit_queue.get()
 
         if not manage_queue.empty():
             res, get_data = manage_queue.get()
             if res == 'r_data':
-                access_flag = get_data['data'].get('access_flag')
+                access_flag = get_data.get('access_flag')
                 msg = "重新测试电阻更新数据"
-                if get_data['data'].get('second') == 0:
+                if get_data.get('second') == 0:
                     msg = "重新测试电阻正常结束,增加进出记录"
-                elif get_data['data'].get('repeat') == 1:
+                elif get_data.get('repeat') == 1:
                     msg = "重复刷卡导致重新测试电阻提前结束,增加进出记录"
-                elif get_data['data'].get('result_num') == 1:
+                elif get_data.get('result_num') == 1:
                     msg = "测试通过,添加进出记录"
                 print(f"发送r_data数据到前端,access_flag={access_flag},msg={msg}")
                 socketio.emit('r_data', get_data)
