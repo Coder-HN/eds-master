@@ -21,9 +21,10 @@ def generate_swipe_data(access_flag):
 
 
 # 错误信息
-def generate_fail_data(access_flag, message_type, error_message):
+def generate_fail_data(access_flag, message_type, error_message, card_id=None):
     fail_data = {
         'access_flag': access_flag,  # 进出门 1/2,
+        'card_id': card_id,  # 权限错误时使用
         'message_type': message_type,  # 1无权限错误/2设备错误,
         'error_message': error_message  # 错误信息
     }
@@ -160,7 +161,7 @@ def manage_system(socketio):
                 electric_queue.put(('test_resistance', user_info))
 
             else:
-                fail_data = generate_fail_data(access_flag, 1, f"该卡人员不在数据库中,无权限通过,card_id={card_id}")
+                fail_data = generate_fail_data(access_flag, 1, None, card_id)
                 socketio.emit('fail_data', fail_data)
                 print(f"card_id={card_id}不在数据库中，无权限通过，发送fail_data={fail_data}")
             enter_queue.get()  # 移除进门读卡
@@ -179,7 +180,7 @@ def manage_system(socketio):
                 electric_queue.put(('open_door', user_info))
                 send_user_data(access_flag, user, card_id, socketio)
             else:
-                fail_data = generate_fail_data(access_flag, 1, f"该卡人员不在数据库中,无权限通过,card_id={card_id}")
+                fail_data = generate_fail_data(access_flag, 1, None, card_id)
                 socketio.emit('fail_data', {'data': fail_data})
                 print(f"card_id={card_id}不在数据库中，无权限通过，发送fail_data={fail_data}")
             exit_queue.get()
