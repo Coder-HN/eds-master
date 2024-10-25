@@ -262,7 +262,6 @@ def send_user_data(access_flag, user, card_id, socketio):
         employee_id=user_employee_id,
         department=user_department,
         pic_path=user_pic_path)
-    time.sleep(1)
     print(f"发送user_data数据到前端,user_data={user_data}")
     socketio.emit('user_data', user_data)
 
