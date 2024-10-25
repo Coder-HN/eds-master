@@ -11,6 +11,20 @@ from utils.dbHelper import get_test_standard_by_service_id
 from utils.portHelper import get_return_msg
 from utils.testResistanceHelper import get_resistance, open_door, standard_r
 
+"""
+错误信息
+  fail_data = {'access_flag': 1, 'message_type': 2, 'error_message': f"进门串口错误: {e}"}
+  access_flag:进出门 1/2,
+  message_type:信息种类 1无权限/2设备错误
+  error_message:str
+  
+进出门跳转信息
+  socketio.emit('read_card_status', {'status': access_flag})
+  
+用户信息
+  socketio.emit('user_data', {'data': user_data})
+"""
+
 # 全局队列
 enter_queue = queue.Queue()
 exit_queue = queue.Queue()
@@ -34,8 +48,6 @@ def monitor_entrance(port, baudrate):
                     buffer = get_return_msg(ser)
                     # 读取到完整数据帧
                     if len(buffer) > 4 and buffer[0] == Config.card_start_data and buffer[-3:] == Config.card_end_data:
-                        # 打印当前时间
-                        # print("进门读卡-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
                         # 获取卡号
                         card_id = buffer[1:-3].decode('ascii')
                         enter_queue.put(card_id)  # 将卡号放入队列
@@ -43,8 +55,8 @@ def monitor_entrance(port, baudrate):
                 time.sleep(0.01)
     except Exception as e:
         print(f"进门串口错误: {e}")
-        error_data = {'message_type': 2, 'error_message': f"进门串口错误: {e}", 'access_flag': 1}
-        manage_queue.put(('fail_data', {'data': error_data}))
+        fail_data = {'access_flag': 1, 'message_type': 2, 'error_message': f"进门串口错误: {e}"}
+        manage_queue.put(('fail_data', {'data': fail_data}))
 
 
 # 出门读卡监听线程
@@ -71,8 +83,8 @@ def monitor_exit(port, baudrate):
                 time.sleep(0.01)
     except Exception as e:
         print(f"出门串口错误: {e}")
-        error_data = {'message_type': 2, 'error_message': f"出门串口错误: {e}", 'access_flag': 2}
-        manage_queue.put(('fail_data', {'data': error_data}))
+        fail_data = {'access_flag': 2, 'message_type': 2, 'error_message': f"出门串口错误: {e}", }
+        manage_queue.put(('fail_data', {'data': fail_data}))
 
 
 # 发送信息到前端线程
@@ -81,8 +93,6 @@ def manage_system(socketio):
     while True:
         if not enter_queue.empty():
             access_flag = 1
-            # 打印当前时间
-            # print("进门发送跳转指令-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
             # 先跳转
             socketio.emit('read_card_status', {'status': access_flag})
             card_id = enter_queue.queue[0]  # 获取队头元素但不移除
@@ -94,14 +104,13 @@ def manage_system(socketio):
                 electric_queue.put(('test_resistance', user_info))
 
             else:
-                time.sleep(1)  # 等待前端监听
                 print(f"card_id={card_id}不在数据库中，无权限通过")
-                error_data = {
+                fail_data = {
+                    'access_flag': access_flag,
                     'message_type': 1,
-                    'error_message': f"该卡人员不在数据库中,无权限通过,card_id={card_id}",
-                    'access_flag': access_flag
+                    'error_message': f"该卡人员不在数据库中,无权限通过,card_id={card_id}"
                 }
-                socketio.emit('fail_data', {'data': error_data})
+                socketio.emit('fail_data', {'data': fail_data})
             enter_queue.get()  # 移除进门读卡
 
         if not exit_queue.empty():
@@ -119,34 +128,33 @@ def manage_system(socketio):
                 electric_queue.put(('open_door', user_info))
                 send_user_info(access_flag, user, card_id, socketio)
             else:
-                time.sleep(1)  # 等待前端监听
                 print(f"card_id={card_id}不在数据库中，无权限通过")
-                error_data = {
+                fail_data = {
+                    'access_flag': access_flag,
                     'message_type': 1,
                     'error_message': f"该卡人员不在数据库中,无权限通过,card_id={card_id}",
-                    'access_flag': access_flag
                 }
-                socketio.emit('fail_data', {'data': error_data})
+                socketio.emit('fail_data', {'data': fail_data})
             exit_queue.get()
 
         if not manage_queue.empty():
-            res, set_data = manage_queue.get()
+            res, get_data = manage_queue.get()
             if res == 'success_data':
                 access_flag = 1
-                if set_data['data'].get('access_flag') is not None:
-                    access_flag = set_data['data'].get('access_flag')
+                if get_data['data'].get('access_flag') is not None:
+                    access_flag = get_data['data'].get('access_flag')
                 msg = "重新测试电阻更新数据"
-                if set_data['data'].get('second') == 0:
+                if get_data['data'].get('second') == 0:
                     msg = "重新测试电阻正常结束,增加进出记录"
-                elif set_data['data'].get('repeat') == 1:
+                elif get_data['data'].get('repeat') == 1:
                     msg = "重复刷卡导致重新测试电阻提前结束,增加进出记录"
-                elif set_data['data'].get('result_num') == 1:
+                elif get_data['data'].get('result_num') == 1:
                     msg = "测试通过,添加进出记录"
                 print(f"发送success_data数据到前端,access_flag={access_flag},msg={msg}")
-                socketio.emit('success_data', set_data)
+                socketio.emit('success_data', get_data)
             elif res == 'fail_data':
-                print(f"发送fail_data数据到前端,fail_data={set_data}")
-                socketio.emit('fail_data', set_data)
+                print(f"发送fail_data数据到前端,fail_data={get_data}")
+                socketio.emit('fail_data', get_data)
         time.sleep(0.001)
 
 
@@ -185,9 +193,8 @@ def electric_control(port, baudrate):
                 time.sleep(0.001)
     except Exception as e:
         print(f"电阻串口错误: {e}")
-        error_data = {'message_type': 2, 'error_message': f"电阻串口错误: {e}", 'access_flag': 1}
-        set_data = {'data': error_data}
-        manage_queue.put(('fail_data', set_data))
+        fail_data = {'access_flag': 1, 'message_type': 2, 'error_message': f"电阻串口错误: {e}"}
+        manage_queue.put(('fail_data', {'data': fail_data}))
 
 
 def send_user_info(access_flag, user, card_id, socketio):
@@ -202,7 +209,7 @@ def send_user_info(access_flag, user, card_id, socketio):
     user_employee_id = user['employee_id']
     user_pic_path = user['pic_path']
     if access_flag == 1:
-        cache_data = {
+        user_data = {
             'access_flag': access_flag,
             'card_id': card_id,
             'user_num': user_num,
@@ -211,13 +218,12 @@ def send_user_info(access_flag, user, card_id, socketio):
             'department': user_department,
             'pic_path': user_pic_path,
         }
-        # time.sleep(1)  # 等待前端监听
-        print(f"发送cache_data数据到前端,cache_data={cache_data}")
-        socketio.emit('cache_data', {'data': cache_data})
+        print(f"发送user_data数据到前端,user_data={user_data}")
+        socketio.emit('user_data', {'data': user_data})
     elif access_flag == 2:
         # TODO 出门无法获取service_id
         service_id = 1
-        set_data = {
+        user_data = {
             'card_id': card_id,
             'access_flag': access_flag,
             'service_id': service_id,
@@ -228,10 +234,9 @@ def send_user_info(access_flag, user, card_id, socketio):
             'department': user_department,
             'pic_path': user_pic_path,
         }
-        time.sleep(1)  # 等待跳转后页面开启监听
-        print(set_data)
-        print("发送success_data数据到前端")
-        socketio.emit('success_data', {'data': set_data})
+        print(user_data)
+        print("发送user_data数据到前端")
+        socketio.emit('user_data', {'data': user_data})
 
 
 def get_send_resistance_info(user_info, resistance_value, r_standard, results):
