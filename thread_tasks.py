@@ -312,8 +312,7 @@ def compare_resistance_values(resistance_value, test_standard):
 def repeat_test_resistance(ser, user_info, test_standard):
     global is_repeat_test
     is_repeat_test = True  # 设置正在重新测试
-    odd_time = 6
-    while odd_time > 0:
+    for i in range(300, 0, -1):
         resistance_value = get_resistance(ser)
         results, resistance_value = compare_resistance_values(resistance_value, test_standard)
         if results['result_num'] == 1:
@@ -329,17 +328,18 @@ def repeat_test_resistance(ser, user_info, test_standard):
                 manage_queue.put(('r_data', r_data))
                 print(f"==================提前结束本次刷卡: user_info={user_info}")
                 return
-            if isinstance(odd_time, int):  # 重新测试过程中未通过需要在每秒刷新页面
-                print(f"重新测试：is_repeat_test={is_repeat_test},odd_time={odd_time}")
-                r_data = generate_r_data(user_info, resistance_value, test_standard, results, second=int(odd_time))
+            if i != 1:
+                # 重新测试过程中未通过需要在每秒刷新页面
+                if i % 50 == 0:
+                    print(f"重新测试：is_repeat_test={is_repeat_test},i={i}")
+                    r_data = generate_r_data(user_info, resistance_value, test_standard, results, second=i / 50)
+                    manage_queue.put(('r_data', r_data))
+            else:
+                # 最后一次未通过
+                r_data = generate_r_data(user_info, resistance_value, test_standard, results, second=0)
                 manage_queue.put(('r_data', r_data))
+                return
             time.sleep(0.02)
-            odd_time = odd_time - 0.02
-        if odd_time == 0:
-            # 最后一次未通过
-            r_data = generate_r_data(user_info, resistance_value, test_standard, results, second=0)
-            manage_queue.put(('r_data', r_data))
-            return
 
 
 def add_task_standard_r(test_part, test_step):
