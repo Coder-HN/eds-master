@@ -112,6 +112,7 @@ def monitor_entrance(port, baudrate):
                         card_id = buffer[1:-3].decode('ascii')
                         enter_queue.put(card_id)  # 将卡号放入队列
                         print(f"==================进门刷卡: {list(enter_queue.queue)}")
+                    buffer.clear()
                 time.sleep(0.01)
     except Exception as e:
         print(f"进门串口错误: {e}")
@@ -138,6 +139,7 @@ def monitor_exit(port, baudrate):
                         card_id = buffer[1:-3].decode('ascii')
                         exit_queue.put(card_id)  # 将卡号放入队列
                         print(f"==================出门刷卡: {list(exit_queue.queue)}")
+                    buffer.clear()
                 time.sleep(0.01)
     except Exception as e:
         print(f"出门串口错误: {e}")
