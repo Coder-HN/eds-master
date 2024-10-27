@@ -348,7 +348,7 @@ def repeat_test_resistance(ser, user_info, test_standard):
                 for task, user_info in list_e:
                     electric_queue.put(task, user_info)
                 return
-            time.sleep(0.25)
+            time.sleep(0.14)
 
 
 def add_task_standard_r(test_part, test_step):
