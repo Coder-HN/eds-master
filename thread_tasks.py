@@ -340,6 +340,13 @@ def repeat_test_resistance(ser, user_info, test_standard):
                 # 最后一次未通过
                 r_data = generate_r_data(user_info, resistance_value, test_standard, results, second=0)
                 manage_queue.put(('r_data', r_data))
+                list_e = []
+                while electric_queue.empty() is not True:
+                    task, user_info = electric_queue.get()
+                    if task != 'test_resistance':
+                        list_e.append((task, user_info))
+                for task, user_info in list_e:
+                    electric_queue.put(task, user_info)
                 return
             time.sleep(0.25)
 
