@@ -91,6 +91,7 @@ exit_queue = queue.Queue()
 electric_queue = queue.Queue()
 manage_queue = queue.Queue()
 standard_r_queue = queue.Queue()
+is_repeat_test = False  # 是否正在重新测试电阻
 
 
 # 进门读卡监听线程
@@ -149,6 +150,9 @@ def monitor_exit(port, baudrate):
 def manage_system(socketio):
     while True:
         if not enter_queue.empty():
+            global is_repeat_test
+            if is_repeat_test:  # 如果在正在重新测试时收到刷卡，停止重新测试
+                is_repeat_test = False
             # 先跳转
             access_flag = 1
             swipe_data = generate_swipe_data(access_flag)
@@ -311,6 +315,8 @@ def compare_resistance_values(resistance_value, test_standard):
 
 # 6秒反复测试电阻，每0.25秒测试一次，每0.5秒一次发送一次数据
 def repeat_test_resistance(ser, user_info, test_standard):
+    global is_repeat_test
+    is_repeat_test = True  # 设置正在重新测试
     for i in range(24, 0, -1):
         resistance_value = get_resistance(ser)
         results, resistance_value = compare_resistance_values(resistance_value, test_standard)
@@ -321,9 +327,8 @@ def repeat_test_resistance(ser, user_info, test_standard):
             open_door(ser, access_flag=1)  # 一次测试成功开门
             return
         else:
-            queue_length = enter_queue.qsize()
-            print(f"重新测试：queue_length={queue_length},i={i}")
-            if queue_length >= 1:
+            print(f"重新测试：is_repeat_test={is_repeat_test},i={i}")
+            if is_repeat_test is not True:
                 # 重新测试过程中有人重复刷卡
                 r_data = generate_r_data(user_info, resistance_value, test_standard, results, repeat=1)
                 manage_queue.put(('r_data', r_data))
