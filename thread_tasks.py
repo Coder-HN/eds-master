@@ -323,7 +323,6 @@ def repeat_test_resistance(ser, user_info, test_standard):
             open_door(ser, access_flag=1)  # 一次测试成功开门
             return
         else:
-            print(f"重新测试：is_repeat_test={is_repeat_test},odd_time={odd_time}")
             if is_repeat_test is not True:
                 # 重新测试过程中有人重复刷卡
                 r_data = generate_r_data(user_info, resistance_value, test_standard, results, repeat=1)
@@ -331,6 +330,7 @@ def repeat_test_resistance(ser, user_info, test_standard):
                 print(f"==================提前结束本次刷卡: user_info={user_info}")
                 return
             if isinstance(odd_time, int):  # 重新测试过程中未通过需要在每秒刷新页面
+                print(f"重新测试：is_repeat_test={is_repeat_test},odd_time={odd_time}")
                 r_data = generate_r_data(user_info, resistance_value, test_standard, results, second=int(odd_time))
                 manage_queue.put(('r_data', r_data))
             time.sleep(0.02)
