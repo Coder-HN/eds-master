@@ -42,6 +42,8 @@ def get_return_msg(ser, timeout=Config.default_com_timeout):
         # 超过指定时间退出
         if time.time() - start_time > timeout:
             break
+        else:
+            time.sleep(0.001)
         # 检查是否已经收到数据，如果有数据且稳定，则提前退出
         if len(buffer) > 0:
             time.sleep(0.1)  # 稍作等待，以确保数据传输稳定
