@@ -108,7 +108,6 @@ def monitor_entrance(port, baudrate):
                     buffer = get_return_msg(ser)
                     # 读取到完整数据帧
                     if len(buffer) > 4 and buffer[0] == Config.card_start_data and buffer[-3:] == Config.card_end_data:
-                        print("进门读卡-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
                         # 获取卡号
                         card_id = buffer[1:-3].decode('ascii')
                         enter_queue.put(card_id)  # 将卡号放入队列
@@ -162,8 +161,6 @@ def manage_system(socketio):
             if user is not None:
                 send_user_data(access_flag, user, card_id, socketio)
                 user_info = {'access_flag': access_flag, 'user_num': user['num'], 'card_id': card_id}
-                print("进门发送测试电阻指令给电阻线程-当前时间（时:分:秒.毫秒）：",
-                      datetime.now().strftime("%H:%M:%S.%f")[:-3])
                 electric_queue.put(('test_resistance', user_info))
                 print("已放置electric_queue")
 
@@ -219,8 +216,6 @@ def electric_control(port, baudrate):
                 if not electric_queue.empty():
                     task, user_info = electric_queue.get()
                     if task == 'test_resistance':
-                        print("电阻测试中-当前时间（时:分:秒.毫秒）：",
-                              datetime.now().strftime("%H:%M:%S.%f")[:-3])
                         resistance_value = get_resistance(ser)
                         test_standard = get_test_standard_by_service_id(resistance_value['service_id'])
                         results, resistance_value = compare_resistance_values(resistance_value, test_standard)
