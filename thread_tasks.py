@@ -149,9 +149,9 @@ def monitor_exit(port, baudrate):
 
 # 发送信息到前端线程
 def manage_system(socketio):
+    global is_repeat_test
     while True:
         if not enter_queue.empty():
-            global is_repeat_test
             if is_repeat_test:  # 如果在正在重新测试时收到刷卡，停止重新测试
                 is_repeat_test = False
             # 先跳转
@@ -173,7 +173,6 @@ def manage_system(socketio):
             enter_queue.get()  # 移除进门读卡
 
         if not exit_queue.empty():
-            global is_repeat_test
             if is_repeat_test:  # 如果在正在重新测试时收到刷卡，停止重新测试
                 is_repeat_test = False
             # 先跳转
