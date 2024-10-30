@@ -261,8 +261,8 @@ def send_user_data(access_flag, user, card_id, socketio):
     user_data = generate_user_data(
         access_flag=access_flag,
         card_id=card_id,
-        # TODO 出门无法获取service_id
-        service_id=None,
+        # TODO 出门无法获取service_id，默认为1
+        service_id=1,
         user_num=user_num,
         name=user_name,
         employee_id=user_employee_id,
