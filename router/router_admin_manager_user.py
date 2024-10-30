@@ -97,8 +97,14 @@ def update_user():
     new_user.employee_id = request.form.get('employee_id')
     new_user.card_id = request.form.get('card_id')
     new_user.name = request.form.get('name')
-    new_user.department_num = request.form.get('department_num')
-    new_user.position_num = request.form.get('position_num')
+    position_num = request.form.get('position_num')
+    if position_num is not None:
+        new_user.position_num = int(position_num)
+
+    department_num = request.form.get('department_num')
+    if department_num is not None:
+        new_user.department_num = int(department_num)
+
     # 处理头像
     if 'file' in request.files:
         file = request.files['file']
@@ -139,8 +145,14 @@ def add_user():
     new_user.employee_id = request.form.get('employee_id')
     new_user.card_id = request.form.get('card_id')
     new_user.name = request.form.get('name')
-    new_user.position_num = int(request.form.get('position_num'))
-    new_user.department_num = int(request.form.get('department_num'))
+
+    position_num = request.form.get('position_num')
+    if position_num is not None:
+        new_user.position_num = int(position_num)
+
+    department_num = request.form.get('department_num')
+    if department_num is not None:
+        new_user.department_num = int(department_num)
 
     # 处理头像
     if 'file' in request.files:
