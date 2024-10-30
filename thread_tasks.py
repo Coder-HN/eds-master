@@ -173,6 +173,10 @@ def manage_system(socketio):
             enter_queue.get()  # 移除进门读卡
 
         if not exit_queue.empty():
+            global is_repeat_test
+            if is_repeat_test:  # 如果在正在重新测试时收到刷卡，停止重新测试
+                is_repeat_test = False
+            # 先跳转
             access_flag = 2
             print("出门发送跳转指令-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
             swipe_data = generate_swipe_data(access_flag)
