@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 
 from config import Config
 from mapper import UserMapper, DepartmentMapper, PositionMapper
+from mapper.UserMapper import is_exist
 from models import TableUser
 
 """
@@ -90,95 +91,116 @@ def delete_user():
 
 @manageUser.route('/updateUser', methods=['POST'])  # 修改人员
 def update_user():
-    new_user = TableUser()
-    # 处理其他数据
-    num = request.form.get('num')
-    new_user.num = num
-    new_user.employee_id = request.form.get('employee_id')
-    new_user.card_id = request.form.get('card_id')
-    new_user.name = request.form.get('name')
-    position_num = request.form.get('position_num')
-    if position_num is not None:
-        new_user.position_num = int(position_num)
-
-    department_num = request.form.get('department_num')
-    if department_num is not None:
-        new_user.department_num = int(department_num)
-
-    # 处理头像
-    if 'file' in request.files:
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({'error': '没有选择文件'}), 400
-        mime_type = file.content_type
-        if mime_type not in ['image/jpeg', 'image/png']:
-            return jsonify({'error': '不支持的文件类型'}), 415
-        if file:
-            # 要先删除原来的图像
-            user = UserMapper.get_user_by_num(num)
-            if user.pic_path:
-                path_delete = Config.STATIC_PUBLIC + user.pic_path
-                if os.path.exists(path_delete):
-                    os.remove(path_delete)
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(Config.UPLOAD_FOLDER, filename)
-            if os.path.exists(file_path):
-                os.remove(file_path)
-            file.save(file_path)
-            new_file_name = f"{new_user.employee_id}_{new_user.card_id}.jpg"
-            new_file_path = os.path.join(Config.UPLOAD_FOLDER, new_file_name)
-            if os.path.exists(new_file_path):
-                os.remove(new_file_path)
-            os.rename(file_path, new_file_path)
-            file_url = f'/profile_photo/{new_file_name}'
-            new_user.pic_path = file_url
-    if UserMapper.update_user(num, new_user):
-        return make_response('', 200)
+    employee_id = request.form.get('employee_id')
+    card_id = request.form.get('card_id')
+    num = int(request.form.get('num'))
+    _, msg, list_user_num = is_exist(employee_id, card_id)
+    res = False
+    msg_zh = ""
+    for i in range(len(list_user_num)):
+        if list_user_num[i] != num:
+            res = True
+            msg_zh += msg[i]
+    if res:
+        return jsonify({'error': msg_zh}), 201
     else:
-        return jsonify({'error': '更新数据失败'}), 500
+        new_user = TableUser()
+        # 处理数据
+        new_user.num = num
+        new_user.employee_id = employee_id
+        new_user.card_id = card_id
+        new_user.name = request.form.get('name')
+        position_num = request.form.get('position_num')
+        if position_num is not None:
+            new_user.position_num = int(position_num)
+
+        department_num = request.form.get('department_num')
+        if department_num is not None:
+            new_user.department_num = int(department_num)
+
+        # 处理头像
+        if 'file' in request.files:
+            file = request.files['file']
+            if file.filename == '':
+                return jsonify({'error': '没有选择文件'}), 400
+            mime_type = file.content_type
+            if mime_type not in ['image/jpeg', 'image/png']:
+                return jsonify({'error': '不支持的文件类型'}), 415
+            if file:
+                # 要先删除原来的图像
+                user = UserMapper.get_user_by_num(new_user.num)
+                if user.pic_path:
+                    path_delete = Config.STATIC_PUBLIC + user.pic_path
+                    if os.path.exists(path_delete):
+                        os.remove(path_delete)
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(Config.UPLOAD_FOLDER, filename)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                file.save(file_path)
+                new_file_name = f"{new_user.employee_id}_{new_user.card_id}.jpg"
+                new_file_path = os.path.join(Config.UPLOAD_FOLDER, new_file_name)
+                if os.path.exists(new_file_path):
+                    os.remove(new_file_path)
+                os.rename(file_path, new_file_path)
+                file_url = f'/profile_photo/{new_file_name}'
+                new_user.pic_path = file_url
+        if UserMapper.update_user(new_user.num, new_user):
+            return make_response('', 200)
+        else:
+            return jsonify({'error': 'UserMapper.update_user更新数据失败'}), 500
 
 
 @manageUser.route('/addUser', methods=['POST'])  # 添加人员
 def add_user():
-    new_user = TableUser()
-    # 处理其他数据
-    new_user.employee_id = request.form.get('employee_id')
-    new_user.card_id = request.form.get('card_id')
-    new_user.name = request.form.get('name')
-
-    position_num = request.form.get('position_num')
-    if position_num is not None:
-        new_user.position_num = int(position_num)
-
-    department_num = request.form.get('department_num')
-    if department_num is not None:
-        new_user.department_num = int(department_num)
-
-    # 处理头像
-    if 'file' in request.files:
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({'error': '没有选择文件'}), 400
-        mime_type = file.content_type
-        if mime_type not in ['image/jpeg', 'image/png']:
-            return jsonify({'error': '不支持的文件类型'}), 415
-        if file:
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(Config.UPLOAD_FOLDER, filename)
-            if os.path.exists(file_path):
-                os.remove(file_path)
-            file.save(file_path)
-            new_file_name = f"{new_user.employee_id}_{new_user.card_id}.jpg"
-            new_file_path = os.path.join(Config.UPLOAD_FOLDER, new_file_name)
-            if os.path.exists(new_file_path):
-                os.remove(new_file_path)
-            os.rename(file_path, new_file_path)
-            file_url = f'/profile_photo/{new_file_name}'
-            new_user.pic_path = file_url
-    if UserMapper.add_user(new_user):
-        return make_response('', 200)
+    employee_id = request.form.get('employee_id')
+    card_id = request.form.get('card_id')
+    res, msg, _ = is_exist(employee_id, card_id)
+    msg_zh = ""
+    for m in msg:
+        msg_zh += m
+    if res:
+        return jsonify({'error': msg_zh}), 201
     else:
-        return jsonify({'error': '添加数据失败'}), 500
+        # 处理数据
+        new_user = TableUser()
+        new_user.employee_id = employee_id
+        new_user.card_id = card_id
+        new_user.name = request.form.get('name')
+
+        position_num = request.form.get('position_num')
+        if position_num is not None:
+            new_user.position_num = int(position_num)
+
+        department_num = request.form.get('department_num')
+        if department_num is not None:
+            new_user.department_num = int(department_num)
+
+        # 处理头像
+        if 'file' in request.files:
+            file = request.files['file']
+            if file.filename == '':
+                return jsonify({'error': '没有选择文件'}), 400
+            mime_type = file.content_type
+            if mime_type not in ['image/jpeg', 'image/png']:
+                return jsonify({'error': '不支持的文件类型'}), 415
+            if file:
+                filename = secure_filename(file.filename)
+                file_path = os.path.join(Config.UPLOAD_FOLDER, filename)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                file.save(file_path)
+                new_file_name = f"{new_user.employee_id}_{new_user.card_id}.jpg"
+                new_file_path = os.path.join(Config.UPLOAD_FOLDER, new_file_name)
+                if os.path.exists(new_file_path):
+                    os.remove(new_file_path)
+                os.rename(file_path, new_file_path)
+                file_url = f'/profile_photo/{new_file_name}'
+                new_user.pic_path = file_url
+        if UserMapper.add_user(new_user):
+            return make_response('', 200)
+        else:
+            return jsonify({'error': 'UserMapper.add_user添加数据失败'}), 500
 
 
 @manageUser.route('/addUserExcel', methods=['POST'])  # 添加人员表
