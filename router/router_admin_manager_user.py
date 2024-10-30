@@ -217,8 +217,11 @@ def add_user_excel():
     users_employee_id_excel = []
     users_card_id_excel = []
     try:
-        # 使用 pandas 读取 Excel 文件
-        df = pd.read_excel(file)
+        # 使用 pandas 读取 Excel 文件，使用 `dtype` 参数将 card_id，employee_id 列读取为字符串类型
+        df = pd.read_excel(file, dtype={
+            'card_id': str,
+            'employee_id': str,
+        })
         results = []  # 存储处理结果
         # 遍历每一行，创建 UserExcelMessage 实例
         for _, row in df.iterrows():
