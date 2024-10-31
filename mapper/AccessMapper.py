@@ -42,7 +42,21 @@ def get_all_access():
 
 
 def get_all_access_excel():
-    return TableAccess.query.all()
+    query = db.session.query(TableAccess.num,
+                             TableAccess.user_num,
+                             TableAccess.service_num,
+                             TableAccess.access_flag,
+                             TableAccess.access_time,
+                             TableAccess.result,
+                             TableAccess.value_hand_left,
+                             TableAccess.value_hand_right,
+                             TableAccess.value_foot_left,
+                             TableAccess.value_foot_right,
+                             )
+    results = query.order_by(desc(TableAccess.access_time)).all()
+    return [dict(num=row[0], user_num=row[1], service_num=row[2], access_flag=row[3], access_time=row[4], result=row[5],
+                 value_hand_left=row[6], value_hand_right=row[7], value_foot_left=row[8], value_foot_right=row[9], )
+            for row in results]
 
 
 def get_access_by_multiple_conditions(employee_id=None, name=None, service_name=None,

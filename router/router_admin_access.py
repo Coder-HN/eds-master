@@ -152,7 +152,7 @@ def download_db():
 @searchAccess.route('/download_excel', methods=['GET'])
 def download_excel():
     try:
-        access_list = AccessMapper.get_all_access()
+        access_list = AccessMapper.get_all_access_excel()
         for access in access_list:
             access_time = access['access_time'].strftime('%Y-%m-%d %H:%M:%S')
             access['access_time'] = access_time
@@ -166,10 +166,21 @@ def download_excel():
             service = ServiceMapper.get_service_by_num(service_num)
             access["service_id"] = service.service_id
             access["service_name"] = service.service_name
+            r_standard = RStandardMapper.get_r_standard_by_num(service.r_standard_num)
+            access['hand_left_min'] = r_standard.hand_left_min
+            access['hand_left_max'] = r_standard.hand_left_max
+            access['hand_right_min'] = r_standard.hand_right_min
+            access['hand_right_max'] = r_standard.hand_right_max
+            access['foot_left_min'] = r_standard.foot_left_min
+            access['foot_left_max'] = r_standard.foot_left_max
+            access['foot_right_min'] = r_standard.foot_right_min
+            access['foot_right_max'] = r_standard.foot_right_max
+
             if access["access_flag"] == 1:
                 access["access_flag"] = "进门"
             elif access["access_flag"] == 2:
                 access["access_flag"] = "出门"
+
             del access['num']
             del access['user_num']
             del access['service_num']
