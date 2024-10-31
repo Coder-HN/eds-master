@@ -1,8 +1,9 @@
 import datetime
 import os
+from io import BytesIO
 
-from flask import Blueprint, request, jsonify, send_file, make_response
-
+import pandas as pd
+from flask import Blueprint, request, jsonify, send_file, make_response, current_app
 from config import Config
 from mapper import UserMapper, ServiceMapper, AccessMapper, DepartmentMapper, RStandardMapper
 from models import TableAccess
@@ -129,7 +130,7 @@ def search():
 
 # 定义导出路由
 @searchAccess.route('/download_db', methods=['GET'])
-def upload_db():
+def download_db():
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     file_name = f"edsystem_{timestamp}.sql"
     output_file = os.path.join(Config.SQL_DATA, file_name)
@@ -138,3 +139,28 @@ def upload_db():
         return response, 200
     else:
         return jsonify({"error": "导出数据库失败"}), 500
+
+
+# 定义导出路由
+@searchAccess.route('/download_excel', methods=['GET'])
+def download_excel():
+    try:
+        access_data = AccessMapper.get_all_access()
+        # 使用 pandas 将数据转换为 DataFrame
+        df = pd.DataFrame(access_data)
+        # 创建输出流，用于生成 Excel 文件
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            # 将 DataFrame 写入 Excel 文件，保持与导入格式一致的列
+            df.to_excel(writer, index=False, sheet_name='进出记录数据')
+        output.seek(0)  # 将指针移到文件开头
+
+        # 返回生成的 Excel 文件
+        return send_file(output,
+                         download_name='进出记录数据.xlsx',
+                         as_attachment=True,
+                         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    except Exception as e:
+        # 记录并返回错误信息
+        current_app.logger.error(f"Error exporting user Excel: {str(e)}")
+        return jsonify({'error': str(e)}), 500
