@@ -183,19 +183,22 @@ def download_excel():
 
             if access['value_hand_left'] == -1:
                 access['value_hand_left'] = "未测"
-            else:
+            elif access['value_hand_left'] is not None:
                 access['value_hand_left'] += "KΩ"
+
             if access['value_hand_right'] == -1:
                 access['value_hand_right'] = "未测"
-            else:
+            elif access['value_hand_right'] is not None:
                 access['value_hand_right'] += "KΩ"
+
             if access['value_foot_left'] == -1:
                 access['value_foot_left'] = "未测"
-            else:
+            elif access['value_foot_left'] is not None:
                 access['value_foot_left'] += "KΩ"
+
             if access['value_foot_right'] == -1:
                 access['value_foot_right'] = "未测"
-            else:
+            elif access['value_foot_right'] is not None:
                 access['value_foot_right'] += "KΩ"
 
             if access["access_flag"] == 1:
