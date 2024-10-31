@@ -167,14 +167,14 @@ def download_excel():
             access["service_id"] = service.service_id
             access["service_name"] = service.service_name
             r_standard = RStandardMapper.get_r_standard_by_num(service.r_standard_num)
-            access['hand_left_min'] = r_standard.hand_left_min + "KΩ"
-            access['hand_left_max'] = r_standard.hand_left_max + "KΩ"
-            access['hand_right_min'] = r_standard.hand_right_min + "KΩ"
-            access['hand_right_max'] = r_standard.hand_right_max + "KΩ"
-            access['foot_left_min'] = r_standard.foot_left_min + "KΩ"
-            access['foot_left_max'] = r_standard.foot_left_max + "KΩ"
-            access['foot_right_min'] = r_standard.foot_right_min + "KΩ"
-            access['foot_right_max'] = r_standard.foot_right_max + "KΩ"
+            access['hand_left_min'] = str(r_standard.hand_left_min) + "KΩ"
+            access['hand_left_max'] = str(r_standard.hand_left_max) + "KΩ"
+            access['hand_right_min'] = str(r_standard.hand_right_min) + "KΩ"
+            access['hand_right_max'] = str(r_standard.hand_right_max) + "KΩ"
+            access['foot_left_min'] = str(r_standard.foot_left_min) + "KΩ"
+            access['foot_left_max'] = str(r_standard.foot_left_max) + "KΩ"
+            access['foot_right_min'] = str(r_standard.foot_right_min) + "KΩ"
+            access['foot_right_max'] = str(r_standard.foot_right_max) + "KΩ"
 
             if access['result'] == 1:
                 access['result'] = "测试合格"
