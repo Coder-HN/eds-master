@@ -8,7 +8,6 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # 开发环境
-    # SQL_DATA = 'E:/workplaces/PythonProjects/edsMaster/static_data'  # 数据库下载位置
     # STATIC_PUBLIC = 'E:/workplaces/FrontProjects/edsFront/public'  # 静态文件位置
     # UPLOAD_FOLDER = 'E:/workplaces/FrontProjects/edsFront/public/profile_photo/'  # 头像位置
     # 部署环境
