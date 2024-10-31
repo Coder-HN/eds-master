@@ -1,6 +1,7 @@
 import glob
 import os
 import subprocess
+from io import BytesIO
 
 import mysql.connector
 
@@ -27,25 +28,33 @@ def delete_sql_files_in_folder(folder_path):
 
 
 # 导出MySQL数据库到SQL文件
-def export_mysql_to_sql(output_file):
-    command = f"mysqldump -h {mysql_config['host']} -u {mysql_config['user']} -p{mysql_config['password']} {mysql_config['database']} > {output_file}"
+def export_mysql_to_sql():
+    output = BytesIO()
+    command = [
+        "mysqldump",
+        "-h", mysql_config['host'],
+        "-u", mysql_config['user'],
+        f"-p{mysql_config['password']}",
+        mysql_config['database']
+    ]
+
     try:
-        delete_sql_files_in_folder(Config.SQL_DATA)
-        subprocess.run(command, shell=True, check=True)
-        return True
+        # 使用 subprocess.Popen 执行 mysqldump 命令
+        with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
+            stdout, stderr = proc.communicate()
+            if proc.returncode != 0:
+                print(f"Error: {stderr.decode('utf-8')}")
+                return None
+            # 将导出的数据库内容写入 BytesIO 流
+            output.write(stdout)
+            output.seek(0)  # 重置流位置，准备读取
+        return output
     except subprocess.CalledProcessError as e:
         print(f"Error: {e}")
-        return False
+        return None
 
 
 # TODO 导入SQL文件到MySQL数据库
-def import_sql_to_mysql(input_file):
-    command = f"mysql -h {mysql_config['host']} -u {mysql_config['user']} -p{mysql_config['password']} {mysql_config['database']} < {input_file}"
-    try:
-        subprocess.run(command, shell=True, check=True)
-        print(f"Database {mysql_config['database']} imported successfully from {input_file}")
-    except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
 
 
 def get_user_by_card_id(card_id):

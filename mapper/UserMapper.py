@@ -47,6 +47,10 @@ def get_all_users():
     return TableUser.query.filter(TableUser.is_delete == 0).order_by(TableUser.num.desc()).all()
 
 
+def get_all_users_excel():
+    return TableUser.query.all()
+
+
 # 获取离职人员列表
 def get_all_users_deleted():
     return TableUser.query.filter(TableUser.is_delete == 1).all()

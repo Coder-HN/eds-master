@@ -1,5 +1,6 @@
 import datetime
 import os
+import subprocess
 from io import BytesIO
 
 import pandas as pd
@@ -133,10 +134,16 @@ def search():
 def download_db():
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     file_name = f"edsystem_{timestamp}.sql"
-    output_file = os.path.join(Config.SQL_DATA, file_name)
-    if export_mysql_to_sql(output_file):
-        response = send_file(output_file, as_attachment=True, download_name=file_name)
-        return response, 200
+
+    output = export_mysql_to_sql()
+    if output:
+        # 返回生成的 SQL 文件作为下载
+        return send_file(
+            output,
+            as_attachment=True,
+            download_name=file_name,
+            mimetype='application/sql'
+        )
     else:
         return jsonify({"error": "导出数据库失败"}), 500
 
@@ -145,9 +152,22 @@ def download_db():
 @searchAccess.route('/download_excel', methods=['GET'])
 def download_excel():
     try:
-        access_data = AccessMapper.get_all_access()
+        access_list = AccessMapper.get_all_access()
+        for access in access_list:
+            access_time = access['access_time'].strftime('%Y-%m-%d %H:%M:%S')
+            access['access_time'] = access_time
+            user_num = access.get("user_num")
+            user = UserMapper.get_user_by_num(user_num)
+            access["name"] = user.name
+            access["employee_id"] = user.employee_id
+            department = DepartmentMapper.get_department_by_num(user.department_num)
+            access["department"] = department.department_name
+            service_num = access.get("service_num")
+            service = ServiceMapper.get_service_by_num(service_num)
+            access["service_id"] = service.service_id
+            access["service_name"] = service.service_name
         # 使用 pandas 将数据转换为 DataFrame
-        df = pd.DataFrame(access_data)
+        df = pd.DataFrame(access_list)
         # 创建输出流，用于生成 Excel 文件
         output = BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:

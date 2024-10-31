@@ -41,6 +41,10 @@ def get_all_access():
             for row in results]
 
 
+def get_all_access_excel():
+    return TableAccess.query.all()
+
+
 def get_access_by_multiple_conditions(employee_id=None, name=None, service_name=None,
                                       start_time=None, end_time=None):
     users = []
