@@ -167,14 +167,36 @@ def download_excel():
             access["service_id"] = service.service_id
             access["service_name"] = service.service_name
             r_standard = RStandardMapper.get_r_standard_by_num(service.r_standard_num)
-            access['hand_left_min'] = r_standard.hand_left_min
-            access['hand_left_max'] = r_standard.hand_left_max
-            access['hand_right_min'] = r_standard.hand_right_min
-            access['hand_right_max'] = r_standard.hand_right_max
-            access['foot_left_min'] = r_standard.foot_left_min
-            access['foot_left_max'] = r_standard.foot_left_max
-            access['foot_right_min'] = r_standard.foot_right_min
-            access['foot_right_max'] = r_standard.foot_right_max
+            access['hand_left_min'] = r_standard.hand_left_min + "KΩ"
+            access['hand_left_max'] = r_standard.hand_left_max + "KΩ"
+            access['hand_right_min'] = r_standard.hand_right_min + "KΩ"
+            access['hand_right_max'] = r_standard.hand_right_max + "KΩ"
+            access['foot_left_min'] = r_standard.foot_left_min + "KΩ"
+            access['foot_left_max'] = r_standard.foot_left_max + "KΩ"
+            access['foot_right_min'] = r_standard.foot_right_min + "KΩ"
+            access['foot_right_max'] = r_standard.foot_right_max + "KΩ"
+
+            if access['result'] == 1:
+                access['result'] = "测试合格"
+            elif access['result'] == 2:
+                access['result'] = "测试不合格"
+
+            if access['value_hand_left'] == -1:
+                access['value_hand_left'] = "未测"
+            else:
+                access['value_hand_left'] += "KΩ"
+            if access['value_hand_right'] == -1:
+                access['value_hand_right'] = "未测"
+            else:
+                access['value_hand_right'] += "KΩ"
+            if access['value_foot_left'] == -1:
+                access['value_foot_left'] = "未测"
+            else:
+                access['value_foot_left'] += "KΩ"
+            if access['value_foot_right'] == -1:
+                access['value_foot_right'] = "未测"
+            else:
+                access['value_foot_right'] += "KΩ"
 
             if access["access_flag"] == 1:
                 access["access_flag"] = "进门"
