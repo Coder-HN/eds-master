@@ -166,6 +166,13 @@ def download_excel():
             service = ServiceMapper.get_service_by_num(service_num)
             access["service_id"] = service.service_id
             access["service_name"] = service.service_name
+            if access["access_flag"] == 1:
+                access["access_flag"] = "进门"
+            elif access["access_flag"] == 2:
+                access["access_flag"] = "出门"
+            del access['num']
+            del access['user_num']
+            del access['service_num']
         # 使用 pandas 将数据转换为 DataFrame
         df = pd.DataFrame(access_list)
         # 创建输出流，用于生成 Excel 文件
