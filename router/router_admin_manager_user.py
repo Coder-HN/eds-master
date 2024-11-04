@@ -19,63 +19,65 @@ from models import TableUser
 manageUser = Blueprint('manageUser', __name__, url_prefix='/api/admin/manageUser')
 
 
-@manageUser.route('/getAllUsers', methods=['GET'])  # 获取人员表单
+@manageUser.route('/getAllUsers', methods=['GET'])  # 查询人员
 def get_all_users():
     try:
-        all_users = UserMapper.get_all_users()
+        request_type = request.args.get('type')
+        all_users = []
+        if request_type == '1':  # 普通权限，只能看到在职人员
+            all_users = UserMapper.get_all_users()
+        elif request_type == '2':
+            all_users = UserMapper.get_all_users_excel()
         users_list = [user.to_dict() for user in all_users]
         for user_dict in users_list:
             department_num = user_dict['department_num']
             position_num = user_dict['position_num']
+            department_name = ''
+            position_name = ''
             if department_num:
                 department_name = (DepartmentMapper.get_department_by_num(int(department_num))).department_name
-            else:
-                department_name = ''
             if position_num:
                 position_name = (PositionMapper.get_position_by_num(int(position_num))).position_name
-            else:
-                position_name = ''
             user_dict["department_name"] = department_name
             user_dict["position_name"] = position_name
+        response = {
+            "data": users_list
+        }
+        return jsonify(response), 200
     except Exception as e:
         return jsonify({'error': e}), 500
-    response = {
-        "data": users_list
-    }
-    return jsonify(response), 200
 
 
-@manageUser.route('/searchUser', methods=['POST'])  # 添加人员
+@manageUser.route('/searchUser', methods=['POST'])  # 搜索人员
 def search_user():
-    employee_id = request.form.get('employee_id')
-    card_id = request.form.get('card_id')
-    name = request.form.get('name')
-    department_num = request.form.get('department_num')
-    position_num = request.form.get('position_num')
     try:
-        all_users = UserMapper.get_users_by_multiple_conditions(employee_id, card_id, name, department_num,
-                                                                position_num)
+        request_type = request.form.get('type')
+        employee_id = request.form.get('employee_id')
+        card_id = request.form.get('card_id')
+        name = request.form.get('name')
+        department_num = request.form.get('department_num')
+        position_num = request.form.get('position_num')
+        all_users = UserMapper.get_users_by_multiple_conditions(request_type, employee_id,
+                                                                card_id, name,
+                                                                department_num, position_num)
         users_list = [user.to_dict() for user in all_users]
         for user_dict in users_list:
             department_num = user_dict['department_num']
             position_num = user_dict['position_num']
+            department_name = ''
+            position_name = ''
             if department_num:
                 department_name = (DepartmentMapper.get_department_by_num(int(department_num))).department_name
-            else:
-                department_name = ''
             if position_num:
                 position_name = (PositionMapper.get_position_by_num(int(position_num))).position_name
-            else:
-                position_name = ''
             user_dict["department_name"] = department_name
             user_dict["position_name"] = position_name
-
+        response = {
+            "data": users_list
+        }
+        return jsonify(response), 200
     except Exception as e:
         return jsonify({'error': e}), 500
-    response = {
-        "data": users_list
-    }
-    return jsonify(response), 200
 
 
 @manageUser.route('/deleteUser', methods=['POST'])  # 删除人员
@@ -87,6 +89,17 @@ def delete_user():
         return make_response('', 200)
     else:
         return jsonify({'error': '删除人员失败'}), 500
+
+
+@manageUser.route('/recoverUser', methods=['POST'])  # 删除人员
+def recover_user():
+    data = request.get_json()
+    num = data.get('num')
+    is_change = UserMapper.update_user(num, TableUser(num=num, is_delete=0))
+    if is_change:
+        return make_response('', 200)
+    else:
+        return jsonify({'error': '恢复人员失败'}), 500
 
 
 @manageUser.route('/updateUser', methods=['POST'])  # 修改人员
