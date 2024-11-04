@@ -81,20 +81,20 @@ def delete_access():
 
 @searchAccess.route('/search', methods=['POST'])  # 搜索进出记录
 def search():
-    start_time = None
-    end_time = None
-    employee_id = request.form.get('employee_id')
-    name = request.form.get('name')
-    service_name = request.form.get('service_name')
-    start_time_str = request.form.get('start_time')
-    end_time_str = request.form.get('end_time')
-    if start_time_str:
-        start_time = timeHelper.parse_datetime(start_time_str)
-        start_time = timeHelper.get_start_of_day(start_time)
-    if end_time_str:
-        end_time = timeHelper.parse_datetime(end_time_str)
-        end_time = timeHelper.get_end_of_day(end_time)
     try:
+        start_time = None
+        end_time = None
+        employee_id = request.form.get('employee_id')
+        name = request.form.get('name')
+        service_name = request.form.get('service_name')
+        start_time_str = request.form.get('start_time')
+        end_time_str = request.form.get('end_time')
+        if start_time_str:
+            start_time = timeHelper.parse_datetime(start_time_str)
+            start_time = timeHelper.get_start_of_day(start_time)
+        if end_time_str:
+            end_time = timeHelper.parse_datetime(end_time_str)
+            end_time = timeHelper.get_end_of_day(end_time)
         all_access = AccessMapper.get_access_by_multiple_conditions(employee_id, name, service_name,
                                                                     start_time, end_time)
         access_list = [access.to_dict() for access in all_access]
@@ -149,10 +149,25 @@ def download_db():
 
 
 # 定义导出路由
-@searchAccess.route('/download_excel', methods=['GET'])
+@searchAccess.route('/download_excel', methods=['POST'])
 def download_excel():
     try:
-        access_list = AccessMapper.get_all_access_excel()
+        start_time = None
+        end_time = None
+        employee_id = request.form.get('employee_id')
+        name = request.form.get('name')
+        service_name = request.form.get('service_name')
+        start_time_str = request.form.get('start_time')
+        end_time_str = request.form.get('end_time')
+        if start_time_str:
+            start_time = timeHelper.parse_datetime(start_time_str)
+            start_time = timeHelper.get_start_of_day(start_time)
+        if end_time_str:
+            end_time = timeHelper.parse_datetime(end_time_str)
+            end_time = timeHelper.get_end_of_day(end_time)
+        all_access = AccessMapper.get_access_by_multiple_conditions(employee_id, name, service_name,
+                                                                    start_time, end_time)
+        access_list = [access.to_dict() for access in all_access]
         for access in access_list:
             access_time = access['access_time'].strftime('%Y-%m-%d %H:%M:%S')
             access['access_time'] = access_time
@@ -209,6 +224,13 @@ def download_excel():
             del access['num']
             del access['user_num']
             del access['service_num']
+            del access['unregist']
+            del access['will_fail']
+            del access['result_hand_left']
+            del access['result_hand_right']
+            del access['result_foot_left']
+            del access['result_foot_right']
+
         # 使用 pandas 将数据转换为 DataFrame
         df = pd.DataFrame(access_list)
         # 创建输出流，用于生成 Excel 文件
@@ -216,6 +238,14 @@ def download_excel():
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             # 将 DataFrame 写入 Excel 文件，保持与导入格式一致的列
             df.to_excel(writer, index=False, sheet_name='进出记录数据')
+            # 获取 worksheet 对象
+            worksheet = writer.sheets['进出记录数据']
+            # 设置列宽仅根据列名长度
+            for idx, col in enumerate(df.columns):  # 遍历 DataFrame 的每一列
+                if col == 'access_time':
+                    worksheet.set_column(idx, idx, len(col) * 2)
+                else:
+                    worksheet.set_column(idx, idx, len(col) + 2)  # 根据列名长度设置列宽，加 2 以增加空白
         output.seek(0)  # 将指针移到文件开头
 
         # 返回生成的 Excel 文件

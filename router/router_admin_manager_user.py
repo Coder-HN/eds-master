@@ -343,14 +343,22 @@ def handle_dp(_department_name, _position_name):
     return department_num, position_num
 
 
-@manageUser.route('/exportUserExcel', methods=['GET'])  # 导出人员表
+@manageUser.route('/exportUserExcel', methods=['POST'])  # 导出人员表
 def export_user_excel():
     try:
-        # 从数据库中获取用户数据
-        users_db = UserMapper.get_all_users()
+        # 从数据库中获取用户数据（根据搜索情况）
+        request_type = request.form.get('type')
+        employee_id = request.form.get('employee_id')
+        card_id = request.form.get('card_id')
+        name = request.form.get('name')
+        department_num = request.form.get('department_num')
+        position_num = request.form.get('position_num')
+        all_users = UserMapper.get_users_by_multiple_conditions(request_type, employee_id,
+                                                                card_id, name,
+                                                                department_num, position_num)
         # 将数据库中的数据转换为字典格式
         user_data = []
-        for user in users_db:
+        for user in all_users:
             user_data.append({
                 'employee_id': user.employee_id,
                 'card_id': user.card_id,
@@ -368,6 +376,11 @@ def export_user_excel():
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             # 将 DataFrame 写入 Excel 文件，保持与导入格式一致的列
             df.to_excel(writer, index=False, sheet_name='用户数据')
+            # 获取 worksheet 对象
+            worksheet = writer.sheets['用户数据']
+            # 设置列宽仅根据列名长度
+            for idx, col in enumerate(df.columns):  # 遍历 DataFrame 的每一列
+                worksheet.set_column(idx, idx, len(col) + 2)  # 根据列名长度设置列宽，加 2 以增加空白
         output.seek(0)  # 将指针移到文件开头
 
         # 返回生成的 Excel 文件

@@ -57,10 +57,10 @@ def get_all_users_deleted():
 
 
 # 多条件查询
-def get_users_by_multiple_conditions(request_type=1, employee_id=None, card_id=None, name=None, department_num=None,
+def get_users_by_multiple_conditions(request_type='1', employee_id=None, card_id=None, name=None, department_num=None,
                                      position_num=None):
     query = TableUser.query
-    if request_type == 1:
+    if request_type == '1':
         query = query.filter(TableUser.is_delete == 0)
     if employee_id:
         query = query.filter(TableUser.employee_id == employee_id)
