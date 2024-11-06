@@ -35,43 +35,18 @@ def add_access():
     access_time = timeHelper.get_now_time()
     new_access = TableAccess()
     if access_flag == 1:
-        value_hand_left = data.get('value_hand_left')
-        value_hand_right = data.get('value_hand_right')
-        value_foot_left = data.get('value_foot_left')
-        value_foot_right = data.get('value_foot_right')
-        r_standard = RStandardMapper.get_r_standard_by_num(service.r_standard_num)
-        hand_left_min = float(r_standard.hand_left_min)
-        hand_left_max = float(r_standard.hand_left_max)
-        hand_right_min = float(r_standard.hand_right_min)
-        hand_right_max = float(r_standard.hand_right_max)
-        foot_left_min = float(r_standard.foot_left_min)
-        foot_left_max = float(r_standard.foot_left_max)
-        foot_right_min = float(r_standard.foot_right_min)
-        foot_right_max = float(r_standard.foot_right_max)
-        result = 1
-        result_hand_left, result_hand_right, result_foot_left, result_foot_right = 1, 1, 1, 1
-        if not (value_hand_left != -1 and hand_left_min <= value_hand_left <= hand_left_max):
-            result_hand_left = 2
-            result = 2
+        new_access.value_hand_left = data.get('value_hand_left')
+        new_access.value_hand_right = data.get('value_hand_right')
+        new_access.value_foot_left = data.get('value_foot_left')
+        new_access.value_foot_right = data.get('value_foot_right')
 
-        if not (value_hand_right != -1 and hand_right_min <= value_hand_right <= hand_right_max):
-            result_hand_right = 2
-            result = 2
-        if not (value_foot_left != -1 and foot_left_min <= value_foot_left <= foot_left_max):
-            result_foot_left = 2
-            result = 2
-        if not (value_foot_right != -1 and foot_right_min <= value_foot_right <= foot_right_max):
-            result_foot_right = 2
-            result = 2
-        new_access.result = result
-        new_access.result_hand_left = result_hand_left
-        new_access.result_hand_right = result_hand_right
-        new_access.result_foot_left = result_foot_left
-        new_access.result_foot_right = result_foot_right
-        new_access.value_hand_left = value_hand_left
-        new_access.value_hand_right = value_hand_right
-        new_access.value_foot_left = value_foot_left
-        new_access.value_foot_right = value_foot_right
+        new_access.result_hand_left = data.get('result_hand_left')
+        new_access.result_hand_right = data.get('result_hand_right')
+        new_access.result_foot_left = data.get('result_foot_left')
+        new_access.result_foot_right = data.get('result_foot_right')
+
+        new_access.result = data.get('result')
+
     new_access.user_num = user_num
     new_access.service_num = service_num
     new_access.access_flag = access_flag
