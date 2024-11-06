@@ -49,25 +49,18 @@ def add_access():
         foot_right_min = float(r_standard.foot_right_min)
         foot_right_max = float(r_standard.foot_right_max)
         result = 1
-        if value_hand_left != -1 and hand_left_min <= value_hand_left <= hand_left_max:
-            result_hand_left = 1
-        else:
+        result_hand_left, result_hand_right, result_foot_left, result_foot_right = 1, 1, 1, 1
+        if not (value_hand_left != -1 and hand_left_min <= value_hand_left <= hand_left_max):
             result_hand_left = 2
             result = 2
 
-        if value_hand_right != -1 and hand_right_min <= value_hand_right <= hand_right_max:
-            result_hand_right = 1
-        else:
+        if not (value_hand_right != -1 and hand_right_min <= value_hand_right <= hand_right_max):
             result_hand_right = 2
             result = 2
-        if value_foot_left != -1 and foot_left_min <= value_foot_left <= foot_left_max:
-            result_foot_left = 1
-        else:
+        if not (value_foot_left != -1 and foot_left_min <= value_foot_left <= foot_left_max):
             result_foot_left = 2
             result = 2
-        if value_foot_right != -1 and foot_right_min <= value_foot_right <= foot_right_max:
-            result_foot_right = 1
-        else:
+        if not (value_foot_right != -1 and foot_right_min <= value_foot_right <= foot_right_max):
             result_foot_right = 2
             result = 2
         new_access.result = result
