@@ -197,7 +197,6 @@ def manage_system(socketio):
         if not manage_queue.empty():
             res, get_data = manage_queue.get()
             if res == 'r_data':
-                time.sleep(1)
                 access_flag = get_data.get('access_flag')
                 msg = "重新测试电阻更新数据"
                 if get_data.get('second') == 0:
