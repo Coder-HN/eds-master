@@ -277,39 +277,45 @@ def send_user_data(access_flag, user, card_id, socketio):
 
 def compare_resistance_values(resistance_value, test_standard):
     results = {
-        'result_hand_left': 3,  # 默认值为 0，表示不进行测试
+        'result_hand_left': 3,  # 默认值为 3，表示未测
         'result_hand_right': 3,
         'result_foot_left': 3,
-        'result_foot_right': 3
+        'result_foot_right': 3,
+        'result_num': 1,  # 综合结果
     }
     test_part = test_standard['test_part']
     if test_part[0] == '1':
-        results['result_hand_left'] = 2
         if test_standard['hand_left_min'] <= resistance_value['value_hand_left'] <= test_standard['hand_left_max']:
             results['result_hand_left'] = 1
+        else:
+            results['result_hand_left'] = 2
+            results['result_num'] = 2
     else:
         resistance_value['value_hand_left'] = -1
 
     if test_part[1] == '1':
-        results['result_hand_right'] = 2
         if test_standard['hand_right_min'] <= resistance_value['value_hand_right'] <= test_standard['hand_right_max']:
             results['result_hand_right'] = 1
+        else:
+            results['result_hand_right'] = 2
+            results['result_num'] = 2
     else:
         resistance_value['value_hand_right'] = -1
 
     if test_part[2] == '1':
-        results['result_foot_left'] = 2
-        results['result_foot_right'] = 2
         if test_standard['foot_left_min'] <= resistance_value['value_foot_left'] <= test_standard['foot_left_max']:
             results['result_foot_left'] = 1
+        else:
+            results['result_foot_left'] = 2
+            results['result_num'] = 2
         if test_standard['foot_right_min'] <= resistance_value['value_foot_right'] <= test_standard['foot_right_max']:
             results['result_foot_right'] = 1
+        else:
+            results['result_foot_right'] = 2
+            results['result_num'] = 2
     else:
         resistance_value['value_foot_left'] = -1
         resistance_value['value_foot_right'] = -1
-
-    # 计算综合结果 result_num，所有值都为 1 时为通过
-    results['result_num'] = 1 if all((value == 1 or value == 0) for value in results.values()) else 0
     return results, resistance_value
 
 
