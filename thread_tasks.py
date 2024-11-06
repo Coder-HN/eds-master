@@ -277,10 +277,10 @@ def send_user_data(access_flag, user, card_id, socketio):
 
 def compare_resistance_values(resistance_value, test_standard):
     results = {
-        'result_hand_left': 0,  # 默认值为 0，表示不进行测试
-        'result_hand_right': 0,
-        'result_foot_left': 0,
-        'result_foot_right': 0
+        'result_hand_left': 3,  # 默认值为 0，表示不进行测试
+        'result_hand_right': 3,
+        'result_foot_left': 3,
+        'result_foot_right': 3
     }
     test_part = test_standard['test_part']
     if test_part[0] == '1':
