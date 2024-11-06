@@ -295,7 +295,7 @@ def compare_resistance_values(resistance_value, test_standard):
         if test_standard['hand_right_min'] <= resistance_value['value_hand_right'] <= test_standard['hand_right_max']:
             results['result_hand_right'] = 1
     else:
-        resistance_value['result_hand_right'] = -1
+        resistance_value['value_hand_right'] = -1
 
     if test_part[2] == '1':
         results['result_foot_left'] = 2
