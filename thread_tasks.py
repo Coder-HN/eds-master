@@ -319,11 +319,11 @@ def compare_resistance_values(resistance_value, test_standard):
     return results, resistance_value
 
 
-# 6秒反复测试电阻，每0.25秒测试一次，每0.5秒一次发送一次数据
+# 8秒反复测试电阻，每0.25秒测试一次，每0.5秒一次发送一次数据
 def repeat_test_resistance(ser, user_info, test_standard):
     global is_repeat_test
     is_repeat_test = True  # 设置正在重新测试
-    for i in range(24, 0, -1):
+    for i in range(32, 0, -1):
         resistance_value = get_resistance(ser)
         results, resistance_value = compare_resistance_values(resistance_value, test_standard)
         if results['result_num'] == 1:
