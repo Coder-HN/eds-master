@@ -15,8 +15,8 @@ def is_exist(employee_id, card_id):
     user1 = TableUser.query.filter_by(card_id=card_id).first()
     if user1 is not None:
         res = True
-        st = "已离职" if user.is_delete == 1 else "未离职;"
-        msg.append(f"card_id={card_id}员工已存在,name={user.name},{st}")
+        st = "已离职" if user1.is_delete == 1 else "未离职;"
+        msg.append(f"card_id={card_id}员工已存在,name={user1.name},{st}")
         list_user_num.append(user1.num)
     return res, msg, list_user_num
 
