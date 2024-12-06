@@ -218,35 +218,40 @@ def electric_control(port, baudrate):
     try:
         with (serial.Serial(port, baudrate, timeout=Config.default_com_timeout) as ser):
             while True:
-                if not electric_queue.empty():
-                    task, user_info = electric_queue.get()
-                    if task == 'test_resistance':
-                        resistance_value = get_resistance(ser)
-                        test_standard = get_test_standard_by_service_id(resistance_value['service_id'])
-                        results, resistance_value = compare_resistance_values(resistance_value, test_standard)
-                        if results['result_num'] == 1:
-                            print(f"电阻测试成功: user_info={user_info}")
-                            r_data = generate_r_data(user_info, resistance_value, test_standard, results)
-                            manage_queue.put(('r_data', r_data))
-                            open_door(ser, access_flag=1)  # 一次测试成功开门
-                        else:
-                            print(f"电阻测试失败，重新测试: user_info={user_info}")
-                            repeat_test_resistance(ser, user_info, test_standard)
+                try:
+                    if not electric_queue.empty():
+                        task, user_info = electric_queue.get()
+                        if task == 'test_resistance':
+                            resistance_value = get_resistance(ser)
+                            test_standard = get_test_standard_by_service_id(resistance_value['service_id'])
+                            results, resistance_value = compare_resistance_values(resistance_value, test_standard)
+                            if results['result_num'] == 1:
+                                print(f"电阻测试成功: user_info={user_info}")
+                                r_data = generate_r_data(user_info, resistance_value, test_standard, results)
+                                manage_queue.put(('r_data', r_data))
+                                open_door(ser, access_flag=1)  # 一次测试成功开门
+                            else:
+                                print(f"电阻测试失败，重新测试: user_info={user_info}")
+                                repeat_test_resistance(ser, user_info, test_standard)
 
-                    elif task == 'open_door':  # 出门那边发来的请求打开出门的门
-                        print(f"开门操作中: user_info={user_info}")
-                        print("出门-发送开门指令给设备-当前时间（时:分:秒.毫秒）：",
-                              datetime.now().strftime("%H:%M:%S.%f")[:-3])
-                        open_door(ser, access_flag=2)
+                        elif task == 'open_door':  # 出门那边发来的请求打开出门的门
+                            print(f"开门操作中: user_info={user_info}")
+                            print("出门-发送开门指令给设备-当前时间（时:分:秒.毫秒）：",
+                                  datetime.now().strftime("%H:%M:%S.%f")[:-3])
+                            open_door(ser, access_flag=2)
 
-                if not standard_r_queue.empty():
-                    test_data = standard_r_queue.get()
-                    standard_r(test_data['test_part'], test_data['test_step'], ser)
+                    if not standard_r_queue.empty():
+                        test_data = standard_r_queue.get()
+                        standard_r(test_data['test_part'], test_data['test_step'], ser)
 
-                time.sleep(0.001)
+                    time.sleep(0.001)
+                except Exception as e:
+                    print(f"电阻串口错误: {e}")
+                    fail_data = generate_fail_data(1, 2, f"电阻串口错误: {e}")
+                    manage_queue.put(('fail_data', fail_data))
     except Exception as e:
-        print(f"电阻串口错误: {e}")
-        fail_data = generate_fail_data(1, 2, f"电阻串口错误: {e}")
+        print(f"电阻串口无法打开: {e}")
+        fail_data = generate_fail_data(1, 2, f"电阻串口无法打开: {e}")
         manage_queue.put(('fail_data', fail_data))
 
 
