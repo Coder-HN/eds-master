@@ -15,6 +15,7 @@ from router.router_admin_manager_service import manageService
 from router.router_admin_manager_user import manageUser
 from router.router_user import user
 from thread_tasks import monitor_entrance, monitor_exit, manage_system, electric_control
+from utils.loggingHelper import setup_logging, decorate_blueprint
 
 
 # 使用配置文件配置数据库配置
@@ -42,37 +43,36 @@ def create_app(config_class=Config):
     # 启动后台线程来处理刷卡逻辑
     start_threads()
 
-    # 配置日志记录
-    _app.logger.setLevel(logging.INFO)
-    # 创建一个文件处理器并设置格式
-    file_handler = logging.FileHandler('app.log')
-    file_handler.setLevel(logging.INFO)
-    # 将处理器添加到应用日志
-    _app.logger.addHandler(file_handler)
-
     # 初始化数据库
     db.init_app(_app)
+    blueprints = [
+        user,
+        manageUser,
+        manageDepartment,
+        manageService,
+        searchAccess,
+        searchAttend
+    ]
 
-    # 注册蓝图
-    _app.register_blueprint(user)
-    _app.register_blueprint(manageUser)
-    _app.register_blueprint(manageDepartment)
-    _app.register_blueprint(manageService)
-    _app.register_blueprint(searchAccess)
-    _app.register_blueprint(searchAttend)
+    for bp in blueprints:
+        # 设置日志
+        decorate_blueprint(bp)
+        # 注册蓝图
+        _app.register_blueprint(bp)
     return _app
 
 
-# 调试乱码用以下代码
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
-else:
-    # 对于不支持 reconfigure 的情况，手动设置编码
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
-    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer)
+# # 调试乱码用以下代码
+# if hasattr(sys.stdout, 'reconfigure'):
+#     sys.stdout.reconfigure(encoding='utf-8')
+# else:
+#     # 对于不支持 reconfigure 的情况，手动设置编码
+#     sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
+#     sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer)
 
 if __name__ == "__main__":
     app = create_app()
+    setup_logging(app)  # 配置日志记录
     with app.app_context():
         db.create_all()
     app.run(debug=True)

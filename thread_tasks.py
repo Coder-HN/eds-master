@@ -215,10 +215,17 @@ def manage_system(socketio):
 
 # 电阻串口线程
 def electric_control(port, baudrate):
-    try:
-        with (serial.Serial(port, baudrate, timeout=Config.default_com_timeout) as ser):
-            while True:
-                try:
+    retries = 0
+    retry_times = 2  # 重试间隔（秒）
+    while True:  # 反复尝试连接
+        try:
+            with (serial.Serial(port, baudrate, timeout=Config.default_com_timeout) as ser):
+                if retries != 0:
+                    print("===========================================================")
+                    print("电阻串口重新连接成功!")
+                    retries = 0
+                    print("===========================================================")
+                while True:
                     if not electric_queue.empty():
                         task, user_info = electric_queue.get()
                         if task == 'test_resistance':
@@ -245,14 +252,15 @@ def electric_control(port, baudrate):
                         standard_r(test_data['test_part'], test_data['test_step'], ser)
 
                     time.sleep(0.001)
-                except Exception as e:
-                    print(f"电阻串口错误: {e}")
-                    fail_data = generate_fail_data(1, 2, f"电阻串口错误: {e}")
-                    manage_queue.put(('fail_data', fail_data))
-    except Exception as e:
-        print(f"电阻串口无法打开: {e}")
-        fail_data = generate_fail_data(1, 2, f"电阻串口无法打开: {e}")
-        manage_queue.put(('fail_data', fail_data))
+        except Exception as e:
+            retries += 1
+            print("===========================================================")
+            print(f"电阻串口错误: {e}, 正在尝试第 {retries} 次重试...")
+            print("请立即恢复电阻串口等待重新连接，或重启后端")
+            fail_data = generate_fail_data(1, 2, f"电阻串口错误: {e}")
+            manage_queue.put(('fail_data', fail_data))
+            print("===========================================================")
+            time.sleep(retry_times)  # 等待一段时间后重试
 
 
 def send_user_data(access_flag, user, card_id, socketio):
