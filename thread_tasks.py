@@ -10,6 +10,7 @@ from utils import dbHelper
 from utils.dbHelper import get_test_standard_by_service_id
 from utils.portHelper import get_return_msg
 from utils.testResistanceHelper import get_resistance, open_door, standard_r
+from flask import current_app
 
 
 # 刷卡信息
@@ -255,7 +256,9 @@ def electric_control(port, baudrate):
         except Exception as e:
             retries += 1
             print("===========================================================")
-            print(f"电阻串口错误: {e}, 正在尝试第 {retries} 次重试...")
+            message = f"电阻串口错误: {e}, 正在尝试第 {retries} 次重试..."
+            current_app.logger.warning(f'{time.asctime()},message={message}')
+            print(message)
             print("请立即恢复电阻串口等待重新连接，或重启后端")
             fail_data = generate_fail_data(1, 2, f"电阻串口错误: {e}")
             manage_queue.put(('fail_data', fail_data))

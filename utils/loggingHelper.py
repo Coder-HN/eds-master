@@ -1,33 +1,44 @@
+import os
 import logging
-from functools import wraps
-from flask import current_app
+import time
+from logging.handlers import RotatingFileHandler
 
 
-def setup_logging(app):
-    # 设置日志级别
-    app.logger.setLevel(logging.INFO)
-
-    # 创建一个文件处理器，并设置其日志格式
-    file_handler = logging.FileHandler('app.log')
-    file_handler.setFormatter(logging.Formatter(
-        '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-    ))
-
-    # 将处理器添加到 Flask 的 logger
-    app.logger.addHandler(file_handler)
+# log配置，实现日志自动按日期生成日志文件
+def make_dir(make_dir_path):
+    path = make_dir_path.strip()
+    if not os.path.exists(path):
+        os.makedirs(path)
 
 
-def log_function_call(f):
-    @wraps(f)
-    def wrapped(*args, **kwargs):
-        current_app.logger.info(f"Function called: {f.__name__}")
-        return f(*args, **kwargs)
+def get_log_handler():
+    # 日志地址
+    log_dir_name = "Logs"
+    # 文件名，以日期作为文件名
+    log_file_name = 'logger-' + time.strftime('%Y-%m-%d', time.localtime(time.time())) + '.log'
+    # 创建日志文件
+    log_file_folder = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), os.pardir)) + os.sep + log_dir_name
+    make_dir(log_file_folder)
+    log_file_str = log_file_folder + os.sep + log_file_name
+    # 默认日志等级的设置
+    logging.basicConfig(level=logging.WARNING)
+    # 创建日志记录器，指明日志保存路径,每个日志的大小，保存日志的上限
+    file_log_handler = RotatingFileHandler(log_file_str, maxBytes=1024 * 1024, backupCount=10, encoding='UTF-8')
+    # 设置日志的格式                   发生时间    日志等级     日志信息文件名      函数名          行数        日志信息
+    formatter = logging.Formatter(
+        '%(asctime)s - %(levelname)s - %(filename)s - %(funcName)s - %(lineno)s - %(message)s')
+    # 将日志记录器指定日志的格式
+    file_log_handler.setFormatter(formatter)
+    # 日志等级的设置
+    file_log_handler.setLevel(logging.WARNING)
+    return file_log_handler
 
-    return wrapped
 
-
-def decorate_blueprint(bp):
-    for endpoint, func in list(bp.view_functions.items()):
-        if not getattr(func, 'is_logged', False):  # 防止重复装饰
-            bp.deferred_functions[endpoint] = log_function_call(func)
-            setattr(bp.deferred_functions[endpoint], 'is_logged', True)
+"""
+    def clear_output(self):
+        # 清空缓冲区
+        os.system('cls' if os.name == 'nt' else 'clear')  # Windows 使用 cls，Unix 系统使用 clear
+        self.seek(0)  # 重置缓存
+        self.truncate(0)  # 清空缓存内容
+"""

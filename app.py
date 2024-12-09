@@ -1,6 +1,3 @@
-import codecs
-import logging
-import sys
 import threading
 
 from flask import Flask
@@ -15,7 +12,7 @@ from router.router_admin_manager_service import manageService
 from router.router_admin_manager_user import manageUser
 from router.router_user import user
 from thread_tasks import monitor_entrance, monitor_exit, manage_system, electric_control
-from utils.loggingHelper import setup_logging, decorate_blueprint
+from utils.loggingHelper import get_log_handler
 
 
 # 使用配置文件配置数据库配置
@@ -53,26 +50,29 @@ def create_app(config_class=Config):
         searchAccess,
         searchAttend
     ]
-
     for bp in blueprints:
-        # 设置日志
-        decorate_blueprint(bp)
         # 注册蓝图
         _app.register_blueprint(bp)
     return _app
 
 
-# # 调试乱码用以下代码
-# if hasattr(sys.stdout, 'reconfigure'):
-#     sys.stdout.reconfigure(encoding='utf-8')
-# else:
-#     # 对于不支持 reconfigure 的情况，手动设置编码
-#     sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
-#     sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer)
+"""
+# 调试乱码用以下代码
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+else:
+    # 对于不支持 reconfigure 的情况，手动设置编码
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer)
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer)
+"""
 
 if __name__ == "__main__":
     app = create_app()
-    setup_logging(app)  # 配置日志记录
+    # 添加日志配置
+    app.logger.addHandler(get_log_handler())
+    # 激活上下文
+    ctx = app.app_context()
+    ctx.push()
     with app.app_context():
         db.create_all()
     app.run(debug=True)
