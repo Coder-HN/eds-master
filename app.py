@@ -34,7 +34,7 @@ def create_app(config_class=Config):
         threading.Thread(target=monitor_exit, args=(Config.test_leave_card_port, Config.default_baud_rate),
                          daemon=True).start()
         threading.Thread(target=manage_system, args=(socketio,), daemon=True).start()
-        threading.Thread(target=electric_control, args=(Config.test_r_port, Config.default_baud_rate),
+        threading.Thread(target=electric_control, args=(Config.test_r_port, Config.default_baud_rate, _app),
                          daemon=True).start()
 
     # 启动后台线程来处理刷卡逻辑

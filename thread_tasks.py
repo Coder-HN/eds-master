@@ -215,7 +215,7 @@ def manage_system(socketio):
 
 
 # 电阻串口线程
-def electric_control(port, baudrate):
+def electric_control(port, baudrate, app):
     retries = 0
     retry_times = 2  # 重试间隔（秒）
     while True:  # 反复尝试连接
@@ -257,7 +257,8 @@ def electric_control(port, baudrate):
             retries += 1
             print("===========================================================")
             message = f"电阻串口错误: {e}, 正在尝试第 {retries} 次重试..."
-            current_app.logger.warning(f'{time.asctime()},message={message}')
+            with app.app_context():
+                current_app.logger.warn(f'{time.asctime()}, message={message}')
             print(message)
             print("请立即恢复电阻串口等待重新连接，或重启后端")
             fail_data = generate_fail_data(1, 2, f"电阻串口错误: {e}")
