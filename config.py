@@ -20,7 +20,7 @@ class Config:
 
     # 默认波特率、端口超时时间ms
     default_baud_rate = 9600
-    default_com_timeout = 10
+    default_com_timeout = 3
     # 串口名
     test_r_port = "COM12"  # 测试电阻的串口port
     # test_enter_card_port = "COM3" # 读卡进门的串口port
