@@ -1,11 +1,18 @@
 class Config:
+    # 本地数据库配置
     HOST = 'localhost'
     USER = 'root'
     PASSWORD = 'root'
     DATABASE = 'edsystem'
-    # 数据库配置
     SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{USER}:{PASSWORD}@{HOST}/{DATABASE}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # 云端数据库配置
+    INTERNET_SQL_Driver = '{SQL Server Native Client 11.0}'
+    INTERNET_SQL_Server = '10.150.232.46'
+    INTERNET_SQL_Database = 'DB_IASV4_KaiHong2023'
+    INTERNET_SQL_USER = 'GateUser'
+    INTERNET_SQL_PASSWORD = 'jR7#pW6%pH'
 
     # 开发环境
     # STATIC_PUBLIC = 'E:/workplaces/FrontProjects/edsFront/public'  # 静态文件位置

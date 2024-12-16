@@ -1,3 +1,4 @@
+# 数据库数据表类定义
 from sqlalchemy import ForeignKey, MetaData
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import FetchedValue
@@ -57,7 +58,7 @@ class TableAccess(db.Model):
                          index=True, info='设备序号num\n,外键')
     access_flag = Column(Integer, nullable=False, info='进出标志位，1或2，1表示进，2表示出')
     access_time = Column(DateTime, nullable=False, info='进出时间accessTime')
-    result = Column(Integer,info='员工静电测试总结果，1"合格"2"不合格"3"免测"4"未测"5"禁测"')
+    result = Column(Integer, info='员工静电测试总结果，1"合格"2"不合格"3"免测"4"未测"5"禁测"')
     unregist = Column(Integer, info='表示员工刷卡时（特殊的临时卡），是否已登记，未登记值为1，登记值为2')
     will_fail = Column(String(10, 'utf8mb4_0900_ai_ci'),
                        info='标示员工的手环、静电鞋是否即将失效。 如000表示没有失效的\n第1位表示手环是否失效，0表示没有即将失效，1表示即将失效\n第2位表示左脚静电鞋是否失效，0表示没有即将失效，1表示即将失效\n第3位表示右脚静电鞋是否失效，0表示没有即将失效，1表示即将失效')

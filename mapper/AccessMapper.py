@@ -1,5 +1,5 @@
+from datetime import datetime, timedelta
 from sqlalchemy import desc
-
 from models import TableAccess
 from database import db
 from mapper import UserMapper, ServiceMapper
@@ -25,6 +25,25 @@ def delete_access(access_num):
 
 def get_access_by_num(access_num):
     return TableAccess.query.filter_by(num=access_num).first()
+
+
+def get_all_access_by_time():
+    # 计算当前时间减去20分钟的时间点
+    time_threshold = datetime.now() - timedelta(minutes=20)
+    # 执行查询，过滤出 20 分钟以内的数据
+    query = db.session.query(
+        TableAccess.user_num,  # 员工工号、员工部门id、员工卡号
+        TableAccess.service_num,
+        TableAccess.access_flag,
+        TableAccess.access_time,
+        TableAccess.result
+    ).filter(
+        TableAccess.access_time >= time_threshold
+    ).order_by(
+        desc(TableAccess.access_time)
+    )
+    results = query.all()
+    return results
 
 
 def get_all_access():
