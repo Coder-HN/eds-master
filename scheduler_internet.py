@@ -14,13 +14,12 @@ def sync_access_to_cloud():
     update_local_access_to_cloud()
 
 
-# 配置定时任务
-scheduler = BackgroundScheduler()
-scheduler.add_job(update_local_userinfo, 'cron', hour=0, minute=0)  # 每天 0:00 定时同步用户数据
-scheduler.add_job(sync_access_to_cloud, 'interval', minutes=20)  # 每隔20分钟一次,更新云端数据库进出记录
-scheduler.add_job(clean_old_logs, 'cron', hour=0, minute=0)  # 每天0点执行日志清理
-
-
-def start_scheduler():
-    scheduler.start()
-    print("[Scheduler] 定时任务已启动")
+def start_scheduler_with_context(myapp):
+    with myapp.app_context():
+        # 配置定时任务
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(update_local_userinfo, 'cron', hour=0, minute=0)  # 每天 0:00 定时同步用户数据
+        scheduler.add_job(sync_access_to_cloud, 'interval', minutes=20)  # 每隔20分钟一次,更新云端数据库进出记录
+        scheduler.add_job(clean_old_logs, 'cron', hour=0, minute=0)  # 每天0点执行日志清理
+        scheduler.start()
+        print("[Scheduler] 定时任务已启动")
