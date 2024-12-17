@@ -13,7 +13,6 @@ from router.router_admin_manager_user import manageUser
 from router.router_user import user
 from router.router_internet import inter
 from thread_tasks import monitor_entrance, monitor_exit, manage_system, electric_control
-from utils.loggingHelper import get_log_handler
 
 
 # 使用配置文件配置数据库配置
@@ -43,8 +42,6 @@ def create_app(config_class=Config):
     blueprints = [user, inter, manageUser, manageDepartment, manageService, searchAccess, searchAttend]
     for bp in blueprints:
         app.register_blueprint(bp)
-    # 配置日志
-    app.logger.addHandler(get_log_handler())
     return app
 
 
