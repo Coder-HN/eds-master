@@ -121,7 +121,15 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
                     userInfo['is_delete'] = 0
                 elif row['canpass'] == '0':
                     userInfo['is_delete'] = 1
-                UserMapper.update_user(user_get.num, userInfo)
+                UserMapper.update_user(user_get.num, TableUser(
+                    employee_id=userInfo['employee_id'],
+                    card_id=userInfo['card_id'],
+                    name=userInfo['name'],
+                    position_num=userInfo['position_num'],
+                    department_num=userInfo['department_num'],
+                    pic_path=userInfo['pic_path'],
+                    is_delete=userInfo['is_delete'],
+                ))
                 print(f"{_employee_id}:信息已更新")
             else:  # 数据库原来没有
                 print(f"{_employee_id}:信息需要添加")
