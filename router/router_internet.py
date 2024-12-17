@@ -39,6 +39,7 @@ def update_cloud_userinfo_to_local_router():
 
 
 def update_cloud_userinfo_to_local(is_hand_opera=False):
+    print("in update_cloud_userinfo_to_local")
     msg = ""
     handleCnt = 0
     try:
@@ -163,7 +164,12 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
 
 # 本地进出记录同步到云端
 @inter.route('/sync_local_records', methods=['GET'])
+def update_local_access_to_cloud_router():
+    return update_local_access_to_cloud()
+
+
 def update_local_access_to_cloud():
+    print("in update_local_access_to_cloud")
     msg = ""
     try:
         conn = pyodbc.connect(conn_str)
