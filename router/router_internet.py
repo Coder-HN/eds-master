@@ -1,3 +1,5 @@
+import traceback
+
 from flask import Blueprint, jsonify
 from config import Config
 import mapper.AccessMapper as AccessMapper
@@ -154,8 +156,10 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
             msg = f"[{datetime.now()}] 成功同步 {handleCnt} 条云端员工数据到本地"
         return jsonify({'status': 'success', 'message': msg}), 200
     except Exception as e:
+        error_trace = traceback.format_exc()
+        print("错误堆栈信息：\n", error_trace)
         msg = f'更新云端员工数据到本地失败: {str(e)}'
-        return jsonify({'status': 'error', 'message': msg}), 500
+        return jsonify({'status': 'error', 'message': msg, 'trace': error_trace}), 500
     finally:
         print(msg)
 
@@ -265,6 +269,8 @@ def update_local_access_to_cloud():
         msg += f"[{datetime.now()}] 成功同步 {len(access_list)} 条本地进出记录到云端"
         return jsonify({'status': 'success', 'message': msg}), 200
     except Exception as e:
+        error_trace = traceback.format_exc()
+        print("错误堆栈信息：\n", error_trace)
         msg += f'同步失败: {str(e)}'
         return jsonify({'status': 'error', 'message': msg}), 500
     finally:
