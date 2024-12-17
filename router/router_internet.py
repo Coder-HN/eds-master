@@ -1,13 +1,10 @@
-from flask import Blueprint, jsonify, request
-
+from flask import Blueprint, jsonify
 from config import Config
-from mapper.AccessMapper import get_all_access_by_time
-from mapper.DepartmentMapper import get_department_by_name, add_department, get_department_by_num, \
-    get_department_by_position_num
-from mapper.PositionMapper import get_position_by_name, add_position, add_position_department
-from mapper.ServiceMapper import get_service_by_num
-from mapper.UserMapper import get_user_by_num, update_user, add_user, get_user_by_card_id, \
-    get_user_by_employee_id
+import mapper.AccessMapper as AccessMapper
+import mapper.DepartmentMapper as DepartmentMapper
+import mapper.PositionMapper as PositionMapper
+import mapper.ServiceMapper as ServiceMapper
+import mapper.UserMapper as UserMapper
 import pyodbc
 import io
 from PIL import Image
@@ -96,8 +93,8 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
             # users_employee_id_excel.append(_employee_id)
             # users_card_id_excel.append(_card_id)
             user_get = None
-            user_get_employee_id = get_user_by_employee_id(_employee_id)
-            user_get_card_id = get_user_by_card_id(_card_id)
+            user_get_employee_id = UserMapper.get_user_by_employee_id(_employee_id)
+            user_get_card_id = UserMapper.get_user_by_card_id(_card_id)
             # if user_get_employee_id is not None:
             #     user_get = user_get_employee_id
             # elif user_get_card_id is not None:
@@ -125,7 +122,7 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
                     userInfo['is_delete'] = 0
                 elif row['canpass'] == '0':
                     userInfo['is_delete'] = 1
-                update_user(user_get['num'], userInfo)
+                UserMapper.update_user(user_get['num'], userInfo)
                 print(f"{_employee_id}:信息已更新")
             else:  # 数据库原来没有
                 print(f"{_employee_id}:信息需要添加")
@@ -146,7 +143,7 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
                     userInfo['is_delete'] = 0
                 elif row['canpass'] == '0':
                     userInfo['is_delete'] = 1
-                add_user(userInfo)
+                UserMapper.add_user(userInfo)
                 print(f"{_employee_id}:成功添加")
                 # results.append({**row.to_dict(), '处理情况': '成功添加'})
             handleCnt = handleCnt + 1
@@ -173,20 +170,19 @@ def update_local_access_to_cloud():
     msg = ""
     try:
         conn = pyodbc.connect(conn_str)
-        access_list = get_all_access_by_time()
+        access_list = AccessMapper.get_all_access_by_time()
         for access in access_list:
-            # user_num = access.get("user_num")
-            user_num = access['user_num']
-            user = get_user_by_num(user_num)
-            access['name'] = user['name']
+            user_num = access.user_num
+            user = UserMapper.get_user_by_num(user_num)
+            access['name'] = user.name
             # empcode
-            access['empcode'] = user['employee_id']
+            access['empcode'] = user.employee_id
             # cardno
-            access['cardno'] = user['card_id']
+            access['cardno'] = user.card_id
             # deptid
-            department = get_department_by_num(user['department_num'])
+            department = DepartmentMapper.get_department_by_num(user.department_num)
             # -deptname
-            access['deptname'] = department['department_name']
+            access['deptname'] = department.department_name
             # deptid
             cursorDept = conn.cursor()
             query = f"SELECT * FROM vw_department where deptname='{access['deptname']}'"
@@ -196,10 +192,9 @@ def update_local_access_to_cloud():
             # devicetype
             access['devicetype'] = 2
             # gateid
-            service_num = access.get("service_num")
-            service = get_service_by_num(service_num)
+            service = ServiceMapper.get_service_by_num(access["service_num"])
             # -devicename
-            access['service_name'] = service['service_name']
+            access['service_name'] = service.service_name
             # get from sql server: select * from vw_device_gate where devicename={access['service_name']}
             cursor = conn.cursor()
             query = f"SELECT * FROM vw_device_gate where devicename='{access['service_name']}'"
@@ -208,9 +203,7 @@ def update_local_access_to_cloud():
             row = cursor.fetchone()
             access['gateid'] = row.deviceid
             # recordtime
-            access_time = access['access_time'].strftime('%Y-%m-%d %H:%M:%S')
-            access['recordtime'] = access_time
-
+            access['recordtime'] = access['access_time']
             # recordmode
             if access['access_flag'] == 1:
                 access['recordmode'] = "in"
@@ -284,23 +277,23 @@ def handle_dp(_department_name, _position_name):
     position_num = None
     # 查看部门
     if len(_department_name) > 0:
-        department = get_department_by_name(_department_name)
+        department = DepartmentMapper.get_department_by_name(_department_name)
         if department is not None:  # 已经存在该部门
-            department_num = department['num']
+            department_num = department.num
         else:
-            new_department = add_department(_department_name)
+            new_department = DepartmentMapper.add_department(_department_name)
             if new_department:  # 不存在该部门则重新创建并创建
-                department_num = new_department['num']
+                department_num = new_department.num
     # 查看职位
     if len(_position_name) > 0:  # 在position表中查找是否存在该职位
-        position = get_position_by_name(_position_name)
+        position = PositionMapper.get_position_by_name(_position_name)
         if position is not None:
-            position_num = position['num']
+            position_num = position.num
         else:
-            new_position = add_position(_position_name)
-            position_num = new_position['num']
+            new_position = PositionMapper.add_position(_position_name)
+            position_num = new_position.num
     # 查看部门职位关系
-    department_num_list = get_department_by_position_num(position_num)
+    department_num_list = DepartmentMapper.get_department_by_position_num(position_num)
     if department_num not in department_num_list:
-        add_position_department(position_num, department_num)
+        PositionMapper.add_position_department(position_num, department_num)
     return department_num, position_num

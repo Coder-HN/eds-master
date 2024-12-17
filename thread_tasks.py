@@ -258,7 +258,7 @@ def electric_control(port, baudrate, app):
             print("===========================================================")
             message = f"电阻串口错误: {e}, 正在尝试第 {retries} 次重试..."
             with app.app_context():
-                current_app.logger.warn(f'{time.asctime()}, message={message}')
+                current_app.logger.warning(f'{time.asctime()}, message={message}')
             print(message)
             print("请立即恢复电阻串口等待重新连接，或重启后端")
             fail_data = generate_fail_data(1, 2, f"电阻串口错误: {e}")

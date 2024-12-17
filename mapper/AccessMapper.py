@@ -32,7 +32,7 @@ def get_all_access_by_time():
     time_threshold = datetime.now() - timedelta(minutes=20)
     # 执行查询，过滤出 20 分钟以内的数据
     query = db.session.query(
-        TableAccess.user_num,  # 员工工号、员工部门id、员工卡号
+        TableAccess.user_num,
         TableAccess.service_num,
         TableAccess.access_flag,
         TableAccess.access_time,
@@ -43,7 +43,18 @@ def get_all_access_by_time():
         desc(TableAccess.access_time)
     )
     results = query.all()
-    return results
+    # 将查询结果转换为字典列表
+    access_list = [
+        {
+            "user_num": row.user_num,
+            "service_num": row.service_num,
+            "access_flag": row.access_flag,
+            "access_time": row.access_time.strftime('%Y-%m-%d %H:%M:%S'),
+            "result": row.result
+        }
+        for row in results
+    ]
+    return access_list
 
 
 def get_all_access():
