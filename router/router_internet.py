@@ -109,8 +109,14 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
             if user_get is not None:  # 数据库原来有
                 print(f"{_employee_id}:信息需要更新:{_card_id}")
                 department_num, position_num = handle_dp(_department_name, _position_name)
-                userInfo = {'employee_id': _employee_id, 'card_id': _card_id, 'name': _name,
-                            'position_num': position_num, 'department_num': department_num}
+                userInfo = {
+                    'employee_id': _employee_id,
+                    'card_id': _card_id,
+                    'name': _name,
+                    'position_num': position_num,
+                    'department_num': department_num,
+                    'pic_path': "",
+                }
                 if isHavePhoto == 1:
                     userInfo['pic_path'] = "/profile_photo/" + photoname
                 if row['empstatus'] == 'A1':
@@ -134,8 +140,14 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
             else:  # 数据库原来没有
                 print(f"{_employee_id}:信息需要添加")
                 department_num, position_num = handle_dp(_department_name, _position_name)
-                userInfo = {'employee_id': _employee_id, 'card_id': _card_id, 'name': _name,
-                            'position_num': position_num, 'department_num': department_num}
+                userInfo = {
+                    'employee_id': _employee_id,
+                    'card_id': _card_id,
+                    'name': _name,
+                    'position_num': position_num,
+                    'department_num': department_num,
+                    'pic_path': "",
+                }
                 if isHavePhoto == 1:
                     userInfo['pic_path'] = "/profile_photo/" + photoname
                 if row['empstatus'] == 'A1':
