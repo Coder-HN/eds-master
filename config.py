@@ -7,12 +7,17 @@ class Config:
     SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{USER}:{PASSWORD}@{HOST}/{DATABASE}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # 云端数据库配置
+    # 云端数据库配置（客户现场）
     INTERNET_SQL_Driver = '{SQL Server Native Client 11.0}'
-    INTERNET_SQL_Server = '10.150.232.46'
-    INTERNET_SQL_Database = 'DB_IASV4_KaiHong2023'
-    INTERNET_SQL_USER = 'GateUser'
-    INTERNET_SQL_PASSWORD = 'jR7#pW6%pH'
+    # INTERNET_SQL_Server = '10.150.232.46'
+    # INTERNET_SQL_Database = 'DB_IASV4_KaiHong2023'
+    # INTERNET_SQL_USER = 'GateUser'
+    # INTERNET_SQL_PASSWORD = 'jR7#pW6%pH'
+    # 云端数据库配置（本地测试）
+    INTERNET_SQL_Server = 'localhost'
+    INTERNET_SQL_Database = 'TestDatabase'
+    INTERNET_SQL_USER = 'wc_esd'
+    INTERNET_SQL_PASSWORD = 'wc123'
 
     # 开发环境
     # STATIC_PUBLIC = 'E:/workplaces/FrontProjects/edsFront/public'  # 静态文件位置
