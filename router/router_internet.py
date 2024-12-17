@@ -11,6 +11,8 @@ from PIL import Image
 import time
 from datetime import datetime
 
+from models import TableUser
+
 """
 网络数据同步
 /api
@@ -36,7 +38,6 @@ def update_cloud_userinfo_to_local_router():
 
 
 def update_cloud_userinfo_to_local(is_hand_opera=False):
-    print("in update_cloud_userinfo_to_local")
     msg = ""
     handleCnt = 0
     try:
@@ -122,7 +123,7 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
                     userInfo['is_delete'] = 0
                 elif row['canpass'] == '0':
                     userInfo['is_delete'] = 1
-                UserMapper.update_user(user_get['num'], userInfo)
+                UserMapper.update_user(user_get.num, userInfo)
                 print(f"{_employee_id}:信息已更新")
             else:  # 数据库原来没有
                 print(f"{_employee_id}:信息需要添加")
@@ -143,7 +144,15 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
                     userInfo['is_delete'] = 0
                 elif row['canpass'] == '0':
                     userInfo['is_delete'] = 1
-                UserMapper.add_user(userInfo)
+                UserMapper.add_user(TableUser(
+                    employee_id=userInfo['employee_id'],
+                    card_id=userInfo['card_id'],
+                    name=userInfo['name'],
+                    position_num=userInfo['position_num'],
+                    department_num=userInfo['department_num'],
+                    pic_path=userInfo['pic_path'],
+                    is_delete=userInfo['is_delete'],
+                ))
                 print(f"{_employee_id}:成功添加")
                 # results.append({**row.to_dict(), '处理情况': '成功添加'})
             handleCnt = handleCnt + 1
@@ -166,7 +175,6 @@ def update_local_access_to_cloud_router():
 
 
 def update_local_access_to_cloud():
-    print("in update_local_access_to_cloud")
     msg = ""
     try:
         conn = pyodbc.connect(conn_str)

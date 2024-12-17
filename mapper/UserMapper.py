@@ -22,16 +22,22 @@ def is_exist(employee_id, card_id):
 
 
 def add_user(user: TableUser):
-    new_user = TableUser(employee_id=user.employee_id,
-                         name=user.name,
-                         position_num=user.position_num,
-                         department_num=user.department_num,
-                         card_id=user.card_id,
-                         pic_path=user.pic_path,
-                         is_delete=0)
+    # 判断 user.is_delete，如果为 None 则设置为 0，否则使用 user.is_delete 的值
+    is_delete_value = 0 if user.is_delete is None else user.is_delete
+
+    new_user = TableUser(
+        employee_id=user.employee_id,
+        name=user.name,
+        position_num=user.position_num,
+        department_num=user.department_num,
+        card_id=user.card_id,
+        pic_path=user.pic_path,
+        is_delete=is_delete_value  # 动态设置 is_delete 的值
+    )
     db.session.add(new_user)
     db.session.commit()
     return new_user
+
 
 
 def get_user_by_num(user_num):
