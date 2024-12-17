@@ -3,7 +3,7 @@ from app import create_app
 from scheduler_internet import start_internet_asks  # 导入定时任务
 
 # 创建 Flask 应用
-myapp = create_app()
+myapp = create_app(debug=True)
 
 if __name__ == '__main__':
     start_internet_asks()  # 启动定时任务
