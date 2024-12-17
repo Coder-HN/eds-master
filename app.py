@@ -17,11 +17,9 @@ from utils.loggingHelper import get_log_handler
 
 
 # 使用配置文件配置数据库配置
-def create_app(config_class=Config, debug=False):
+def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
-    # 设置调试模式
-    app.debug = debug
     # 初始化 SocketIO
     socketio = SocketIO(app, cors_allowed_origins="*", logger=False, engineio_logger=False)
     print("==================socketio未开启" if socketio else "==================socketio已开启")
