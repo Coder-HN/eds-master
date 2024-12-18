@@ -1,6 +1,7 @@
 import glob
 import os
 import subprocess
+from datetime import datetime, timedelta
 from io import BytesIO
 
 import mysql.connector
@@ -56,12 +57,44 @@ def export_mysql_to_sql():
 
 # TODO 导入SQL文件到MySQL数据库
 
+def get_user_by_num(num):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    query = f"SELECT * FROM table_user WHERE num = '{num}'"
+    cursor.execute(query)
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result
+
 
 def get_user_by_card_id(card_id):
     conn = mysql.connector.connect(**mysql_config)
     cursor = conn.cursor(dictionary=True)
     query = "SELECT * FROM table_user WHERE card_id = %s AND is_delete = 0"
     cursor.execute(query, (card_id,))
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result
+
+
+def get_user_by_card_id_all(card_id):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    query = f"SELECT * FROM table_user WHERE card_id = '{card_id}'"
+    cursor.execute(query)
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result
+
+
+def get_user_by_employee_id(employee_id):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    query = f"SELECT * FROM table_user WHERE employee_id ='{employee_id}'"
+    cursor.execute(query)
     result = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -77,6 +110,194 @@ def get_department_by_num(department_num):
     cursor.close()
     conn.close()
     return result
+
+
+def get_department_by_name(department_name):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    query = f"SELECT * FROM table_department WHERE department_name = '{department_name}'"
+    cursor.execute(query)
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result
+
+
+def add_department(department_name):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    query = f"INSERT INTO table_department (department_name) VALUES ('{department_name}')"
+    cursor.execute(query)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    query = f"SELECT * FROM table_department WHERE department_name = '{department_name}'"
+    cursor.execute(query)
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result
+
+
+def get_position_by_name(position_name):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    query = f"SELECT * FROM table_position WHERE position_name = '{position_name}'"
+    # print(query)
+
+    cursor.execute(query)
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result
+
+
+def add_position(position_name):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    query = f"INSERT INTO table_position (position_name) VALUES ('{position_name}')"
+    cursor.execute(query)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    query = f"SELECT * FROM table_position WHERE position_name = '{position_name}'"
+    cursor.execute(query)
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result
+
+
+def get_department_by_position_num(position_num):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    query = f"SELECT * FROM table_department_position WHERE position_num = {position_num}"
+    # print(query)
+    cursor.execute(query)
+    department_num_list = []
+    row = cursor.fetchone()
+    while row:
+        department_num_list.append(row['department_num'])
+        row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return department_num_list
+
+
+def add_position_department(position_num, department_num):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    query = f"INSERT INTO table_department_position (position_num,department_num) VALUES ({position_num},{department_num})"
+    # print(query)
+    cursor.execute(query)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+def get_service_by_num(service_num):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    query = f"SELECT * FROM table_service WHERE num = {service_num}"
+    print(query)
+    cursor.execute(query)
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return result
+
+
+# 修改员工信息or删除员工（将is_delete置为1）
+def update_user(user_num, userInfo):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    if 'pic_path' in userInfo:
+        query = f'''update table_user SET 
+            employee_id='{userInfo['employee_id']}',
+            card_id='{userInfo['card_id']}',
+            name='{userInfo['name']}',
+            position_num={userInfo['position_num']},
+            department_num={userInfo['department_num']},
+            pic_path='{userInfo['pic_path']}',
+            is_delete={userInfo['is_delete']} WHERE num={user_num}'''
+        # print(query)
+        cursor.execute(query)
+    else:
+        query = f'''update table_user SET 
+            employee_id='{userInfo['employee_id']}',
+            card_id='{userInfo['card_id']}',
+            name='{userInfo['name']}',
+            position_num={userInfo['position_num']},
+            department_num={userInfo['department_num']},
+            is_delete={userInfo['is_delete']} WHERE num={user_num}'''
+        # print(query)
+        cursor.execute(query)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+def add_user(userInfo):
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    if 'pic_path' in userInfo:
+        query = f'''INSERT INTO table_user (
+            employee_id,
+            card_id,
+            name,
+            position_num,
+            department_num,
+            pic_path,
+            is_delete) VALUES ('{userInfo['employee_id']}',
+                        '{userInfo['card_id']}',
+                        '{userInfo['name']}',
+                        {userInfo['position_num']},
+                        {userInfo['department_num']},
+                        '{userInfo['pic_path']}',
+                        {userInfo['is_delete']})'''
+        # print(query)
+        cursor.execute(query)
+    else:
+        query = f'''INSERT INTO table_user (
+            employee_id,
+            card_id,
+            name,
+            position_num,
+            department_num,
+            is_delete) VALUES ('{userInfo['employee_id']}',
+                        '{userInfo['card_id']}',
+                        '{userInfo['name']}',
+                        {userInfo['position_num']},
+                        {userInfo['department_num']},
+                        {userInfo['is_delete']})'''
+        # print(query)
+        cursor.execute(query)
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+def get_all_access_by_time():
+    # 计算当前时间减去20分钟的时间点
+    time_threshold = datetime.now() - timedelta(minutes=20)
+    conn = mysql.connector.connect(**mysql_config)
+    cursor = conn.cursor(dictionary=True)
+    query = f"SELECT * FROM table_access WHERE access_time >= '{time_threshold}' ORDER BY access_time asc"
+    cursor.execute(query)
+    all_access = []
+    row = cursor.fetchone()
+    while row:
+        all_access.append(row)
+        row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return all_access
 
 
 def get_test_standard_by_service_id(service_id):
