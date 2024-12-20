@@ -154,7 +154,9 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
         print(f"HandleCnt:{handleCnt}")
         time.sleep(0.001)
         rowline = cursor.fetchone()
-    return f"[{datetime.now()}] 成功同步 {handleCnt} 条云端员工数据到本地"
+    msg = f"[{datetime.now()}] 成功同步 {handleCnt} 条云端员工数据到本地"
+    print(msg)
+    return msg
 
 
 # 本地进出记录同步到云端
@@ -272,7 +274,9 @@ def update_local_access_to_cloud():
             print(insertSql)
             cursorRecordInsert.execute(insertSql)
             conn.commit()
-    return f"[{datetime.now()}] 成功同步 {len(access_list)} 条本地进出记录到云端"
+    msg = f"[{datetime.now()}] 成功同步 {len(access_list)} 条本地进出记录到云端"
+    print(msg)
+    return msg
 
 
 def handle_dp(_department_name, _position_name):
