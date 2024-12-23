@@ -104,28 +104,32 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
         if user_get_card_id is not None:
             user_get = user_get_card_id
         if user_get is not None:  # 数据库原来有
-            print(f"{_employee_id}:信息需要更新:{_card_id}")
-            department_num, position_num = handle_dp(_department_name, _position_name)
-            userInfo = {
-                'employee_id': _employee_id,
-                'card_id': _card_id,
-                'name': _name,
-                'position_num': position_num,
-                'department_num': department_num,
-                'pic_path': "",
-            }
-            if isHavePhoto == 1:
-                userInfo['pic_path'] = "/profile_photo/" + photoname
-            if row['empstatus'] == 'A1':
-                userInfo['is_delete'] = 0
-            elif row['empstatus'] == 'A0':
-                userInfo['is_delete'] = 1
-            if row['canpass'] == '1':
-                userInfo['is_delete'] = 0
-            elif row['canpass'] == '0':
-                userInfo['is_delete'] = 1
-            update_user(user_get['num'], userInfo)
-            print(f"{_employee_id}:信息已更新")
+            # 判断更新时间
+            time_local = user_get['update_time']  # timestamp->datetime
+            time_cloud = row['updatetime']  # datetime
+            if time_cloud > time_local:  # 如果服务器updatetime比本地的晚，才需要更新信息
+                print(f"{_employee_id}:信息需要更新:{_card_id}")
+                department_num, position_num = handle_dp(_department_name, _position_name)
+                userInfo = {
+                    'employee_id': _employee_id,
+                    'card_id': _card_id,
+                    'name': _name,
+                    'position_num': position_num,
+                    'department_num': department_num,
+                    'pic_path': "",
+                }
+                if isHavePhoto == 1:
+                    userInfo['pic_path'] = "/profile_photo/" + photoname
+                if row['empstatus'] == 'A1':
+                    userInfo['is_delete'] = 0
+                elif row['empstatus'] == 'A0':
+                    userInfo['is_delete'] = 1
+                if row['canpass'] == '1':
+                    userInfo['is_delete'] = 0
+                elif row['canpass'] == '0':
+                    userInfo['is_delete'] = 1
+                update_user(user_get['num'], userInfo)
+                print(f"{_employee_id}:信息已更新")
         else:  # 数据库原来没有
             print(f"{_employee_id}:信息需要添加")
             department_num, position_num = handle_dp(_department_name, _position_name)
