@@ -21,7 +21,7 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
     # 初始化 SocketIO
     socketio = SocketIO(app, cors_allowed_origins="*", logger=False, engineio_logger=False)
-    print("==================socketio未开启" if socketio else "==================socketio已开启")
+    print("==================socketio已开启" if socketio else "==================socketio未开启")
 
     # 启动多线程任务
     def start_threads():
