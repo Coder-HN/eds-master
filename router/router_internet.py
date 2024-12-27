@@ -88,6 +88,9 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
             # 判断更新时间
             time_local = user_get['update_time']  # timestamp->datetime
             time_cloud = row['updatetime']  # datetime
+            print(f"time_cloud 内容: {time_cloud}, 类型: {type(time_cloud)}")
+            print(f"time_local 内容: {time_local}, 类型: {type(time_local)}")
+            time_cloud = datetime.strptime(time_cloud, '%Y-%m-%d %H:%M:%S')
             if time_cloud > time_local:  # 如果服务器updatetime比本地的晚，才需要更新信息
                 print(f"{_employee_id}:信息需要更新:{_card_id}")
                 # Handle Photo
