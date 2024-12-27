@@ -56,31 +56,16 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
     while rowline:
         row = dict(zip([col[0] for col in cursor.description], rowline))
         isHavePhoto = 0
-        # Handle Photo
-        data = row['empimage']
-        print(row['empcode'])
-        # print (row.empimage)
-        if data == "" or data == b' ':
-            print("Empty Picture")
-        else:
-            isHavePhoto = 1
-            print("Save Photo to File")
-            photoname = f"{row['empcode']}_{row['CARDNO']}.jpg"
-            image = Image.open(io.BytesIO(data))
-            path = "D:\\eds-front\\public\\profile_photo\\" + photoname
-            image.convert('RGB').save(path, 'JPEG', quality=95)
         # employee_id
         _employee_id = row['empcode']
         # card_id
         _card_id = row['CARDNO']
         # name
         _name = row['empname']
-
         # _department_name
         _department_id = row['deptid']
         conn1 = pyodbc.connect(conn_str)
         cursor1 = conn1.cursor()
-        # print(f"SELECT * FROM vw_department where deptid='{_department_id}'")
         cursor1.execute(f"SELECT * FROM vw_department where deptid='{_department_id}'")
         rowline1 = cursor1.fetchone()
         if rowline1:
@@ -90,12 +75,8 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
             _department_name = '无相关部门'
         cursor1.close()
         conn1.close()
-
         # _position_name
         _position_name = f"{_department_name}_1"
-
-        # users_employee_id_excel.append(_employee_id)
-        # users_card_id_excel.append(_card_id)
         user_get = None
         user_get_employee_id = get_user_by_employee_id(_employee_id)
         user_get_card_id = get_user_by_card_id_all(_card_id)
@@ -109,6 +90,19 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
             time_cloud = row['updatetime']  # datetime
             if time_cloud > time_local:  # 如果服务器updatetime比本地的晚，才需要更新信息
                 print(f"{_employee_id}:信息需要更新:{_card_id}")
+                # Handle Photo
+                data = row['empimage']
+                print(row['empcode'])
+                # print (row.empimage)
+                if data == "" or data == b' ':
+                    print("Empty Picture")
+                else:
+                    isHavePhoto = 1
+                    print("Save Photo to File")
+                    photoname = f"{row['empcode']}_{row['CARDNO']}.jpg"
+                    image = Image.open(io.BytesIO(data))
+                    path = "D:\\eds-front\\public\\profile_photo\\" + photoname
+                    image.convert('RGB').save(path, 'JPEG', quality=95)
                 department_num, position_num = handle_dp(_department_name, _position_name)
                 userInfo = {
                     'employee_id': _employee_id,
