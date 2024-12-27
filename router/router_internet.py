@@ -126,6 +126,19 @@ def update_cloud_userinfo_to_local(is_hand_opera=False):
                 print(f"{_employee_id}:信息已更新")
         else:  # 数据库原来没有
             print(f"{_employee_id}:信息需要添加")
+            # Handle Photo
+            data = row['empimage']
+            print(row['empcode'])
+            # print (row.empimage)
+            if data == "" or data == b' ':
+                print("Empty Picture")
+            else:
+                isHavePhoto = 1
+                print("Save Photo to File")
+                photoname = f"{row['empcode']}_{row['CARDNO']}.jpg"
+                image = Image.open(io.BytesIO(data))
+                path = "D:\\eds-front\\public\\profile_photo\\" + photoname
+                image.convert('RGB').save(path, 'JPEG', quality=95)
             department_num, position_num = handle_dp(_department_name, _position_name)
             userInfo = {
                 'employee_id': _employee_id,
