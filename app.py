@@ -23,7 +23,7 @@ def create_app(config_class=Config):
     app.config.from_object(config_class)
 
     # 日志配置
-    setup_logging(app, True)  # 第二个参数设置是否将日志输出到cmd上
+    setup_logging(app, cmd_print=True)  # 第二个参数设置是否将日志输出到cmd上
     clean_old_logs()
     # 添加全局异常处理
     register_error_handlers(app)

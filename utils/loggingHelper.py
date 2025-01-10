@@ -11,7 +11,7 @@ logger: Optional[logging.Logger] = None  # 全局日志记录器
 
 
 # 配置日志
-def setup_logging(app, cmd_print=False):
+def setup_logging(app, cmd_print):
     global logger  # 声明全局 logger
     if not os.path.exists(LOG_DIR):
         os.makedirs(LOG_DIR)
