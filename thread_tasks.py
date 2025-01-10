@@ -108,7 +108,7 @@ def monitor_entrance(port, baudrate):
                         # 获取卡号
                         card_id = buffer[1:-3].decode('ascii')
                         enter_queue.put(card_id)  # 将卡号放入队列
-                        log_message(f'==================进门刷卡: {list(enter_queue.queue)}')
+                        log_message(f'进门刷卡: {list(enter_queue.queue)}')
                     buffer.clear()
                 time.sleep(0.01)
     except Exception as e:
@@ -136,7 +136,7 @@ def monitor_exit(port, baudrate):
                         # 获取卡号
                         card_id = buffer[1:-3].decode('ascii')
                         exit_queue.put(card_id)  # 将卡号放入队列
-                        log_message(f"==================出门刷卡: {list(exit_queue.queue)}")
+                        log_message(f"出门刷卡: {list(exit_queue.queue)}")
                     buffer.clear()
                 time.sleep(0.01)
     except Exception as e:
@@ -347,7 +347,7 @@ def repeat_test_resistance(ser, user_info, test_standard):
                 # 重新测试过程中有人重复刷卡
                 r_data = generate_r_data(user_info, resistance_value, test_standard, results, repeat=1)
                 manage_queue.put(('r_data', r_data))
-                log_message(f"==================提前结束本次刷卡: user_info={user_info}")
+                log_message(f"提前结束本次刷卡: user_info={user_info}")
                 return
             if i != 1:
                 # 重新测试过程中未通过需要在每秒刷新页面
