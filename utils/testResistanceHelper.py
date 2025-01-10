@@ -1,6 +1,5 @@
-import serial
-import serial.tools.list_ports
-from utils.portHelper import set_hex_data, get_return_msg, printf_byte, crc8_check, turn_16_to_10, \
+from utils.loggingHelper import log_message
+from utils.portHelper import set_hex_data, get_return_msg, crc8_check, turn_16_to_10, \
     crc8
 from config import Config
 
@@ -35,7 +34,6 @@ def open_door(ser, access_flag):
         set_hex_data(ser, Config.hex_open_enter_door)
         received_data = get_return_msg(ser)
         if crc8_check(received_data) and bytearray.fromhex(Config.hex_open_enter_door_success) == received_data:
-            print("获取开门请求成功")
             return True
         else:
             return False
@@ -43,7 +41,6 @@ def open_door(ser, access_flag):
         set_hex_data(ser, Config.hex_open_leave_door)
         received_data = get_return_msg(ser)
         if crc8_check(received_data) and bytearray.fromhex(Config.hex_open_leave_door_success) == received_data:
-            print("获取开门请求成功")
             return True
         else:
             return False
@@ -57,12 +54,10 @@ def standard_r(test_part: int, test_step: int, ser):  # 1~4  # 1~8
     _hex_r_standard_get = f"01 05 0{str(test_part)} 00 00 00 0{str(test_step)} 05"
     hex_r_standard_send = _hex_r_standard_send + f" {crc8(bytearray.fromhex(_hex_r_standard_send)):02X}"
     hex_r_standard_get = _hex_r_standard_get + f" {crc8(bytearray.fromhex(_hex_r_standard_get)):02X}"
-    print(hex_r_standard_send)
-    print(hex_r_standard_get)
     set_hex_data(ser, hex_r_standard_send)
     received_data = get_return_msg(ser)
     if received_data == hex_r_standard_get:
-        print(f"test_part={test_part},test_step={test_step},电阻校准成功")
+        log_message(f"test_part={test_part},test_step={test_step},电阻校准成功")
         return True
     else:
         return False

@@ -1,5 +1,4 @@
 from gevent import pywsgi
-from utils.loggingHelper import setup_request_logging
 from app import create_app
 import sys
 import os
@@ -9,9 +8,7 @@ if __name__ == '__main__':
     myapp = create_app()
     myapp.debug = False  # 设置调试模式
     # 禁用标准输出
-    sys.stdout = open(os.devnull, "w")
-    sys.stderr = open(os.devnull, "w")
-    # 输出请求记录
-    setup_request_logging(myapp)
+    # sys.stdout = open(os.devnull, "w")
+    # sys.stderr = open(os.devnull, "w")
     server = pywsgi.WSGIServer(('127.0.0.1', 5000), myapp, spawn=100)  # 配置并运行 gevent WSGI 服务器
     server.serve_forever()

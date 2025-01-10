@@ -1,16 +1,14 @@
 import queue
 import time
 from datetime import datetime
-
 import serial
 import serial.tools.list_ports
-
 from config import Config
 from utils import dbHelper
 from utils.dbHelper import get_test_standard_by_service_id
+from utils.loggingHelper import log_message
 from utils.portHelper import get_return_msg
 from utils.testResistanceHelper import get_resistance, open_door, standard_r
-from flask import current_app
 
 
 # 刷卡信息
@@ -37,9 +35,7 @@ def generate_user_data(access_flag, card_id, service_id, user_num, name, employe
     user_data = {
         'access_flag': access_flag,
         'card_id': card_id,
-
         'service_id': service_id,
-
         'user_num': user_num,
         'name': name,
         'employee_id': employee_id,
@@ -99,10 +95,10 @@ is_repeat_test = False  # 是否正在重新测试电阻
 def monitor_entrance(port, baudrate):
     try:
         with serial.Serial(port, baudrate, timeout=Config.default_com_timeout) as ser:
-            print("进门读卡监听中......")
+            log_message('进门读卡监听中......')
             is_standard_r = standard_r_queue.qsize()
             if is_standard_r != 0:
-                print("正在进行电阻校验，刷卡无效！")
+                log_message('正在进行电阻校验，刷卡无效！')
             while True:
                 if is_standard_r == 0:
                     # 读取数据
@@ -112,11 +108,11 @@ def monitor_entrance(port, baudrate):
                         # 获取卡号
                         card_id = buffer[1:-3].decode('ascii')
                         enter_queue.put(card_id)  # 将卡号放入队列
-                        print(f"==================进门刷卡: {list(enter_queue.queue)}")
+                        log_message(f'==================进门刷卡: {list(enter_queue.queue)}')
                     buffer.clear()
                 time.sleep(0.01)
     except Exception as e:
-        print(f"进门串口错误: {e}")
+        log_message(f"进门串口错误: {e}", 'warning')
         fail_data = generate_fail_data(1, 2, f"进门串口错误: {e}")
         manage_queue.put(('fail_data', fail_data))
 
@@ -125,25 +121,26 @@ def monitor_entrance(port, baudrate):
 def monitor_exit(port, baudrate):
     try:
         with serial.Serial(port, baudrate, timeout=Config.default_com_timeout) as ser:
-            print("出门读卡监听中......")
+            log_message("出门读卡监听中......")
             is_standard_r = standard_r_queue.qsize()
             if is_standard_r != 0:
-                print("正在进行电阻校验，刷卡无效！")
+                log_message("正在进行电阻校验，刷卡无效！")
             while True:
                 if is_standard_r == 0:
                     # 读取数据
                     buffer = get_return_msg(ser)
                     # 读取到完整数据帧
                     if len(buffer) > 4 and buffer[0] == Config.card_start_data and buffer[-3:] == Config.card_end_data:
-                        print("出门读卡-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
+                        log_message(
+                            f"出门读卡-当前时间（时:分:秒.毫秒）：{datetime.now().strftime('%H:%M:%S.%f')[:-3]}")
                         # 获取卡号
                         card_id = buffer[1:-3].decode('ascii')
                         exit_queue.put(card_id)  # 将卡号放入队列
-                        print(f"==================出门刷卡: {list(exit_queue.queue)}")
+                        log_message(f"==================出门刷卡: {list(exit_queue.queue)}")
                     buffer.clear()
                 time.sleep(0.01)
     except Exception as e:
-        print(f"出门串口错误: {e}")
+        log_message(f"出门串口错误: {e}", 'warning')
         fail_data = generate_fail_data(2, 2, f"进门串口错误: {e}")
         manage_queue.put(('fail_data', fail_data))
 
@@ -165,12 +162,12 @@ def manage_system(socketio):
                 send_user_data(access_flag, user, card_id, socketio)
                 user_info = {'access_flag': access_flag, 'user_num': user['num'], 'card_id': card_id}
                 electric_queue.put(('test_resistance', user_info))
-                print("已放置electric_queue")
+                log_message("已放置electric_queue")
 
             else:
                 fail_data = generate_fail_data(access_flag, 1, None, card_id)
                 socketio.emit('fail_data', fail_data)
-                print(f"card_id={card_id}不在数据库中，无权限通过，发送fail_data={fail_data}")
+                log_message(f"card_id={card_id}不在数据库中，无权限通过，发送fail_data={fail_data}")
             enter_queue.get()  # 移除进门读卡
 
         if not exit_queue.empty():
@@ -178,21 +175,22 @@ def manage_system(socketio):
                 is_repeat_test = False
             # 先跳转
             access_flag = 2
-            print("出门发送跳转指令-当前时间（时:分:秒.毫秒）：", datetime.now().strftime("%H:%M:%S.%f")[:-3])
+            log_message(
+                f"出门发送跳转指令-当前时间（时:分:秒.毫秒）：{datetime.now().strftime('%H:%M:%S.%f')[:-3]}")
             swipe_data = generate_swipe_data(access_flag)
             socketio.emit('swipe_data', swipe_data)
             card_id = exit_queue.queue[0]  # 获取队头元素但不移除
             user = dbHelper.get_user_by_card_id(card_id)
             if user is not None:
                 user_info = {"access_flag": access_flag, 'user_num': user['num'], "card_id": card_id}
-                print("出门发送开门指令给电阻线程-当前时间（时:分:秒.毫秒）：",
-                      datetime.now().strftime("%H:%M:%S.%f")[:-3])
+                log_message(
+                    f"出门发送开门指令给电阻线程-当前时间（时:分:秒.毫秒）：{datetime.now().strftime('%H:%M:%S.%f')[:-3]}")
                 electric_queue.put(('open_door', user_info))
                 send_user_data(access_flag, user, card_id, socketio)
             else:
                 fail_data = generate_fail_data(access_flag, 1, None, card_id)
                 socketio.emit('fail_data', fail_data)
-                print(f"card_id={card_id}不在数据库中，无权限通过，发送fail_data={fail_data}")
+                log_message(f"card_id={card_id}不在数据库中，无权限通过，发送fail_data={fail_data}")
             exit_queue.get()
 
         if not manage_queue.empty():
@@ -206,29 +204,24 @@ def manage_system(socketio):
                     msg = "重复刷卡导致重新测试电阻提前结束,增加进出记录"
                 elif get_data.get('result_num') == 1:
                     msg = "测试通过,添加进出记录"
-                print(f"发送r_data数据到前端,access_flag={access_flag},msg={msg}")
+                log_message(f"发送r_data数据到前端,access_flag={access_flag},msg={msg}")
                 socketio.emit('r_data', get_data)
             elif res == 'fail_data':
-                print(f"发送fail_data数据到前端,fail_data={get_data}")
+                log_message(f"发送fail_data数据到前端,fail_data={get_data}")
                 socketio.emit('fail_data', get_data)
         time.sleep(0.001)
 
 
 # 电阻串口线程
-def electric_control(port, baudrate, app):
+def electric_control(port, baudrate):
     retries = 0
     retry_times = 2  # 重试间隔（秒）
     while True:  # 反复尝试连接
         try:
             with (serial.Serial(port, baudrate, timeout=Config.default_com_timeout) as ser):
                 if retries != 0:
-                    print("===========================================================")
-                    message = "电阻串口重新连接成功!"
-                    print(message)
-                    with app.app_context():
-                        current_app.logger.warning(f'message={message}')
+                    log_message("电阻串口重新连接成功!", 'warning')
                     retries = 0
-                    print("===========================================================")
                 while True:
                     if not electric_queue.empty():
                         task, user_info = electric_queue.get()
@@ -237,18 +230,18 @@ def electric_control(port, baudrate, app):
                             test_standard = get_test_standard_by_service_id(resistance_value['service_id'])
                             results, resistance_value = compare_resistance_values(resistance_value, test_standard)
                             if results['result_num'] == 1:
-                                print(f"电阻测试成功: user_info={user_info}")
+                                log_message(f"电阻测试成功: user_info={user_info}")
                                 r_data = generate_r_data(user_info, resistance_value, test_standard, results)
                                 manage_queue.put(('r_data', r_data))
                                 open_door(ser, access_flag=1)  # 一次测试成功开门
                             else:
-                                print(f"电阻测试失败，重新测试: user_info={user_info}")
+                                log_message(f"电阻测试失败，重新测试: user_info={user_info}")
                                 repeat_test_resistance(ser, user_info, test_standard)
 
                         elif task == 'open_door':  # 出门那边发来的请求打开出门的门
-                            print(f"开门操作中: user_info={user_info}")
-                            print("出门-发送开门指令给设备-当前时间（时:分:秒.毫秒）：",
-                                  datetime.now().strftime("%H:%M:%S.%f")[:-3])
+                            log_message(f"开门操作中: user_info={user_info}")
+                            log_message(
+                                f"出门-发送开门指令给设备-当前时间（时:分:秒.毫秒）：{datetime.now().strftime('%H:%M:%S.%f')[:-3]}")
                             open_door(ser, access_flag=2)
 
                     if not standard_r_queue.empty():
@@ -259,16 +252,10 @@ def electric_control(port, baudrate, app):
         except Exception as e:
             pre_retries = retries
             retries += 1
-            print("===========================================================")
-            message = f"电阻串口错误: {e}, 正在尝试第 {retries} 次重试..."
             if pre_retries == 0:
-                with app.app_context():
-                    current_app.logger.warning(f'message={message}')
-            print(message)
-            print("请立即恢复电阻串口等待重新连接，或重启后端")
-            fail_data = generate_fail_data(1, 2, f"电阻串口错误: {e}")
+                log_message(f"电阻串口错误: {e}, 正在尝试第 {retries} 次重试...", "warning")
+            fail_data = generate_fail_data(1, 2, f"电阻串口错误: {e},请立即恢复电阻串口等待重新连接，或重启后端")
             manage_queue.put(('fail_data', fail_data))
-            print("===========================================================")
             time.sleep(retry_times)  # 等待一段时间后重试
 
 
@@ -293,7 +280,7 @@ def send_user_data(access_flag, user, card_id, socketio):
         employee_id=user_employee_id,
         department=user_department,
         pic_path=user_pic_path)
-    print(f"发送user_data数据到前端,user_data={user_data}")
+    log_message(f"发送user_data数据到前端,user_data={user_data}")
     socketio.emit('user_data', user_data)
 
 
@@ -349,18 +336,18 @@ def repeat_test_resistance(ser, user_info, test_standard):
         resistance_value = get_resistance(ser)
         results, resistance_value = compare_resistance_values(resistance_value, test_standard)
         if results['result_num'] == 1:
-            print(f"电阻重新测试成功: user_info={user_info}")
+            log_message(f"电阻重新测试成功: user_info={user_info}")
             r_data = generate_r_data(user_info, resistance_value, test_standard, results)
             manage_queue.put(('r_data', r_data))
             open_door(ser, access_flag=1)  # 一次测试成功开门
             return
         else:
-            print(f"重新测试：is_repeat_test={is_repeat_test},i={i}")
+            log_message(f"重新测试：is_repeat_test={is_repeat_test},i={i}")
             if is_repeat_test is not True:
                 # 重新测试过程中有人重复刷卡
                 r_data = generate_r_data(user_info, resistance_value, test_standard, results, repeat=1)
                 manage_queue.put(('r_data', r_data))
-                print(f"==================提前结束本次刷卡: user_info={user_info}")
+                log_message(f"==================提前结束本次刷卡: user_info={user_info}")
                 return
             if i != 1:
                 # 重新测试过程中未通过需要在每秒刷新页面

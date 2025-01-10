@@ -3,6 +3,7 @@ import serial.tools.list_ports
 import time
 
 from config import Config
+from utils.loggingHelper import log_message
 
 
 def turn_16_to_10(hex_array):
@@ -59,7 +60,7 @@ def printf_byte(data):
     # 将数据转换为十六进制字符串
     hex_received_data = ' '.join(f'{byte:02X}' for byte in data)
     # 打印接收的数据
-    print(f"Received Data: {hex_received_data}")
+    log_message(f"Received Data: {hex_received_data}")
 
 
 # 定义 自定义CRC-8 函数
@@ -105,5 +106,6 @@ def crc8_check(data):
     if calculated_crc_hex == received_crc:
         return True
     else:
-        print(f"CRC 校验失败！data: {data}, 计算出的 CRC: {calculated_crc_hex}, 接收的 CRC: {received_crc}")
+        log_message(f"CRC 校验失败！data: {data}, 计算出的 CRC: {calculated_crc_hex}, 接收的 CRC: {received_crc}",
+                    'warning')
         return False

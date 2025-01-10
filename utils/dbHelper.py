@@ -7,6 +7,7 @@ from io import BytesIO
 import mysql.connector
 
 from config import Config
+from utils.loggingHelper import log_message
 
 # 读取MySQL数据库配置
 mysql_config = {
@@ -25,7 +26,7 @@ def delete_sql_files_in_folder(folder_path):
         for file_path in sql_files:
             os.remove(file_path)  # 删除 .sql 文件
     except Exception as e:
-        print(f"Error: {e}")
+        log_message(f"Error: {e}", 'warning')
 
 
 # 导出MySQL数据库到SQL文件
@@ -44,14 +45,14 @@ def export_mysql_to_sql():
         with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as proc:
             stdout, stderr = proc.communicate()
             if proc.returncode != 0:
-                print(f"Error: {stderr.decode('utf-8')}")
+                log_message(f"Error: {stderr.decode('utf-8')}", 'warning')
                 return None
             # 将导出的数据库内容写入 BytesIO 流
             output.write(stdout)
             output.seek(0)  # 重置流位置，准备读取
         return output
     except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
+        log_message(f"Error: {e}", 'warning')
         return None
 
 
@@ -146,7 +147,6 @@ def get_position_by_name(position_name):
     conn = mysql.connector.connect(**mysql_config)
     cursor = conn.cursor(dictionary=True)
     query = f"SELECT * FROM table_position WHERE position_name = '{position_name}'"
-    # print(query)
 
     cursor.execute(query)
     result = cursor.fetchone()
@@ -178,7 +178,6 @@ def get_department_by_position_num(position_num):
     conn = mysql.connector.connect(**mysql_config)
     cursor = conn.cursor(dictionary=True)
     query = f"SELECT * FROM table_department_position WHERE position_num = {position_num}"
-    # print(query)
     cursor.execute(query)
     department_num_list = []
     row = cursor.fetchone()
@@ -194,7 +193,6 @@ def add_position_department(position_num, department_num):
     conn = mysql.connector.connect(**mysql_config)
     cursor = conn.cursor(dictionary=True)
     query = f"INSERT INTO table_department_position (position_num,department_num) VALUES ({position_num},{department_num})"
-    # print(query)
     cursor.execute(query)
     conn.commit()
     cursor.close()
@@ -205,7 +203,6 @@ def get_service_by_num(service_num):
     conn = mysql.connector.connect(**mysql_config)
     cursor = conn.cursor(dictionary=True)
     query = f"SELECT * FROM table_service WHERE num = {service_num}"
-    print(query)
     cursor.execute(query)
     result = cursor.fetchone()
     cursor.close()
@@ -226,7 +223,6 @@ def update_user(user_num, userInfo):
             department_num={userInfo['department_num']},
             pic_path='{userInfo['pic_path']}',
             is_delete={userInfo['is_delete']} WHERE num={user_num}'''
-        # print(query)
         cursor.execute(query)
     else:
         query = f'''update table_user SET 
@@ -236,7 +232,6 @@ def update_user(user_num, userInfo):
             position_num={userInfo['position_num']},
             department_num={userInfo['department_num']},
             is_delete={userInfo['is_delete']} WHERE num={user_num}'''
-        # print(query)
         cursor.execute(query)
     conn.commit()
     cursor.close()
@@ -261,7 +256,6 @@ def add_user(userInfo):
                         {userInfo['department_num']},
                         '{userInfo['pic_path']}',
                         {userInfo['is_delete']})'''
-        # print(query)
         cursor.execute(query)
     else:
         query = f'''INSERT INTO table_user (
@@ -276,7 +270,6 @@ def add_user(userInfo):
                         {userInfo['position_num']},
                         {userInfo['department_num']},
                         {userInfo['is_delete']})'''
-        # print(query)
         cursor.execute(query)
     conn.commit()
     cursor.close()

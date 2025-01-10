@@ -21,4 +21,3 @@ def start_scheduler_with_context():
     # scheduler.add_job(sync_access_to_cloud, 'interval', minutes=20)  # 每隔20分钟一次,更新云端数据库进出记录
     scheduler.add_job(clean_old_logs, 'cron', hour=0, minute=0)  # 每天0点执行日志清理
     scheduler.start()
-    print("[Scheduler] 定时任务已启动")

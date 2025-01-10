@@ -30,9 +30,7 @@ def create_app(config_class=Config):
 
     # 初始化 SocketIO
     socketio = SocketIO(app, cors_allowed_origins="*", logger=False, engineio_logger=False)
-    # TODO
     print("SocketIO 初始化成功" if socketio else "SocketIO 初始化失败")
-    app.logger.info("SocketIO 初始化成功" if socketio else "SocketIO 初始化失败")
 
     # 启动多线程任务
     def start_threads():
@@ -48,6 +46,7 @@ def create_app(config_class=Config):
 
     # 启动定时任务
     start_scheduler_with_context()
+    print("[Scheduler] 定时任务已启动")
 
     # 初始化数据库
     db.init_app(app)
