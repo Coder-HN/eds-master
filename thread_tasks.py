@@ -223,7 +223,10 @@ def electric_control(port, baudrate, app):
             with (serial.Serial(port, baudrate, timeout=Config.default_com_timeout) as ser):
                 if retries != 0:
                     print("===========================================================")
-                    print("电阻串口重新连接成功!")
+                    message = "电阻串口重新连接成功!"
+                    print(message)
+                    with app.app_context():
+                        current_app.logger.warning(f'message={message}')
                     retries = 0
                     print("===========================================================")
                 while True:
@@ -254,11 +257,13 @@ def electric_control(port, baudrate, app):
 
                     time.sleep(0.001)
         except Exception as e:
+            pre_retries = retries
             retries += 1
             print("===========================================================")
             message = f"电阻串口错误: {e}, 正在尝试第 {retries} 次重试..."
-            with app.app_context():
-                current_app.logger.warning(f'{time.asctime()}, message={message}')
+            if pre_retries == 0:
+                with app.app_context():
+                    current_app.logger.warning(f'message={message}')
             print(message)
             print("请立即恢复电阻串口等待重新连接，或重启后端")
             fail_data = generate_fail_data(1, 2, f"电阻串口错误: {e}")
