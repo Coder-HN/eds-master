@@ -2,6 +2,7 @@ import os
 import logging
 from logging.handlers import TimedRotatingFileHandler
 from datetime import datetime, timedelta
+from flask import request
 
 # 日志配置
 LOG_DIR = "logs"  # 日志目录
@@ -37,3 +38,21 @@ def clean_old_logs():
             file_time = datetime.fromtimestamp(os.path.getmtime(file_path))
             if now - file_time > timedelta(days=RETENTION_DAYS):
                 os.remove(file_path)
+
+
+def setup_request_logging(app):
+    """配置 werkzeug 的日志格式"""
+    werkzeug_logger = logging.getLogger('werkzeug')
+    handler = logging.StreamHandler()  # 输出到控制台
+    formatter = logging.Formatter('[%(asctime)s] %(levelname)s: %(message)s')
+    handler.setFormatter(formatter)
+    werkzeug_logger.addHandler(handler)
+    werkzeug_logger.setLevel(logging.INFO)
+
+    # 添加 Flask 自定义请求日志
+    @app.before_request
+    def log_request():
+        method = request.method
+        url = request.url
+        client_ip = request.remote_addr
+        werkzeug_logger.info(f"{client_ip} {method} {url}")
