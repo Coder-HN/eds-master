@@ -39,7 +39,7 @@ def create_app(config_class=Config):
         threading.Thread(target=monitor_exit, args=(Config.test_leave_card_port, Config.default_baud_rate),
                          daemon=True).start()
         threading.Thread(target=manage_system, args=(socketio,), daemon=True).start()
-        threading.Thread(target=electric_control, args=(Config.test_r_port, Config.default_baud_rate, app),
+        threading.Thread(target=electric_control, args=(Config.test_r_port, Config.default_baud_rate),
                          daemon=True).start()
 
     start_threads()
