@@ -1,6 +1,8 @@
 import threading
-from flask import Flask
+from flask import Flask, jsonify, abort
+import traceback
 from flask_socketio import SocketIO
+from werkzeug.exceptions import HTTPException
 from config import Config
 from database import db
 from router.router_admin_access import searchAccess
@@ -19,9 +21,12 @@ def create_app(config_class=Config):
     # 创建 Flask 应用
     app = Flask(__name__)
     app.config.from_object(config_class)
+
     # 日志配置
     setup_logging(app)
     clean_old_logs()
+    # 添加全局异常处理
+    register_error_handlers(app)
 
     # 初始化 SocketIO
     socketio = SocketIO(app, cors_allowed_origins="*", logger=False, engineio_logger=False)
@@ -53,4 +58,55 @@ def create_app(config_class=Config):
     blueprints = [user, inter, manageUser, manageDepartment, manageService, searchAccess, searchAttend]
     for bp in blueprints:
         app.register_blueprint(bp)
+
+    @app.route('/test_exception')
+    def test_exception():
+        # 人为触发未处理的异常
+        1 / 0
+
+    @app.route('/test_http_exception')
+    def test_http_exception():
+        # 人为触发 HTTP 异常
+        abort(404)  # 模拟页面未找到
+
     return app
+
+
+# 注册全局异常处理器
+def register_error_handlers(app):
+    @app.errorhandler(Exception)
+    def handle_exception(e):
+        """
+        捕获未处理的异常并记录详细日志
+        """
+        error_trace = traceback.format_exc()  # 获取详细的错误堆栈信息
+        app.logger.error("Unhandled Exception occurred")
+        app.logger.error(f"错误类型: {type(e).__name__}")
+        app.logger.error(f"错误信息: {str(e)}")
+        app.logger.error(f"错误堆栈信息:\n{error_trace}")
+
+        # 返回标准化的 JSON 错误响应
+        return jsonify({
+            "error": "Internal Server Error",
+            "message": str(e),
+            "details": "An unexpected error occurred. Please contact support."
+        }), 500
+
+    @app.errorhandler(HTTPException)
+    def handle_http_exception(e):
+        """
+        捕获 HTTP 异常并记录详细日志
+        """
+        error_trace = traceback.format_exc()  # 获取详细的错误堆栈信息
+        app.logger.error("HTTP Exception occurred")
+        app.logger.error(f"HTTP 错误: {e.name}")
+        app.logger.error(f"HTTP 状态码: {e.code}")
+        app.logger.error(f"错误信息: {e.description}")
+        app.logger.error(f"错误堆栈信息:\n{error_trace}")
+
+        # 返回标准化的 JSON 错误响应
+        return jsonify({
+            "error": e.name,
+            "message": e.description,
+            "details": "A request error occurred. Please verify the request and try again."
+        }), e.code
