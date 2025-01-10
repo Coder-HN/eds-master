@@ -11,7 +11,7 @@ logger: Optional[logging.Logger] = None  # 全局日志记录器
 
 
 # 配置日志
-def setup_logging(app):
+def setup_logging(app, cmd_print=False):
     global logger  # 声明全局 logger
     if not os.path.exists(LOG_DIR):
         os.makedirs(LOG_DIR)
@@ -34,10 +34,10 @@ def setup_logging(app):
     # 配置应用的日志记录器
     app.logger.setLevel(logging.INFO)
 
-    # 移除默认的 StreamHandler
-    for handler_to_remove in app.logger.handlers:
-        if isinstance(handler_to_remove, logging.StreamHandler):
-            app.logger.removeHandler(handler_to_remove)
+    if cmd_print:  # 移除默认的 StreamHandler
+        for handler_to_remove in app.logger.handlers:
+            if isinstance(handler_to_remove, logging.StreamHandler):
+                app.logger.removeHandler(handler_to_remove)
 
     app.logger.addHandler(handler)
     logger = app.logger  # 设置全局 logger 为 Flask 应用的 logger
