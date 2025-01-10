@@ -56,7 +56,6 @@ def export_mysql_to_sql():
         return None
 
 
-# TODO 导入SQL文件到MySQL数据库
 
 def get_user_by_num(num):
     conn = mysql.connector.connect(**mysql_config)
