@@ -3,7 +3,6 @@ import json
 from flask import Blueprint, request, jsonify, make_response
 
 from mapper import DepartmentMapper, PositionMapper
-from models import TableDepartment, TablePosition
 
 """
 部门管理

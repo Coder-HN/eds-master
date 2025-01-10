@@ -1,7 +1,7 @@
 from decimal import Decimal
 from sqlalchemy import desc
 
-from mapper import UserMapper, DepartmentMapper
+from mapper import UserMapper
 from models import TableAttend
 from database import db
 

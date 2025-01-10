@@ -1,5 +1,3 @@
-import traceback
-
 from flask import Blueprint, jsonify
 from config import Config
 import pyodbc
@@ -36,8 +34,6 @@ def update_cloud_userinfo_to_local_router():
         msg = update_cloud_userinfo_to_local(is_hand_opera)
         return jsonify({'status': 'success', 'message': msg}), 200
     except Exception as e:
-        error_trace = traceback.format_exc()
-        print("错误堆栈信息：\n", error_trace)
         msg = f'更新云端员工数据到本地失败: {str(e)}'
         return jsonify({'status': 'error', 'message': msg}), 500
 
@@ -178,8 +174,6 @@ def update_local_access_to_cloud_router():
         msg = update_local_access_to_cloud()
         return jsonify({'status': 'success', 'message': msg}), 200
     except Exception as e:
-        error_trace = traceback.format_exc()
-        print("错误堆栈信息：\n", error_trace)
         msg = f'同步本地进出记录同步到云端失败: {str(e)}'
         return jsonify({'status': 'error', 'message': msg}), 500
 

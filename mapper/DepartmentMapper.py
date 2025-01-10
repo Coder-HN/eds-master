@@ -1,6 +1,5 @@
 from models import TableDepartment, TableDepartmentPosition, TablePosition
 from database import db
-from mapper import PositionMapper
 
 
 def add_department(department_name):

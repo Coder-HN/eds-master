@@ -1,4 +1,3 @@
-from datetime import datetime, timedelta
 from sqlalchemy import desc
 from models import TableAccess
 from database import db
@@ -28,7 +27,6 @@ def get_access_by_num(access_num):
 
 
 def get_all_access():
-    # TableAccess.query
     query = db.session.query(TableAccess.num,
                              TableAccess.user_num,
                              TableAccess.service_num,
