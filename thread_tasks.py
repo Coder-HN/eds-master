@@ -93,9 +93,9 @@ is_repeat_test = False  # 是否正在重新测试电阻
 
 # 进门读卡监听线程
 def monitor_entrance(port, baudrate):
+    print('进门读卡监听中......')
     try:
         with serial.Serial(port, baudrate, timeout=Config.default_com_timeout) as ser:
-            log_message('进门读卡监听中......')
             is_standard_r = standard_r_queue.qsize()
             if is_standard_r != 0:
                 log_message('正在进行电阻校验，刷卡无效！')
@@ -119,9 +119,9 @@ def monitor_entrance(port, baudrate):
 
 # 出门读卡监听线程
 def monitor_exit(port, baudrate):
+    print("出门读卡监听中......")
     try:
         with serial.Serial(port, baudrate, timeout=Config.default_com_timeout) as ser:
-            log_message("出门读卡监听中......")
             is_standard_r = standard_r_queue.qsize()
             if is_standard_r != 0:
                 log_message("正在进行电阻校验，刷卡无效！")
