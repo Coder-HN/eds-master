@@ -29,7 +29,7 @@ def setup_logging(app, cmd_print):
     )
     handler.suffix = "%Y-%m-%d"
     handler.setFormatter(logging.Formatter(
-        "%(asctime)s - %(levelname)s - [threadName: %(threadName)s] - %(message)s"
+        "%(asctime)s - %(levelname)s - [%(threadName)s] - %(message)s"
     ))
 
     # 配置应用的日志记录器
