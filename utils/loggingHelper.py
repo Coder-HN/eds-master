@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 
 # 日志配置
 LOG_DIR = "logs"  # 日志目录
-LOG_FILE = "app.log"  # 日志文件名称
 RETENTION_DAYS = 14  # 日志保留天数
 
 
@@ -13,8 +12,8 @@ def setup_logging(app):
     """配置日志"""
     if not os.path.exists(LOG_DIR):
         os.makedirs(LOG_DIR)
-
-    log_file_path = os.path.join(LOG_DIR, LOG_FILE)
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    log_file_path = os.path.join(LOG_DIR, f"{current_date}_app.log")
     # 使用 TimedRotatingFileHandler 生成每天一个日志文件
     handler = TimedRotatingFileHandler(
         log_file_path,
