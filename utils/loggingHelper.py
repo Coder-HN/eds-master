@@ -35,6 +35,7 @@ def setup_logging(app, cmd_print=False):
     app.logger.setLevel(logging.INFO)
 
     if cmd_print:  # 移除默认的 StreamHandler
+        print("in cmd_print")
         for handler_to_remove in app.logger.handlers:
             if isinstance(handler_to_remove, logging.StreamHandler):
                 app.logger.removeHandler(handler_to_remove)
