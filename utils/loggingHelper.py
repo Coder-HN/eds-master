@@ -1,5 +1,6 @@
 import os
 import logging
+import inspect
 from typing import Optional
 from logging.handlers import TimedRotatingFileHandler
 from datetime import datetime, timedelta
@@ -51,16 +52,22 @@ def log_message(message, level='info'):
     """
     if logger is None:
         raise RuntimeError("日志系统未初始化!")
+    # 动态获取调用者的模块名称
+    caller_frame = inspect.stack()[1]
+    module_name = inspect.getmodule(caller_frame[0]).__name__
+
+    # 为每个模块动态创建记录器
+    dynamic_logger = logging.getLogger(module_name)
     if level.lower() == 'debug':
-        logger.debug(message)
+        dynamic_logger.debug(message)
     elif level.lower() == 'info':
-        logger.info(message)
+        dynamic_logger.info(message)
     elif level.lower() == 'warning':
-        logger.warning(message)
+        dynamic_logger.warning(message)
     elif level.lower() == 'error':
-        logger.error(message)
+        dynamic_logger.error(message)
     elif level.lower() == 'critical':
-        logger.critical(message)
+        dynamic_logger.critical(message)
     else:
         raise ValueError(f"未知的日志级别: {level}")
 
