@@ -17,13 +17,13 @@ from thread_tasks import monitor_entrance, monitor_exit, manage_system, electric
 from utils.loggingHelper import setup_logging, clean_old_logs
 
 
-def create_app(config_class=Config):
+def create_app(config_class=Config, cmd_print=True):
     # 创建 Flask 应用
     app = Flask(__name__)
     app.config.from_object(config_class)
 
     # 日志配置
-    setup_logging(app, cmd_print=True)  # 第二个参数设置是否将日志输出到cmd上
+    setup_logging(app, cmd_print)  # 第二个参数设置是否将日志输出到cmd上
     clean_old_logs()
     # 添加全局异常处理
     register_error_handlers(app)

@@ -5,7 +5,7 @@ import os
 
 if __name__ == '__main__':
     # 创建 Flask 应用
-    myapp = create_app()
+    myapp = create_app(cmd_print=True)
     myapp.debug = False  # 设置调试模式
     # 禁用标准输出
     # sys.stdout = open(os.devnull, "w")
