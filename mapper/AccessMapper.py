@@ -26,6 +26,25 @@ def get_access_by_num(access_num):
     return TableAccess.query.filter_by(num=access_num).first()
 
 
+def get_all_access_count():
+    count = db.session.query(TableAccess).count()
+    return count
+
+
+def get_all_access_paginated(offset, limit):
+    query = db.session.query(
+        TableAccess.num,
+        TableAccess.user_num,
+        TableAccess.service_num,
+        TableAccess.access_flag,
+        TableAccess.access_time,
+        TableAccess.result
+    ).order_by(desc(TableAccess.access_time)).offset(offset).limit(limit)
+    results = query.all()
+    return [dict(num=row[0], user_num=row[1], service_num=row[2], access_flag=row[3], access_time=row[4], result=row[5])
+            for row in results]
+
+
 def get_all_access():
     query = db.session.query(TableAccess.num,
                              TableAccess.user_num,

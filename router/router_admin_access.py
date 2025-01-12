@@ -17,7 +17,15 @@ searchAccess = Blueprint('searchAccess', __name__, url_prefix='/api/admin/search
 @searchAccess.route('/getAllAccess', methods=['GET'])  # 获取所有进出记录
 def get_all_access():
     try:
-        access_list = AccessMapper.get_all_access()
+        # 获取分页参数
+        page = int(request.args.get('page', 1))  # 当前页码，默认为第 1 页
+        page_size = int(request.args.get('pageSize', 5))  # 每页记录数，默认为 5 条
+        # 计算分页的起始索引和结束索引
+        offset = (page - 1) * page_size
+        limit = page_size
+        # 查询所有进出记录 access_list = AccessMapper.get_all_access()
+        total_records = AccessMapper.get_all_access_count()  # 获取总记录数
+        access_list = AccessMapper.get_all_access_paginated(offset, limit)  # 获取分页后的记录
         for access in access_list:
             access_time = access['access_time'].strftime('%Y-%m-%d %H:%M:%S')
             access['access_time'] = access_time
@@ -31,12 +39,18 @@ def get_all_access():
             service = ServiceMapper.get_service_by_num(service_num)
             access["service_id"] = service.service_id
             access["service_name"] = service.service_name
+        # 构造响应数据
+        response = {
+            "data": access_list,
+            "pagination": {
+                "current": page,
+                "pageSize": page_size,
+                "total": total_records,
+            }
+        }
+        return jsonify(response), 200
     except Exception as e:
-        return jsonify({'error': e}), 500
-    response = {
-        "data": access_list
-    }
-    return jsonify(response), 200
+        return jsonify({'error': str(e)}), 500
 
 
 @searchAccess.route('/getDetailAccess', methods=['Post'])  # 获取进出记录的详细信息
