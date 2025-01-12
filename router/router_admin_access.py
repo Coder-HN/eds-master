@@ -130,12 +130,13 @@ def search():
             access['foot_left_max'] = r_standard.foot_left_max
             access['foot_right_min'] = r_standard.foot_right_min
             access['foot_right_max'] = r_standard.foot_right_max
+        print("lenaccess_list", len(access_list))
+        response = {
+            "data": access_list
+        }
+        return jsonify(response), 200
     except Exception as e:
-        return jsonify({'error': e}), 500
-    response = {
-        "data": access_list
-    }
-    return jsonify(response), 200
+        return jsonify({'error': str(e)}), 500
 
 
 # 定义导出路由

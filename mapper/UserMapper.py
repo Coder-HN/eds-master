@@ -39,7 +39,6 @@ def add_user(user: TableUser):
     return new_user
 
 
-
 def get_user_by_num(user_num):
     return TableUser.query.filter_by(num=user_num).first()
 
