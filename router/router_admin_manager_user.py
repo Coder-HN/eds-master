@@ -22,12 +22,21 @@ manageUser = Blueprint('manageUser', __name__, url_prefix='/api/admin/manageUser
 @manageUser.route('/getAllUsers', methods=['GET'])  # 查询人员
 def get_all_users():
     try:
+        # 获取分页参数
+        page = int(request.args.get('page', 1))  # 当前页码，默认为第 1 页
+        page_size = int(request.args.get('pageSize', 5))  # 每页记录数，默认为 5 条
+        # 计算分页的起始索引和结束索引
+        offset = (page - 1) * page_size
+        limit = page_size
         request_type = request.args.get('type')
         all_users = []
+        total_records = 0
         if request_type == '1':  # 普通权限，只能看到在职人员
-            all_users = UserMapper.get_all_users()
+            total_records = UserMapper.get_users_count()  # 获取总记录数
+            all_users = UserMapper.get_users_paginated(offset, limit)  # 获取分页后的记录
         elif request_type == '2':
-            all_users = UserMapper.get_all_users_excel()
+            total_records = UserMapper.get_all_users_count()  # 获取总记录数
+            all_users = UserMapper.get_all_users_paginated(offset, limit)  # 获取分页后的记录
         users_list = [user.to_dict() for user in all_users]
         for user_dict in users_list:
             department_num = user_dict['department_num']
@@ -41,11 +50,16 @@ def get_all_users():
             user_dict["department_name"] = department_name
             user_dict["position_name"] = position_name
         response = {
-            "data": users_list
+            "data": users_list,
+            "pagination": {
+                "current": page,
+                "pageSize": page_size,
+                "total": total_records,
+            }
         }
         return jsonify(response), 200
     except Exception as e:
-        return jsonify({'error': e}), 500
+        return jsonify({'error': str(e)}), 500
 
 
 @manageUser.route('/searchUser', methods=['POST'])  # 搜索人员

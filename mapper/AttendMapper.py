@@ -10,7 +10,7 @@ def get_attend_by_num(attend_num):
     return TableAttend.query.filter_by(num=attend_num).first()
 
 
-def get_all_attend():
+def get_all_attend(offset, limit):
     query = db.session.query(TableAttend.num,
                              TableAttend.user_num,
                              TableAttend.attend_date,
@@ -19,10 +19,15 @@ def get_all_attend():
                              TableAttend.access_times,
                              TableAttend.access_times_limit
                              )
-    results = query.order_by(desc(TableAttend.attend_date)).all()
+    results = query.order_by(desc(TableAttend.attend_date)).offset(offset).limit(limit).all()
     return [dict(num=row[0], user_num=row[1], attend_date=row[2], attend_time=row[3],
                  attend_time_require=row[4], access_times=row[5], access_times_limit=row[6])
             for row in results]
+
+
+def get_all_attend_count():
+    count = db.session.query(TableAttend).count()
+    return count
 
 
 def get_attend_by_user_num_attend_date(user_num, attend_date):
@@ -51,7 +56,9 @@ def get_attend_by_multiple_conditions(employee_id=None, card_id=None, name=None,
     if employee_id is not None or card_id is not None or name is not None or department_num is not None:
         users = UserMapper.get_users_by_multiple_conditions(employee_id=employee_id, card_id=card_id, name=name,
                                                             department_num=department_num)
-    if len(users) == 1:
+        if len(users) == 0:
+            user_num = -1
+    if users is not None and len(users) != 0:
         user_num = users[0].num
     query = TableAttend.query
     if user_num:

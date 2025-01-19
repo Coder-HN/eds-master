@@ -14,7 +14,15 @@ searchAttend = Blueprint('searchAttend', __name__, url_prefix='/api/admin/search
 @searchAttend.route('/getAllAttend', methods=['GET'])  # 获取所有出勤记录
 def get_all_attend():
     try:
-        attend_list = AttendMapper.get_all_attend()
+        # 获取分页参数
+        page = int(request.args.get('page', 1))  # 当前页码，默认为第 1 页
+        page_size = int(request.args.get('pageSize', 5))  # 每页记录数，默认为 5 条
+        # 计算分页的起始索引和结束索引
+        offset = (page - 1) * page_size
+        limit = page_size
+        # 查询所有进出记录 attend_list = AttendMapper.get_all_attend()
+        total_records = AttendMapper.get_all_attend_count()  # 获取总记录数
+        attend_list = AttendMapper.get_all_attend(offset, limit)  # 获取分页后的记录
         for attend in attend_list:
             attend_date = attend['attend_date'].strftime('%Y-%m-%d')
             attend['attend_date'] = attend_date
@@ -33,12 +41,18 @@ def get_all_attend():
                 position = PositionMapper.get_position_by_num(user.position_num)
                 position_name = position.position_name
             attend["position"] = position_name
+        # 构造响应数据
+        response = {
+            "data": attend_list,
+            "pagination": {
+                "current": page,
+                "pageSize": page_size,
+                "total": total_records,
+            }
+        }
+        return jsonify(response), 200
     except Exception as e:
-        return jsonify({'error': e}), 500
-    response = {
-        "data": attend_list
-    }
-    return jsonify(response), 200
+        return jsonify({'error': str(e)}), 500
 
 
 @searchAttend.route('/search', methods=['POST'])  # 搜索出勤记录

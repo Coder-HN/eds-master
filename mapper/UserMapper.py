@@ -52,6 +52,28 @@ def get_all_users():
     return TableUser.query.filter(TableUser.is_delete == 0).order_by(TableUser.num.desc()).all()
 
 
+def get_users_paginated(offset, limit):
+    return (TableUser.query.filter(TableUser.is_delete == 0).order_by(TableUser.num.desc())
+            .offset(offset)
+            .limit(limit).all())
+
+
+def get_users_count():
+    count = TableUser.query.filter(TableUser.is_delete == 0).count()
+    return count
+
+
+def get_all_users_count():
+    count = TableUser.query.filter().count()
+    return count
+
+
+def get_all_users_paginated(offset, limit):
+    return (TableUser.query.order_by(TableUser.num.desc())
+            .offset(offset)
+            .limit(limit).all())
+
+
 def get_all_users_excel():
     return TableUser.query.all()
 
