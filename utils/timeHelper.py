@@ -26,6 +26,22 @@ def parse_datetime(date_str):
         return None
 
 
+def parse_datetime_detail(date_str):
+    """
+    解析前端传来的“YYYY-MM-DD HH:mm”格式时间，设为北京时间。
+    """
+    try:
+        # 先按前端格式解析为 datetime 对象（无时区）
+        dt_naive = datetime.strptime(date_str, "%Y-%m-%d %H:%M")
+
+        # 设为北京时间（Asia/Shanghai）
+        china_tz = pytz.timezone("Asia/Shanghai")
+        dt_localized = china_tz.localize(dt_naive)
+        return dt_localized
+    except ValueError:
+        return None
+
+
 def get_start_of_day(dt):
     return dt.replace(hour=0, minute=0, second=0, microsecond=0)
 
