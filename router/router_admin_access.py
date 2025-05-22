@@ -99,9 +99,9 @@ def search():
         start_time_str = request.form.get('start_time')
         end_time_str = request.form.get('end_time')
         if start_time_str:
-            start_time = timeHelper.parse_datetime_detail(start_time_str)  # 精确时间，无需改成整天开始
+            start_time = timeHelper.parse_datetime_detail(start_time_str)  # 精确时间
         if end_time_str:
-            end_time = timeHelper.parse_datetime_detail(end_time_str)  # 精确时间，无需改成整天结束
+            end_time = timeHelper.parse_datetime_detail(end_time_str)  # 精确时间
         all_access = AccessMapper.get_access_by_multiple_conditions(employee_id, name, service_name,
                                                                     start_time, end_time)
         access_list = [access.to_dict() for access in all_access]
@@ -168,11 +168,9 @@ def download_excel():
         start_time_str = request.form.get('start_time')
         end_time_str = request.form.get('end_time')
         if start_time_str:
-            start_time = timeHelper.parse_datetime_detail(start_time_str)
-            start_time = timeHelper.get_start_of_day(start_time)
+            start_time = timeHelper.parse_datetime_detail(start_time_str)  # 精确时间
         if end_time_str:
-            end_time = timeHelper.parse_datetime_detail(end_time_str)
-            end_time = timeHelper.get_end_of_day(end_time)
+            end_time = timeHelper.parse_datetime_detail(end_time_str)  # 精确时间
         all_access = AccessMapper.get_access_by_multiple_conditions(employee_id, name, service_name,
                                                                     start_time, end_time)
         access_list = [access.to_dict() for access in all_access]
