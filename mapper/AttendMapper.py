@@ -49,17 +49,18 @@ def add_attend(attend: TableAttend):
     return new_attend
 
 
-def get_attend_by_multiple_conditions(employee_id=None, card_id=None, name=None, department_num=None,
-                                      start_time=None, end_time=None):
+def get_attend_by_conditions_count(employee_id=None, card_id=None, name=None, department_num=None,
+                                   start_time=None, end_time=None):
     users = []
     user_num = None
-    if employee_id is not None or card_id is not None or name is not None or department_num is not None:
-        users = UserMapper.get_users_by_multiple_conditions(employee_id=employee_id, card_id=card_id, name=name,
-                                                            department_num=department_num)
+    if employee_id or card_id or name or department_num:
+        users = UserMapper.get_users_by_multiple_conditions(
+            employee_id=employee_id, card_id=card_id, name=name, department_num=department_num)
         if len(users) == 0:
-            user_num = -1
-    if users is not None and len(users) != 0:
+            user_num = -1  # 用于确保查询无结果
+    if users and len(users) != 0:
         user_num = users[0].num
+
     query = TableAttend.query
     if user_num:
         query = query.filter(TableAttend.user_num == user_num)
@@ -67,4 +68,28 @@ def get_attend_by_multiple_conditions(employee_id=None, card_id=None, name=None,
         query = query.filter(TableAttend.attend_date >= start_time)
     if end_time:
         query = query.filter(TableAttend.attend_date <= end_time)
-    return query.order_by(desc(TableAttend.attend_date)).all()
+
+    return query.count()
+
+
+def get_attend_by_conditions_paginated(offset, limit, employee_id=None, card_id=None, name=None,
+                                       department_num=None, start_time=None, end_time=None):
+    users = []
+    user_num = None
+    if employee_id or card_id or name or department_num:
+        users = UserMapper.get_users_by_multiple_conditions(
+            employee_id=employee_id, card_id=card_id, name=name, department_num=department_num)
+        if len(users) == 0:
+            user_num = -1
+    if users and len(users) != 0:
+        user_num = users[0].num
+
+    query = TableAttend.query
+    if user_num:
+        query = query.filter(TableAttend.user_num == user_num)
+    if start_time:
+        query = query.filter(TableAttend.attend_date >= start_time)
+    if end_time:
+        query = query.filter(TableAttend.attend_date <= end_time)
+
+    return query.order_by(desc(TableAttend.attend_date)).offset(offset).limit(limit).all()

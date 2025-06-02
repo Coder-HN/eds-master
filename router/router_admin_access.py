@@ -23,7 +23,7 @@ def get_all_access():
         # 计算分页的起始索引和结束索引
         offset = (page - 1) * page_size
         limit = page_size
-        # 查询所有进出记录 access_list = AccessMapper.get_all_access()
+        # 查询所有进出记录
         total_records = AccessMapper.get_all_access_count()  # 获取总记录数
         access_list = AccessMapper.get_all_access_paginated(offset, limit)  # 获取分页后的记录
         for access in access_list:
@@ -70,7 +70,7 @@ def get_detail_access():
         data['foot_right_min'] = r_standard.foot_right_min
         data['foot_right_max'] = r_standard.foot_right_max
     except Exception as e:
-        return jsonify({'error': e}), 500
+        return jsonify({'error': str(e)}), 500
     response = {
         "data": data
     }
@@ -91,6 +91,13 @@ def delete_access():
 @searchAccess.route('/search', methods=['POST'])  # 搜索进出记录
 def search():
     try:
+        # 获取分页参数
+        page = int(request.args.get('page', 1))  # 当前页码，默认为第 1 页
+        page_size = int(request.args.get('pageSize', 5))  # 每页记录数，默认为 5 条
+        # 计算分页的起始索引和结束索引
+        offset = (page - 1) * page_size
+        limit = page_size
+
         start_time = None
         end_time = None
         employee_id = request.form.get('employee_id')
@@ -102,9 +109,12 @@ def search():
             start_time = timeHelper.parse_datetime_detail(start_time_str)  # 精确时间
         if end_time_str:
             end_time = timeHelper.parse_datetime_detail(end_time_str)  # 精确时间
-        all_access = AccessMapper.get_access_by_multiple_conditions(employee_id, name, service_name,
-                                                                    start_time, end_time)
-        access_list = [access.to_dict() for access in all_access]
+        total_records = AccessMapper.get_access_by_multiple_conditions_count(employee_id, name, service_name,
+                                                                             start_time, end_time)
+        access_list = AccessMapper.get_access_by_multiple_conditions_paginated(offset, limit, employee_id, name,
+                                                                               service_name,
+                                                                               start_time, end_time)  # 获取分页后的记录
+
         for access in access_list:
             access_time = access['access_time'].strftime('%Y-%m-%d %H:%M:%S')
             access['access_time'] = access_time
@@ -128,9 +138,13 @@ def search():
             access['foot_left_max'] = r_standard.foot_left_max
             access['foot_right_min'] = r_standard.foot_right_min
             access['foot_right_max'] = r_standard.foot_right_max
-        print("lenaccess_list", len(access_list))
         response = {
-            "data": access_list
+            "data": access_list,
+            "pagination": {
+                "current": page,
+                "pageSize": page_size,
+                "total": total_records,
+            }
         }
         return jsonify(response), 200
     except Exception as e:
@@ -165,7 +179,6 @@ def download_excel():
         employee_id = request.form.get('employee_id')
         name = request.form.get('name')
         service_name = request.form.get('service_name')
-
         start_time_str = request.form.get('start_time')
         end_time_str = request.form.get('end_time')
         if start_time_str:
@@ -173,9 +186,10 @@ def download_excel():
         if end_time_str:
             end_time = timeHelper.parse_datetime_detail(end_time_str)  # 精确时间
 
-        all_access = AccessMapper.get_access_by_multiple_conditions(employee_id, name, service_name,
-                                                                    start_time, end_time)
-        access_list = [access.to_dict() for access in all_access]
+        access_list = AccessMapper.get_access_by_multiple_conditions_paginated(None, None, employee_id, name,
+                                                                              service_name,
+                                                                              start_time, end_time)
+
         for access in access_list:
             access_time = access['access_time'].strftime('%Y-%m-%d %H:%M:%S')
             access['access_time'] = access_time

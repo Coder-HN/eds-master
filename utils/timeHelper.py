@@ -15,15 +15,19 @@ def get_now_time():
     local_time = utc_time.astimezone(local_tz)  # 转换为本地时间
     return local_time
 
-
 def parse_datetime(date_str):
-    date_format = "%a, %d %b %Y %H:%M:%S GMT"
-    try:
-        dt = datetime.strptime(date_str, date_format)
-        dt = dt.replace(tzinfo=pytz.UTC)  # 设置时区信息为 UTC
-        return dt + timedelta(days=1)
-    except ValueError:
-        return None
+    formats = [
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%d %H:%M",
+        "%Y-%m-%d",
+        "%a, %d %b %Y %H:%M:%S GMT",  # 原始格式，保留备用
+    ]
+    for fmt in formats:
+        try:
+            return datetime.strptime(date_str, fmt)
+        except ValueError:
+            continue
+    return None  # 全部解析失败
 
 
 def parse_datetime_detail(date_str):
